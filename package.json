@@ -1,0 +1,41 @@
+{
+  "name": "trend-keyword-infuser-mvp-root",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Root project for Trend Keyword Infuser MVP, managing frontend and backend workspaces.",
+  "scripts": {
+    "dev:frontend": "npm run dev --prefix frontend",
+    "dev:backend": "npm run start --prefix backend",
+    "dev": "npm-run-all -p dev:frontend dev:backend",
+    "lint:frontend": "npm run lint --prefix frontend",
+    "lint:backend": "npm run lint --prefix backend",
+    "lint": "npm-run-all -p lint:frontend lint:backend",
+    "format:frontend": "npm run format --prefix frontend",
+    "format:backend": "npm run format --prefix backend",
+    "format": "npm-run-all -p format:frontend format:backend",
+    "check-format:frontend": "npm run check-format --prefix frontend",
+    "check-format:backend": "npm run check-format --prefix backend",
+    "check-format": "npm-run-all -p check-format:frontend check-format:backend",
+    "test:backend": "npm run test --prefix backend",
+    "test": "npm run test:backend",
+    "prepare": "husky"
+  },
+  "devDependencies": {
+    "husky": "^9.1.7",
+    "lint-staged": "^16.1.0",
+    "npm-run-all": "^4.1.5"
+  },
+  "lint-staged": {
+    "frontend/**/*.{js,jsx,ts,tsx,json,css,md}": [
+      "prettier --write",
+      "eslint --fix"
+    ],
+    "backend/**/*.{js,json,md}": [
+      "prettier --write",
+      "eslint --fix"
+    ],
+    "*.{json,md}": [
+      "prettier --write"
+    ]
+  }
+}

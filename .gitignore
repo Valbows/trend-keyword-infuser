@@ -1,0 +1,40 @@
+# OS-generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+Thumbs.db
+Thumbs.db:encryptable
+ehtrace.etl
+
+# IDE & Editor specific files
+.idea/
+*.iml
+*.sublime-project
+*.sublime-workspace
+*.vscodeignore
+
+# Log files
+*.log
+logs
+*.log.*
+
+# Temporary files
+*.tmp
+*.temp
+*.swp
+*~
+
+# Local environment files (sub-projects should manage their own .env)
+# .env
+# .env.local
+# .env.*
+
+# Dependency directories (sub-projects should manage their own node_modules)
+# node_modules/
+
+# Build output (sub-projects should manage their own build/dist/out folders)
+# build/
+# dist/
+# out/
