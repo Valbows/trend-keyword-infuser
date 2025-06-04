@@ -1,3 +1,31 @@
+# Cache and Build Output
+build/
+dist/
+out/
+.next/
+coverage/
+
+# Log files
+*.log
+logs
+*.log.*
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Dependency directories
+node_modules/
+
+# Environment variables
+.env
+.env.local
+.env.development
+.env.test
+.env.production
+.env.*
+# IMPORTANT: Add any .env.example or .env.sample files you want to commit to the line below!
+# For example: !.env.example
+
 # OS-generated files
 .DS_Store
 .DS_Store?
@@ -26,15 +54,4 @@ logs
 *.swp
 *~
 
-# Local environment files (sub-projects should manage their own .env)
-# .env
-# .env.local
-# .env.*
 
-# Dependency directories (sub-projects should manage their own node_modules)
-# node_modules/
-
-# Build output (sub-projects should manage their own build/dist/out folders)
-# build/
-# dist/
-# out/
