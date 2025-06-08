@@ -107,8 +107,63 @@ const handleGetScriptById = async (req, res) => {
   }
 };
 
+/**
+ * Handles the request to modify an existing script with selected keywords.
+ * @param {object} req - The Express request object.
+ * @param {object} res - The Express response object.
+ */
+const handleModifyScript = async (req, res) => {
+  const { existingScript, selectedKeywords } = req.body;
+
+  if (!existingScript || typeof existingScript !== 'string' || existingScript.trim() === '') {
+    return res.status(400).json({ error: 'Missing or invalid required field: existingScript (must be a non-empty string).' });
+  }
+
+  if (!selectedKeywords || !Array.isArray(selectedKeywords) || selectedKeywords.length === 0) {
+    return res.status(400).json({ error: 'Missing or invalid required field: selectedKeywords (must be a non-empty array of strings).' });
+  }
+  if (selectedKeywords.some(kw => typeof kw !== 'string' || kw.trim() === '')) {
+    return res.status(400).json({ error: 'Invalid field: selectedKeywords must be an array of non-empty strings.' });
+  }
+
+  try {
+    console.log(`Controller: Received request to modify script with ${selectedKeywords.length} keywords.`);
+    const modifiedScriptText = await scriptOrchestrationService.orchestrateScriptModification(existingScript, selectedKeywords);
+
+    // Optionally, save the modified script or log its modification. For now, just returning.
+    // Consider if modified scripts should also be saved to Supabase or a different table.
+
+    res.status(200).json({
+      modifiedScript: modifiedScriptText,
+      originalScript: existingScript,
+      keywordsUsed: selectedKeywords,
+    });
+  } catch (error) {
+    // Log the original error object for more detailed debugging if needed
+    console.error('Raw error in scriptController handling script modification:', error);
+    // Safely access error.message
+    const errorMessageString = (error && typeof error.message === 'string') ? error.message : '';
+    const errorStack = (error && typeof error.stack === 'string') ? error.stack : 'No stack available.';
+
+    console.error(`Error in scriptController handling script modification (Processed): Message: "${errorMessageString}", Stack: ${errorStack}`);
+
+    if (errorMessageString.includes('GEMINI_API_KEY is not set')) {
+      return res.status(500).json({ error: 'Script modification service is not configured (API Key missing).' });
+    } else if (errorMessageString.includes('Failed to get valid modified script content')) {
+      return res.status(502).json({ error: 'Failed to modify script due to an issue with the AI service response.' });
+    } else if (errorMessageString.includes('Failed to get response from Gemini API')) {
+      return res.status(502).json({ error: 'Failed to get response from the AI service for script modification.' });
+    }
+    
+    // Generic error for other cases
+    const displayError = errorMessageString ? `Failed to modify script: ${errorMessageString}` : 'Failed to modify script due to an internal server error.';
+    res.status(500).json({ error: displayError });
+  }
+};
+
 module.exports = {
   handleGenerateScript,
   handleGetAllScripts,
   handleGetScriptById,
+  handleModifyScript,
 };

@@ -55,6 +55,51 @@ class ScriptOrchestrationService {
     // Step 4: Return the final script
     return scriptText;
   }
+
+  /**
+   * Orchestrates the modification of an existing script with selected keywords.
+   * @param {string} existingScript - The script content to be modified.
+   * @param {Array<string>} selectedKeywords - An array of keywords to infuse into the script.
+   * @returns {Promise<string>} The modified script text.
+   * @throws {Error} If script modification fails.
+   */
+  async orchestrateScriptModification(existingScript, selectedKeywords) {
+    console.log(`[OrchestrationService] Starting script modification with ${selectedKeywords.length} keywords.`);
+
+    // Construct a detailed instructional prompt for the LLM. 
+    // This prompt will be passed as the "topic" to the llmService.generateScript method,
+    // and selectedKeywords will be passed as "trends".
+    const instructionalTopic = `Please modify the following script by naturally and coherently infusing the provided keywords. 
+Maintain the original tone and intent of the script as much as possible. Focus on enhancing the script with these keywords, not rewriting it entirely.
+
+Keywords to infuse: ${selectedKeywords.join(', ')}
+
+Existing Script to Modify:
+---
+${existingScript}
+---
+
+Return only the modified script content.`;
+
+    console.log('[OrchestrationService] Invoking LLM service for script modification...');
+    let modifiedScriptText;
+    try {
+      // We use the existing llmService.generateScript method.
+      // The 'instructionalTopic' contains the core task and the script.
+      // 'selectedKeywords' are passed as 'trends' which the LLM prompt within generateScript can reference.
+      modifiedScriptText = await llmService.generateScript(instructionalTopic, selectedKeywords.map(kw => ({ keyword: kw, source: 'user-selected' })));
+      console.log('[OrchestrationService] Script successfully modified by LLM service.');
+    } catch (error) {
+      console.error('[OrchestrationService] Error during LLM script modification:', error.message, error.stack);
+      // Re-throw a more specific error to be handled by the controller
+      throw new Error(`Failed to get valid modified script content: ${error.message}`);
+    }
+
+    // Future post-processing for modified script could go here.
+    console.log('[OrchestrationService] Modified script post-processing (placeholder).');
+
+    return modifiedScriptText;
+  }
 }
 
 module.exports = new ScriptOrchestrationService();

@@ -58,26 +58,41 @@ The system consists of:
 - [x] Task 3.1: Create responsive UI layout and components in the Next.js frontend (e.g., input fields, buttons, display areas). Utilized Tailwind CSS in `page.tsx` for main application interface, including topic input, script generation button, and script display area with loading/error states.
 - [ ] Develop Trend & Keyword Suggestion Panel (Task 3.2) - Phased Implementation:
   - [ABANDONED] **Phase 3.2 - Step 1: Foundational Sidebar & Google Daily Trends Integration**
-  - [ ] **Phase 3.2 - Step 2: Integrating YouTube Keyword Trends (Topic & Timeframe-Based) into Panel**
+  - [x] **Phase 3.2 - Step 2: Integrating YouTube Keyword Trends (Topic & Timeframe-Based) into Panel**
     - **Objective**: Extract and display trending keywords from YouTube based on user-defined topics and selectable timeframes (e.g., last 24h, 48h, 72h, all time), derived from high-engagement video titles and descriptions.
     - **Backend**:
-      1. Enhance `TrendDiscoveryService.js` to accept `topic` and `timeframe` (e.g., '24h', '48h', '72h', 'any') parameters.
-      2. Utilize YouTube Data API v3 `search.list` with `publishedAfter` for time filtering and `order` (e.g., `viewCount`) for engagement ranking.
-      3. Implement logic to extract relevant keywords/phrases from titles and descriptions of fetched videos.
-      4. Define a clear data structure for returned keywords (e.g., `{ keyword: string, engagement_score: number, source_video_count: number, timeframe: string }`).
-      5. Adapt or create an API endpoint (e.g., `/api/v1/trends/youtube-keywords?topic=<topic>&timeframe=<timeframe>`) to serve this data.
+      - [x] Enhance `TrendDiscoveryService.js` to accept `topic` and `timeframe` (e.g., '24h', '48h', '72h', 'any') parameters.
+      - [x] Utilize YouTube Data API v3 `search.list` with `publishedAfter` for time filtering and `order` (e.g., `viewCount`) for engagement ranking.
+      - [x] Implement logic to extract relevant keywords/phrases from titles and descriptions of fetched videos.
+      - [x] Define a clear data structure for returned keywords (e.g., `{ keyword: string, engagement_score: number, source_video_count: number, timeframe: string }`).
+      - [x] Adapt or create an API endpoint (e.g., `/api/v1/trends/youtube-keywords?topic=<topic>&timeframe=<timeframe>`) to serve this data.
     - **Frontend (`TrendSidebar.tsx`)**:
-      1. Implement UI elements (e.g., dropdown) for timeframe selection (24h, 48h, 72h, All Time).
-      2. Call the new/updated backend endpoint with the selected topic and timeframe.
-      3. Display the fetched keywords, potentially with indicators of their engagement or recency.
-      4. Initially view-only, with selection for script infusion planned for Step 3.
-  - [ ] **Phase 3.2 - Step 3: "Existing Script" Input & Keyword Selection for Modification**
-    - **Frontend**:
-      1. Add textarea for existing script.
-      2. Enable selection of trends/keywords from sidebar.
-    - **Backend**:
-      1. New API endpoint (e.g., `/api/v1/scripts/modify`) accepting script and selected trends.
-      2. LLM logic to modify script with selected items.
+      - [x] Implement UI elements (e.g., dropdown) for timeframe selection (24h, 48h, 72h, All Time).
+      - [x] Call the new/updated backend endpoint with the selected topic and timeframe.
+      - [x] Display the fetched keywords, potentially with indicators of their engagement or recency.
+      - [x] Initially view-only, with selection for script infusion planned for Step 3.
+  - [x] **Phase 3.2 - Step 3: "Existing Script" Input & Keyword Selection for Modification**
+    - [x] **Sub-Task 3.2.3.1: Frontend - UI for Existing Script and Keyword Selection**
+      - **Objective**: Allow users to input an existing script and select keywords from the `TrendSidebar` for infusion.
+      - **Actions (Frontend - likely `page.tsx` and `TrendSidebar.tsx`):**
+          - [ ] In `page.tsx` (or a relevant main content area): Add a `textarea` component for users to paste their existing script. Manage its state.
+          - [ ] In `TrendSidebar.tsx`: Modify the keyword display. Clicking a keyword should toggle its selection state. Selected keywords should be visually distinct.
+          - [ ] In `TrendSidebar.tsx` (or `page.tsx`): Maintain a list of currently selected keywords (e.g., in React state, possibly lifted to a shared parent or context).
+          - [x] In `page.tsx`: Add a "Modify Script" button, enabled when there's an existing script and at least one keyword is selected.
+      - **Success Criteria**: User can paste script, select/deselect keywords, and "Modify Script" button behaves correctly.
+    - [x] **Sub-Task 3.2.3.2: Backend - API Endpoint for Script Modification**
+      - **Objective**: Create a backend API endpoint that accepts an existing script and selected keywords, then uses an LLM to infuse them.
+      - **Actions (Backend):**
+          - [ ] In `scriptRoutes.js`: Define a new POST route, e.g., `/api/v1/scripts/modify`.
+          - [ ] In `scriptController.js`: Create `modifyScript(req, res)` method to validate input, call a service for modification logic, and return the modified script.
+          - [x] In `ScriptOrchestrationService.js` (or new `ScriptModificationService.js`): Create `infuseKeywordsIntoScript(existingScript, selectedKeywords)` method to construct an LLM prompt (for Gemini API) and get the modified script.
+      - **Success Criteria**: POST to `/api/v1/scripts/modify` with valid data returns a modified script; errors are handled.
+    - [x] **Sub-Task 3.2.3.3: Frontend - Integrate Script Modification Feature**
+      - **Objective**: Connect the frontend UI to the new backend API endpoint.
+      - **Actions (Frontend - likely `page.tsx`):**
+          - [ ] On "Modify Script" button click: Gather script and selected keywords, call `/api/v1/scripts/modify`.
+          - [ ] Handle API response: Display modified script or error message. Implement loading states.
+      - **Success Criteria**: End-to-end flow works: user inputs script, selects keywords, clicks modify, sees modified script. Loading/error states are graceful.
   - [ ] **Phase 3.2 - Step 4: Advanced Features (AI Selection, Granular Volume, Filtering)**
     - Future enhancements: AI keyword selection, detailed search volume data, time-based filtering.
 - [ ] Implement AI Script Editor/Display
@@ -103,6 +118,16 @@ The system consists of:
 - [ ] Deploy frontend application
 - [ ] Configure monitoring and logging
 - [ ] Perform final testing in production environment
+
+### Phase 6: Enhancements and Refinements
+
+- [ ] **Advanced NLP**: Integrate more sophisticated Natural Language Processing for keyword extraction (e.g., named entity recognition, stemming, TF-IDF) to improve relevance.
+- [ ] **Caching Layer**: Implement server-side caching (e.g., using Redis, as per your tech stack) for YouTube API responses to reduce redundant calls, manage API quotas, and improve response times.
+- [ ] **Error Handling & Resilience**: Further enhance error handling on both frontend and backend, providing more specific user feedback for API errors or unexpected data.
+- [ ] **Rate Limiting**: Implement rate limiting on the backend API to protect against abuse.
+- [ ] **Comprehensive Testing**: Develop unit and integration tests for both backend services/controllers and frontend components to ensure 'Durable' quality.
+- [ ] **UI/UX Refinements**: Polish the `TrendSidebar` UI for an even more 'Elegant' user experience, perhaps with visualizations or more detailed keyword insights.
+- [ ] **Configuration Management**: Move hardcoded values (like default topic in `TrendSidebar.tsx`) to configuration files or environment variables for easier management.
 
 ## Technical Stack (Confirmed)
 

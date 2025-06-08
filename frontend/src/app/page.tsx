@@ -9,6 +9,10 @@ export default function Home() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [copySuccessMessage, setCopySuccessMessage] = useState('');
+  const [existingScript, setExistingScript] = useState('');
+  const [selectedKeywords, setSelectedKeywords] = useState<string[]>([]);
+  const [isModifying, setIsModifying] = useState(false);
+  const [modifyError, setModifyError] = useState('');
 
   const handleGenerateScript = async () => {
     if (!topic.trim()) {
@@ -55,10 +59,56 @@ export default function Home() {
     }
   };
 
+  const handleModifyScript = async () => {
+    if (!existingScript.trim() || selectedKeywords.length === 0) {
+      setModifyError('Please provide a script and select at least one keyword.');
+      return;
+    }
+    setIsModifying(true);
+    setModifyError('');
+    // setScript(''); // Optional: Clear main script display or decide how to update
+
+    try {
+      const response = await fetch('/api/v1/scripts/modify', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ existingScript, selectedKeywords }),
+      });
+
+      if (!response.ok) {
+        let errorData;
+        try {
+          errorData = await response.json();
+        } catch (parseError) {
+          // If parsing JSON fails, use a generic error based on status
+          console.error('Failed to parse error JSON from server:', parseError);
+          throw new Error(`HTTP error! status: ${response.status}. Unable to parse error details.`);
+        }
+        throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      setScript(data.modifiedScript); // Update the main script display area
+      // Optionally, you could also clear existingScript or selectedKeywords here if desired
+      // setExistingScript(''); 
+      // setSelectedKeywords([]);
+
+    } catch (e: any) {
+      console.error('Failed to modify script:', e);
+      setModifyError(e.message || 'Failed to modify script. Please try again.');
+      // Optionally clear the main script display on error, or leave it as is
+      // setScript(''); 
+    } finally {
+      setIsModifying(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-slate-100 dark:bg-slate-900 text-slate-900 dark:text-slate-100 flex flex-col items-center p-4 sm:p-8 font-[family-name:var(--font-geist-sans)]">
       <main className="container mx-auto w-full bg-white dark:bg-slate-800 shadow-xl rounded-lg p-6 sm:p-10 flex">
-        <TrendSidebar />
+        <TrendSidebar selectedKeywords={selectedKeywords} onSelectedKeywordsChange={setSelectedKeywords} />
         <div className="flex-1 flex flex-col items-center p-4 md:p-8 overflow-y-auto">
           <header className="mb-8 text-center">
             <h1 className="text-4xl sm:text-5xl font-bold text-sky-600 dark:text-sky-400">
@@ -109,6 +159,55 @@ export default function Home() {
               )}
             </button>
           </section>
+
+          {/* Section for Existing Script Input */}
+          <section className="mb-8 w-full max-w-2xl">
+            <label htmlFor="existingScriptInput" className="block text-lg font-medium text-slate-700 dark:text-slate-200 mb-2">
+              Paste Your Existing Script to Modify (Optional):
+            </label>
+            <textarea
+              id="existingScriptInput"
+              value={existingScript}
+              onChange={(e) => setExistingScript(e.target.value)}
+              placeholder="Paste your script here..."
+              rows={8}
+              className="w-full p-3 border border-slate-300 dark:border-slate-600 rounded-md shadow-sm focus:ring-sky-500 focus:border-sky-500 dark:bg-slate-700 dark:text-slate-50 transition-colors duration-150"
+              disabled={isLoading || isModifying}
+            />
+          </section>
+
+          {/* Section for Modify Script Button - only shown if existingScript has content */}
+          {existingScript.trim() && (
+            <section className="mb-8 text-center">
+              <button
+                onClick={handleModifyScript}
+                disabled={isModifying || isLoading || !existingScript.trim() || selectedKeywords.length === 0}
+                className="px-8 py-3 bg-green-600 hover:bg-green-700 dark:bg-green-500 dark:hover:bg-green-600 text-white font-semibold rounded-lg shadow-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-75 transition-all duration-150 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-105 active:scale-95 flex items-center justify-center space-x-2"
+              >
+                {isModifying ? (
+                  <>
+                    <svg className="animate-spin -ml-1 mr-2 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Modifying...
+                  </>
+                ) : (
+                  'Modify Script with Selected Keywords'
+                )}
+              </button>
+              {selectedKeywords.length === 0 && existingScript.trim() && !isModifying && (
+                 <p className="text-sm text-yellow-600 dark:text-yellow-400 mt-2">Select keywords from the sidebar to enable modification.</p>
+              )}
+            </section>
+          )}
+
+          {/* Display Modification Error */}
+          {modifyError && (
+              <div className="mb-6 p-3 bg-red-100 dark:bg-red-900 border border-red-400 dark:border-red-700 text-red-700 dark:text-red-200 rounded-md w-full max-w-2xl">
+                <p><strong>Modification Error:</strong> {modifyError}</p>
+              </div>
+          )}
 
           {script && (
             <section className="mt-10 p-6 bg-slate-50 dark:bg-slate-700 rounded-lg shadow">

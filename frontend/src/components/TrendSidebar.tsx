@@ -15,9 +15,15 @@ interface YouTubeKeywordItem {
 
 // The NewsItem and GoogleTrendItem interfaces are no longer needed for this component's primary function.
 
-const TrendSidebar: React.FC = () => {
+interface TrendSidebarProps {
+  selectedKeywords: string[];
+  onSelectedKeywordsChange: (keywords: string[]) => void;
+}
+
+const TrendSidebar: React.FC<TrendSidebarProps> = ({ selectedKeywords, onSelectedKeywordsChange }) => {
   const [keywords, setKeywords] = useState<YouTubeKeywordItem[]>([]);
-  const [topic, setTopic] = useState<string>('artificial intelligence'); // Default topic for initial testing
+  const [topic, setTopic] = useState<string>('artificial intelligence'); // User's direct input
+  const [debouncedTopic, setDebouncedTopic] = useState<string>(topic); // Debounced topic for API calls
   const [selectedTimeframe, setSelectedTimeframe] = useState<string>('24h'); // Default timeframe
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
@@ -29,33 +35,57 @@ const TrendSidebar: React.FC = () => {
     { value: 'any', label: 'All Time' },
   ];
 
+  // Effect for debouncing the topic input
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedTopic(topic);
+    }, 750); // 750ms delay
+
+    // Cleanup function to clear the timeout if topic changes before delay is over
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [topic]); // This effect runs when 'topic' changes
+
+  // Effect for fetching keywords when debouncedTopic or selectedTimeframe changes
   useEffect(() => {
     const fetchYouTubeKeywords = async () => {
-      if (!topic) {
-        setKeywords([]); // Clear keywords if topic is empty
+      // Guard clause: if debouncedTopic is empty, clear keywords and don't fetch.
+      if (!debouncedTopic.trim()) {
+        setKeywords([]); 
+        setError(null); // Clear previous errors if any
+        setIsLoading(false); // Ensure loading is false
         return;
       }
       setIsLoading(true);
       setError(null);
       try {
-        const response = await fetch(`/api/v1/trends/youtube-keywords?topic=${encodeURIComponent(topic)}&timeframe=${selectedTimeframe}`);
+        const response = await fetch(`/api/v1/trends/youtube-keywords?topic=${encodeURIComponent(debouncedTopic)}&timeframe=${selectedTimeframe}`);
         if (!response.ok) {
           const errorData = await response.json().catch(() => ({ message: `HTTP error! status: ${response.status}` }));
           throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
         }
-        const data = await response.json(); // Expects { topic, timeframe, keywords: YouTubeKeywordItem[] }
+        const data = await response.json(); 
         setKeywords(data.keywords || []);
       } catch (err: any) {
         console.error('Failed to fetch YouTube Keywords:', err);
         setError(err.message || 'Failed to load keywords.');
-        setKeywords([]); // Clear keywords on error
+        setKeywords([]); 
       } finally {
         setIsLoading(false);
       }
     };
 
-    fetchYouTubeKeywords();
-  }, [topic, selectedTimeframe]); // Re-fetch when topic or timeframe changes
+    fetchYouTubeKeywords(); // Call fetchYouTubeKeywords directly, the guard clause inside handles empty debouncedTopic.
+
+  }, [debouncedTopic, selectedTimeframe]); // Re-fetch when debouncedTopic or timeframe changes
+
+  const handleKeywordClick = (keywordClicked: string) => {
+    const newSelectedKeywords = selectedKeywords.includes(keywordClicked)
+      ? selectedKeywords.filter(k => k !== keywordClicked)
+      : [...selectedKeywords, keywordClicked];
+    onSelectedKeywordsChange(newSelectedKeywords);
+  };
 
   return (
     <aside className="w-full md:w-1/3 lg:w-1/4 bg-slate-800 p-6 space-y-4 h-screen overflow-y-auto text-slate-100 shadow-lg">
@@ -98,7 +128,14 @@ const TrendSidebar: React.FC = () => {
       {keywords.length > 0 && (
         <ul className="space-y-3">
           {keywords.map((kw, index) => (
-            <li key={`${kw.keyword}-${index}`} className="p-3 bg-slate-700/50 rounded-lg shadow-md hover:bg-slate-700 transition-colors duration-150">
+            <li 
+              key={`${kw.keyword}-${index}`} 
+              className={`p-3 rounded-lg shadow-md transition-all duration-200 cursor-pointer 
+                ${selectedKeywords.includes(kw.keyword) 
+                  ? 'bg-sky-600 ring-2 ring-sky-400 scale-105' 
+                  : 'bg-slate-700/50 hover:bg-slate-700'}`}
+              onClick={() => handleKeywordClick(kw.keyword)}
+            >
               <h3 className="text-md text-sky-300 font-semibold">{kw.keyword}</h3>
               <p className="text-xs text-slate-400">
                 Engagement Score: <span className="font-medium text-sky-400">{kw.engagement_score}</span>
