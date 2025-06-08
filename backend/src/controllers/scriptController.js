@@ -46,7 +46,23 @@ const handleGenerateScript = async (req, res) => {
       console.error('Unexpected error during Supabase insert:', e);
     }
 
-    res.status(200).json({ script: scriptText });
+    // Ensure dbData is valid and contains the id before sending it back
+    let scriptId = null;
+    if (dbData && dbData.length > 0 && dbData[0].id) {
+      scriptId = dbData[0].id;
+      console.log(`Script ID ${scriptId} successfully retrieved for response.`);
+    } else {
+      // This case should ideally not happen if Supabase insert and select work as expected.
+      // Log an error, but still return the script text if generation was successful.
+      console.error('Failed to retrieve script ID from Supabase after insert, or dbData is unexpected:', dbData);
+      // Optionally, you could throw an error here or return a specific error response to the client
+      // if the scriptId is absolutely critical for the immediate next step on the client-side.
+      // For now, we allow proceeding without it if scriptText exists.
+    }
+
+    // If scriptId is null here, it means it wasn't successfully retrieved from dbData
+    // The client should be prepared to handle a missing scriptId in such edge cases if it proceeds.
+    res.status(200).json({ scriptId: scriptId, script: scriptText });
   } catch (error) {
     console.error('Error in scriptController handling script generation:', error.message);
     if (error.message.includes('GEMINI_API_KEY is not set')) {
@@ -161,9 +177,53 @@ const handleModifyScript = async (req, res) => {
   }
 };
 
+const handleUpdateScriptContent = async (req, res) => {
+  const { id } = req.params;
+  const { content } = req.body;
+
+  if (!id) {
+    return res.status(400).json({ error: 'Script ID is required in URL parameters.' });
+  }
+
+  // Content can be an empty string, but it must be a string.
+  if (typeof content !== 'string') {
+    return res.status(400).json({ error: 'Invalid request body: content must be a string.' });
+  }
+
+  try {
+    const { data, error } = await supabase
+      .from('scripts')
+      .update({ 
+        generated_script: content,
+        updated_at: new Date().toISOString() // Explicitly set updated_at
+      })
+      .eq('id', id)
+      .select(); // Fetch the updated record
+
+    if (error) {
+      console.error(`Error updating script with ID ${id}:`, error);
+      // Check for specific Supabase errors if needed, e.g., foreign key violation, etc.
+      return res.status(500).json({ error: 'Failed to update script due to a database error.' });
+    }
+
+    if (!data || data.length === 0) {
+      // This means the .eq('id', id) condition did not find any matching row.
+      return res.status(404).json({ error: 'Script not found or no changes made.' });
+    }
+
+    console.log(`Script with ID ${id} updated successfully.`);
+    res.status(200).json(data[0]); // Return the updated script object
+
+  } catch (e) {
+    console.error('Unexpected error in handleUpdateScriptContent:', e);
+    res.status(500).json({ error: 'An unexpected error occurred while updating the script.' });
+  }
+};
+
 module.exports = {
   handleGenerateScript,
   handleGetAllScripts,
   handleGetScriptById,
   handleModifyScript,
+  handleUpdateScriptContent,
 };

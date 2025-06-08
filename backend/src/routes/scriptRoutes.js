@@ -23,6 +23,7 @@ const {
   handleGetAllScripts,
   handleGetScriptById,
   handleModifyScript,
+  handleUpdateScriptContent, // Added for the new PUT endpoint
 } = scriptController; // Destructure after logging and from the already required object
 
 const router = express.Router();
@@ -163,5 +164,60 @@ router.get('/:id', handleGetScriptById);
  *               $ref: '#/components/schemas/Error'
  */
 router.post('/modify', handleModifyScript);
+
+/**
+ * @swagger
+ * /api/v1/scripts/{id}:
+ *   put:
+ *     summary: Update an existing script's content
+ *     tags: [Scripts]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *         description: The ID of the script to update.
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - content
+ *             properties:
+ *               content:
+ *                 type: string
+ *                 description: The new content for the script. Can be an empty string.
+ *                 example: "This is the updated script content. It's even better now!"
+ *     responses:
+ *       200:
+ *         description: Script updated successfully.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Script' # Assuming you have a Script schema defined for Swagger
+ *       400:
+ *         description: Bad request (e.g., missing content in body, invalid script ID format, or content not a string).
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       404:
+ *         description: Script not found.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       500:
+ *         description: Internal server error (e.g., database update failure).
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ */
+router.put('/:id', handleUpdateScriptContent);
 
 module.exports = router;
