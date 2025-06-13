@@ -10,7 +10,7 @@ interface AIRelevance {
   error?: string;
 }
 
-interface YouTubeKeywordItem {
+export interface YouTubeKeywordItem {
   keyword: string;
   engagement_score: number;
   source_video_count: number;
@@ -218,46 +218,56 @@ const TrendSidebar: React.FC<TrendSidebarProps> = ({ selectedKeywords, onSelecte
             <span className="font-semibold">Show/Hide Top 10 Keywords</span>
             <svg className={`w-5 h-5 transition-transform ${isMobileListVisible ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
           </button>
-          <ul className={`space-y-3 mt-2 md:mt-0 ${isMobileListVisible ? 'block' : 'hidden'} md:block`}>
-          {keywords.map((kw, index) => (
-            <li 
-              key={`${kw.keyword}-${index}`} 
-              className={`p-3 rounded-lg shadow-md transition-all duration-200 cursor-pointer 
-                ${selectedKeywords.includes(kw.keyword) 
-                  ? 'bg-sky-600 ring-2 ring-sky-400 scale-105' 
-                  : 'bg-slate-700/50 hover:bg-slate-700'}`}
-              onClick={() => handleKeywordClick(kw.keyword)}
-            >
-              <h3 className="text-md text-sky-300 font-semibold">{kw.keyword}</h3>
-              <p className="text-xs text-slate-400">
-                Engagement Score: <span className="font-medium text-sky-400">{kw.engagement_score}</span>
-              </p>
-              <p className="text-xs text-slate-400">
-                Source Videos: <span className="font-medium text-slate-300">{kw.source_video_count}</span> | Timeframe: <span className="font-medium text-slate-300">{kw.timeframe}</span>
-              </p>
-              {/* Display AI Relevance Data */}
-              {kw.aiRelevance && (
-                <div className="mt-1 pt-1 border-t border-slate-600/50">
-                  {typeof kw.aiRelevance.score === 'number' && (
-                    <p className="text-xs text-slate-400">
-                      AI Relevance: <span className="font-semibold text-teal-400">{kw.aiRelevance.score}/5</span>
-                    </p>
+                    <ul className={`space-y-3 mt-2 md:mt-0 ${isMobileListVisible ? 'block' : 'hidden'} md:block`}>
+            {keywords.map((kw, index) => {
+              const isSelected = selectedKeywords.includes(kw.keyword);
+              return (
+                <li
+                  key={`${kw.keyword}-${index}`}
+                  role="button"
+                  tabIndex={0}
+                  onClick={() => handleKeywordClick(kw.keyword)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault(); // Prevent scrolling on spacebar
+                      handleKeywordClick(kw.keyword);
+                    }
+                  }}
+                  className={`p-3 rounded-lg shadow-md transition-all duration-200 cursor-pointer 
+                    ${isSelected 
+                      ? 'bg-sky-600 ring-2 ring-sky-400 scale-105' 
+                      : 'bg-slate-700/50 hover:bg-slate-700'}`}
+                >
+                  <h3 className="text-md text-sky-300 font-semibold">{kw.keyword}</h3>
+                  <p className="text-xs text-slate-400">
+                    Engagement Score: <span className="font-medium text-sky-400">{kw.engagement_score}</span>
+                  </p>
+                  <p className="text-xs text-slate-400">
+                    Source Videos: <span className="font-medium text-slate-300">{kw.source_video_count}</span> | Timeframe: <span className="font-medium text-slate-300">{kw.timeframe}</span>
+                  </p>
+                  {kw.aiRelevance && (
+                    <div className="mt-1 pt-1 border-t border-slate-600/50">
+                      {typeof kw.aiRelevance.score === 'number' && (
+                        <p className="text-xs text-slate-400">
+                          AI Relevance: <span className="font-semibold text-teal-400">{kw.aiRelevance.score}/5</span>
+                        </p>
+                      )}
+                      {kw.aiRelevance.justification && (
+                        <p className="text-xs text-slate-500 italic">
+                          &ldquo;{kw.aiRelevance.justification}&rdquo;
+                        </p>
+                      )}
+                      {kw.aiRelevance.error && (
+                        <p className="text-xs text-amber-400">
+                          AI Note: <span className="italic">{kw.aiRelevance.error}</span>
+                        </p>
+                      )}
+                    </div>
                   )}
-                  {kw.aiRelevance.justification && (
-                    <p className="text-xs text-slate-500 italic">
-                      &ldquo;{kw.aiRelevance.justification}&rdquo;
-                    </p>
-                  )}
-                  {kw.aiRelevance.error && (
-                    <p className="text-xs text-amber-400">
-                      AI Note: <span className="italic">{kw.aiRelevance.error}</span>
-                    </p>
-                  )}
-                </div>
-              )}
-            </li>
-          ))}
-                  </ul>
+                </li>
+              );
+            })}
+          </ul>
         </div>
       )}
     </aside>
