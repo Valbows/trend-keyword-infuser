@@ -19,11 +19,17 @@ const ScriptEditor: React.FC<ScriptEditorProps> = ({
   title = 'Edit Your Script',
 }) => {
   const [editedScript, setEditedScript] = useState<string>(initialScriptContent);
+  const [isDirty, setIsDirty] = useState<boolean>(false);
 
-  // Effect to update local state if the initial content prop changes
+  // Effect to update local state if the initial content prop changes (e.g., loading a new script)
   useEffect(() => {
     setEditedScript(initialScriptContent);
   }, [initialScriptContent]);
+
+  // Effect to check if the content has been modified by the user
+  useEffect(() => {
+    setIsDirty(initialScriptContent !== editedScript);
+  }, [editedScript, initialScriptContent]);
 
   const handleSave = () => {
     if (!isLoading) {
@@ -33,9 +39,12 @@ const ScriptEditor: React.FC<ScriptEditorProps> = ({
 
   return (
     <div className="bg-slate-800 p-6 rounded-lg shadow-xl w-full space-y-4">
-      <h3 className="text-xl font-semibold text-sky-400 border-b border-slate-700 pb-2 mb-4">
-        {title}
-      </h3>
+      <div className="flex items-center border-b border-slate-700 pb-2 mb-4">
+        <h3 className="text-xl font-semibold text-sky-400">
+          {title}
+        </h3>
+        {isDirty && <span className="text-yellow-400 ml-2 text-2xl" title="Unsaved changes">*</span>}
+      </div>
       <textarea
         value={editedScript}
         onChange={(e) => setEditedScript(e.target.value)}
@@ -51,11 +60,13 @@ const ScriptEditor: React.FC<ScriptEditorProps> = ({
       <div className="flex justify-end">
         <button
           onClick={handleSave}
-          disabled={isLoading}
-          className={`px-6 py-2 rounded-md font-medium transition-colors duration-150 
+          disabled={isLoading || !isDirty}
+          className={`px-6 py-2 rounded-md font-medium transition-all duration-150 transform
             ${isLoading
               ? 'bg-slate-500 text-slate-400 cursor-not-allowed'
-              : 'bg-sky-600 hover:bg-sky-500 text-white focus:ring-2 focus:ring-sky-400 focus:ring-offset-2 focus:ring-offset-slate-800'
+              : isDirty
+                ? 'bg-sky-600 hover:bg-sky-500 text-white focus:ring-2 focus:ring-sky-400 focus:ring-offset-2 focus:ring-offset-slate-800 active:scale-95'
+                : 'bg-slate-600 text-slate-400 cursor-not-allowed'
             }
           `}
         >

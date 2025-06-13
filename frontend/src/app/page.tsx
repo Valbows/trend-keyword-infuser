@@ -107,8 +107,8 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-100 dark:bg-slate-900 text-slate-900 dark:text-slate-100 flex flex-col items-center p-4 sm:p-8 font-[family-name:var(--font-geist-sans)]">
-      <main className="container mx-auto w-full bg-white dark:bg-slate-800 shadow-xl rounded-lg p-6 sm:p-10 flex">
+    <>
+      <div className="bg-white dark:bg-slate-800 shadow-xl rounded-lg p-6 sm:p-10 flex flex-col md:flex-row gap-6">
         <TrendSidebar selectedKeywords={selectedKeywords} onSelectedKeywordsChange={setSelectedKeywords} />
         <div className="flex-1 flex flex-col items-center p-4 md:p-8 overflow-y-auto">
           <header className="mb-8 text-center">
@@ -126,7 +126,7 @@ export default function Home() {
             </div>
           </header>
 
-          <section className="mb-8 w-full max-w-2xl">
+          <section id="generate-script-section" className="mb-8 w-full max-w-2xl scroll-mt-24">
             <label htmlFor="topicInput" className="block text-lg font-medium text-slate-700 dark:text-slate-200 mb-2">
               Enter Your Video Topic:
             </label>
@@ -168,7 +168,7 @@ export default function Home() {
           </section>
 
           {/* Section for Existing Script Input */}
-          <section className="mb-8 w-full max-w-2xl">
+          <section id="modify-script-section" className="mb-8 w-full max-w-2xl scroll-mt-24">
             <label htmlFor="existingScriptInput" className="block text-lg font-medium text-slate-700 dark:text-slate-200 mb-2">
               Paste Your Existing Script to Modify (Optional):
             </label>
@@ -238,13 +238,13 @@ export default function Home() {
             </section>
           )}
         </div>
-      </main>
+      </div>
 
-      <footer className="w-full max-w-3xl mx-auto text-center py-8 mt-12 border-t border-slate-200 dark:border-slate-700">
+      <footer className="text-center py-8 mt-12 border-t border-slate-200 dark:border-slate-700">
         <p className="text-sm text-slate-500 dark:text-slate-400">
-          &copy; {new Date().getFullYear()} Trend Keyword Infuser. Powered by G.O.A.T. C.O.D.E.X. B.O.T.
+          &copy; {new Date().getFullYear()} Trend Keyword Infuser. Powered By Cookin With AI
         </p>
       </footer>
-    </div>
+    </>
   );
 }

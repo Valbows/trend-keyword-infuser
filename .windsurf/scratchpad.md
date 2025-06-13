@@ -202,30 +202,33 @@ The system consists of:
     - **Testing**:
       - [x] Test script generation: topic input, API call, display of new script in editor. (COMPLETED)
       - [x] Test saving new script edits: content modification, save button, API call, success/error feedback, content update in editor. (COMPLETED)
-      - [ ] Test listing existing scripts: API call on load, display of script list, loading/error states.
-      - [ ] Test loading existing script for editing: selection from list, script content loaded into editor, topic updated.
-      - [ ] Test saving edits to an existing script: content modification, save button, API call, success/error feedback, content update in editor.
-      - [ ] Verify all loading indicators and error messages behave as expected across all operations.
-    - **UI/UX Polish**:
-      - [ ] Review and refine layout, styling, and responsiveness of `ScriptWorkflowOrchestrator.tsx` and `ScriptEditor.tsx`.
-      - [ ] Ensure clear visual feedback for all user actions (e.g., toast notifications for save success/failure, clear loading states).
-      - [ ] Check for accessibility best practices.
+      - [x] Test listing existing scripts: API call on load, display of script list, loading/error states. (COMPLETED)
+      - [x] Test loading existing script for editing: selection from list, script content loaded into editor, topic updated. (COMPLETED)
+      - [x] Test saving edits to an existing script: content modification, save button, API call, success/error feedback, content update in editor. (COMPLETED)
+      - [x] Verify all loading indicators and error messages behave as expected across all operations. (COMPLETED)
+  - [x] **Phase 5: UI/UX Polish and Final Testing**
+    - [x] **Task 5.1: Detailed UI/UX Polish**: Conduct a thorough review of `ScriptWorkflowOrchestrator.tsx` and `ScriptEditor.tsx`. Refine layout, styling, visual feedback (e.g., unsaved changes indicators), and accessibility best practices. - `COMPLETED`
+    - [x] Review and refine layout, styling, and responsiveness of `ScriptWorkflowOrchestrator.tsx` and `ScriptEditor.tsx`.
+    - [x] Ensure clear visual feedback for all user actions (e.g., toast notifications for save success/failure, clear loading states).
+    - [x] Check for accessibility best practices.
     - **Success Criteria**: The script editing feature is stable, intuitive, and visually appealing.
   - [x] **Sub-Task 3.4.3: Implement Auto-Save for Modified Scripts (Main Page Feature)**
     - **Objective**: Ensure scripts modified using the 'Modify Script with Selected Keywords' button on the main page are automatically saved to the database.
     - **Backend**:
-      - [x] Modified `ScriptOrchestrationService.orchestrateScriptModification` to accept `userId`, save the AI-modified script to Supabase `scripts` table, and return `{ modifiedScriptText, savedScriptId }`.
-      - [x] Modified `scriptController.handleModifyScript` to extract `userId` (from `req.user` if available), pass it to the service, and include `savedScriptId` and a success message in the API response.
-    - **Success Criteria**: When a user modifies a script using this feature, the modified script is saved as a new entry in the `scripts` table, and the API response confirms this with a `savedScriptId`.
-- [~] Add action buttons and loading indicators (Initial loading/error states implemented in Task 3.1. Added 'Copy Script' button with success feedback, styled scrollbars for script display, and a loading spinner icon to the 'Generate Script' button.)
-- [~] Integrate frontend with backend APIs (Script generation API `/api/v1/scripts/generate` successfully integrated and tested end-to-end. Further API integrations may be needed for other features.)
+{{ ... }}
 
 ### Phase 3: Frontend Development (Continued)
+
+### Task 4: Implement Responsive Navigation and Site-Wide Responsiveness (COMPLETED)
+- [x] Create reusable, responsive Navbar component with logo and navigation links.
+- [x] Integrate Navbar into the main application layout to appear on all pages.
+- [x] Ensure main content areas on Home and AI Script Studio pages are mobile-responsive.
+- [x] Add logo asset to the project.
 
 ### Phase 4: Integration and Testing
 
 - [ ] Connect all components end-to-end
-- [ ] Implement error handling and fallbacks
+{{ ... }}
 - [ ] Perform unit and integration testing
 - [ ] Conduct user flow testing
 - [ ] Optimize performance and fix bugs

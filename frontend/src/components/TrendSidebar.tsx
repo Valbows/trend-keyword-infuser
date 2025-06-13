@@ -36,6 +36,7 @@ const TrendSidebar: React.FC<TrendSidebarProps> = ({ selectedKeywords, onSelecte
   const [startDate, setStartDate] = useState<string>('');
   const [endDate, setEndDate] = useState<string>('');
   const [error, setError] = useState<string | null>(null);
+  const [isMobileListVisible, setIsMobileListVisible] = useState(false);
 
   const timeframes = [
     { value: '24h', label: 'Last 24 Hours' },
@@ -117,7 +118,7 @@ const TrendSidebar: React.FC<TrendSidebarProps> = ({ selectedKeywords, onSelecte
           throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
         }
         const data = await response.json();
-        setKeywords(data.keywords || []);
+        setKeywords((data.keywords || []).slice(0, 10));
       } catch (err: any) {
         console.error('Failed to fetch YouTube Keywords:', err);
         setError(err.message || 'Failed to load keywords.');
@@ -140,7 +141,7 @@ const TrendSidebar: React.FC<TrendSidebarProps> = ({ selectedKeywords, onSelecte
 
   return (
     <aside className="w-full md:w-1/3 lg:w-1/4 bg-slate-800 p-6 space-y-4 h-screen overflow-y-auto text-slate-100 shadow-lg">
-      <h2 className="text-2xl font-bold text-sky-400 mb-6 border-b border-slate-700 pb-3">YouTube Keyword Trends</h2>
+      <h2 className="text-2xl font-bold text-sky-400 mb-6 border-b border-slate-700 pb-3">Trending YouTube Keywords</h2>
       {/* Temporary Topic Input - REMOVE/REFACTOR for integration with main page topic input */}
       <div className="mb-4">
         <label htmlFor="topicInput" className="block text-sm font-medium text-slate-300 mb-1">Enter Topic (Temporary):</label>
@@ -220,7 +221,15 @@ const TrendSidebar: React.FC<TrendSidebarProps> = ({ selectedKeywords, onSelecte
       )}
       {!isLoading && !error && keywords.length === 0 && !topic && <p className="text-slate-400">Enter a topic to search for keywords.</p>}
       {keywords.length > 0 && (
-        <ul className="space-y-3">
+        <div>
+          <button 
+            onClick={() => setIsMobileListVisible(!isMobileListVisible)}
+            className="w-full md:hidden bg-slate-700 p-3 rounded-lg text-left flex justify-between items-center hover:bg-slate-600 transition-colors"
+          >
+            <span className="font-semibold">Show/Hide Top 10 Keywords</span>
+            <svg className={`w-5 h-5 transition-transform ${isMobileListVisible ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
+          </button>
+          <ul className={`space-y-3 mt-2 md:mt-0 ${isMobileListVisible ? 'block' : 'hidden'} md:block`}>
           {keywords.map((kw, index) => (
             <li 
               key={`${kw.keyword}-${index}`} 
@@ -259,7 +268,8 @@ const TrendSidebar: React.FC<TrendSidebarProps> = ({ selectedKeywords, onSelecte
               )}
             </li>
           ))}
-        </ul>
+                  </ul>
+        </div>
       )}
     </aside>
   );
