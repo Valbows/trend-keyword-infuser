@@ -164,19 +164,28 @@ const ScriptWorkflowOrchestrator: React.FC = () => {
     }
   };
 
+  console.log('[ScriptWorkflowOrchestrator] DEBUG: ScriptEditor render conditions:', {
+    hasContent: !!currentScriptContent,
+    hasId: !!currentScriptId,
+    shouldRenderEditor: !!(currentScriptContent || currentScriptId),
+    currentScriptIdForTitle: currentScriptId,
+    isLoadingSaveProp: isLoadingSave, // This is passed to ScriptEditor's isLoading prop
+    saveErrorProp: saveError
+  });
+
   return (
     <div className="space-y-8 p-4 md:p-8 max-w-4xl mx-auto bg-slate-900 text-slate-100 rounded-xl shadow-2xl">
       <div className="generation-section space-y-4 bg-slate-800 p-6 rounded-lg shadow-lg">
         <h2 className="text-2xl font-semibold text-sky-400 border-b border-slate-700 pb-2">Generate New Script</h2>
         <div>
           <label htmlFor="topicInput" className="block text-sm font-medium text-slate-300 mb-1">Topic:</label>
-          <input
+          <textarea
             id="topicInput"
-            type="text"
             value={topic}
             onChange={(e) => setTopic(e.target.value)}
             placeholder="Enter a topic (e.g., Future of AI)"
-            className="w-full p-2.5 bg-slate-700 border border-slate-600 rounded-md focus:ring-2 focus:ring-sky-500 focus:border-sky-500 shadow-sm text-slate-100 placeholder-slate-400"
+            rows={3}
+            className="w-full p-2.5 bg-slate-700 border border-slate-600 rounded-md focus:ring-2 focus:ring-sky-500 focus:border-sky-500 shadow-sm text-slate-100 placeholder-slate-400 resize-y"
             disabled={isLoadingGeneration}
           />
         </div>

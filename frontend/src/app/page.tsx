@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import TrendSidebar from '@/components/TrendSidebar'; // Import the new sidebar
+import Link from 'next/link';
 
 export default function Home() {
   const [topic, setTopic] = useState('');
@@ -117,19 +118,25 @@ export default function Home() {
             <p className="text-slate-600 dark:text-slate-300 mt-2 text-lg">
               Generate video scripts powered by the latest trends!
             </p>
+            <div className="mt-6">
+              <Link href="/scripts"
+                className="px-6 py-3 bg-purple-600 hover:bg-purple-700 dark:bg-purple-500 dark:hover:bg-purple-600 text-white font-semibold rounded-lg shadow-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-opacity-75 transition-all duration-150 ease-in-out text-lg transform hover:scale-105 active:scale-95">
+                Manage AI Scripts
+              </Link>
+            </div>
           </header>
 
-          <section className="mb-8">
+          <section className="mb-8 w-full max-w-2xl">
             <label htmlFor="topicInput" className="block text-lg font-medium text-slate-700 dark:text-slate-200 mb-2">
               Enter Your Video Topic:
             </label>
-            <input
+            <textarea
               id="topicInput"
-              type="text"
               value={topic}
               onChange={(e) => setTopic(e.target.value)}
               placeholder="e.g., 'Future of Artificial Intelligence'"
-              className="w-full p-3 border border-slate-300 dark:border-slate-600 rounded-md shadow-sm focus:ring-sky-500 focus:border-sky-500 dark:bg-slate-700 dark:text-slate-50 transition-colors duration-150"
+              rows={3}
+              className="w-full p-3 border border-slate-300 dark:border-slate-600 rounded-md shadow-sm focus:ring-sky-500 focus:border-sky-500 dark:bg-slate-700 dark:text-slate-50 transition-colors duration-150 resize-y"
               disabled={isLoading}
             />
           </section>

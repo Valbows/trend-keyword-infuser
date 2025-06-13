@@ -129,6 +129,9 @@ const handleGetScriptById = async (req, res) => {
  * @param {object} res - The Express response object.
  */
 const handleModifyScript = async (req, res) => {
+  // G.O.A.T. C.O.D.E.X. B.O.T. - Extract userId, assuming auth middleware sets req.user
+  const userId = req.user ? req.user.id : null; 
+  // If req.user is not set, this will pass null. Adjust if auth works differently for this route.
   const { existingScript, selectedKeywords } = req.body;
 
   if (!existingScript || typeof existingScript !== 'string' || existingScript.trim() === '') {
@@ -143,16 +146,18 @@ const handleModifyScript = async (req, res) => {
   }
 
   try {
-    console.log(`Controller: Received request to modify script with ${selectedKeywords.length} keywords.`);
-    const modifiedScriptText = await scriptOrchestrationService.orchestrateScriptModification(existingScript, selectedKeywords);
+    console.log(`Controller: Received request to modify script with ${selectedKeywords.length} keywords for user ID: ${userId}.`);
+    const { modifiedScriptText, savedScriptId } = await scriptOrchestrationService.orchestrateScriptModification(existingScript, selectedKeywords, userId);
 
     // Optionally, save the modified script or log its modification. For now, just returning.
     // Consider if modified scripts should also be saved to Supabase or a different table.
 
     res.status(200).json({
+      message: 'Script modified and saved successfully.',
       modifiedScript: modifiedScriptText,
       originalScript: existingScript,
       keywordsUsed: selectedKeywords,
+      savedScriptId: savedScriptId // G.O.A.T. C.O.D.E.X. B.O.T. - Include the ID of the saved script
     });
   } catch (error) {
     // Log the original error object for more detailed debugging if needed

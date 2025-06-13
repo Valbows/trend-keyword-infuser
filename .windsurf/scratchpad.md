@@ -49,7 +49,7 @@ The system consists of:
 - [x] Develop Script Orchestration Service (Initial structure and integration complete)
 - [x] Create Trend & Keyword Discovery Service with external API integration (Initial placeholder service complete)
 - [x] Integrate YouTube Data API into TrendDiscoveryService for real-time trend fetching
-- [x] **Internal Test:** `VERIFIED (After Debugging)` Make a test request to `/api/v1/scripts/generate` with a topic like "Artificial Intelligence". Verified that `server.log` now correctly captures detailed logs from `TrendDiscoveryService` (YouTube API calls, trends fetched) and other services. The generated script accurately reflects dynamic trends from YouTube. Key debugging steps involved correcting `dotenv` load order in `index.js` and ensuring proper log flushing.
+- [x] **Internal Test:** `VERIFIED (After Debugging)` Make a test request to `/api/v1/scripts/generate` with a topic like "Artificial Intelligence". Verified that `server.log` now correctly captures detailed logs from `TrendDiscoveryService` (YouTube API calls, trends fetched) and other services. The generated script accurately reflects dynamic trends from YouTube. Key debugging steps involved correcting `dotenv` load order in `index.js` and ensuring proper log flushing. Additionally, a persistent 500 error with `/api/v1/trends/youtube-keywords` was investigated and subsequently resolved (potentially due to transient backend/API key state or server restarts), and the feature is now functioning correctly.
 - [x] Implement LLM Script Generation Service (`DEFERRED OpenRouter Integration` - Current Gemini API `gemini-2.0-flash` setup is complete for this phase)
 - [x] Set up data models and database connections (Basic 'scripts' table in Supabase with topic, trends_used, generated_script is implemented and functional via `scriptController.js`)
 
@@ -65,6 +65,16 @@ The system consists of:
       - [x] Utilize YouTube Data API v3 `search.list` with `publishedAfter` for time filtering and `order` (e.g., `viewCount`) for engagement ranking.
       - [x] Implement logic to extract relevant keywords/phrases from titles and descriptions of fetched videos.
       - [x] Define a clear data structure for returned keywords (e.g., `{ keyword: string, engagement_score: number, source_video_count: number, timeframe: string }`).
+        - **Note on `engagement_score` Calculation (as of 2025-06-08 in `TrendDiscoveryService._extractKeywordsFromVideos`):**
+          - **Formula**: `engagementScore = count * source_video_count * (0.5 + averageRecency)`
+          - **Components**:
+            - `count`: Total number of times the keyword appears across all analyzed video titles/descriptions.
+            - `source_video_count`: Number of unique videos containing the keyword.
+            - `averageRecency`: A score from 0 (oldest in set) to 1 (newest in set), calculated as the average of individual video recency scores for each keyword occurrence.
+              - `recencyScore_per_video_occurrence = (videoPublishedAt_timestamp - minTimestamp_in_set) / (maxTimestamp_in_set - minTimestamp_in_set)`
+              - `averageRecency = SUM(recencyScore_per_video_occurrence for the keyword) / count`
+          - **Recency Multiplier**: The `(0.5 + averageRecency)` term acts as a multiplier ranging from 0.5 to 1.5, boosting scores for more recent keywords.
+          - **Filter**: Keywords are included only if `count > 1`.
       - [x] Adapt or create an API endpoint (e.g., `/api/v1/trends/youtube-keywords?topic=<topic>&timeframe=<timeframe>`) to serve this data.
     - **Frontend (`TrendSidebar.tsx`)**:
       - [x] Implement UI elements (e.g., dropdown) for timeframe selection (24h, 48h, 72h, All Time).
@@ -75,137 +85,142 @@ The system consists of:
     - [x] **Sub-Task 3.2.3.1: Frontend - UI for Existing Script and Keyword Selection**
       - **Objective**: Allow users to input an existing script and select keywords from the `TrendSidebar` for infusion.
       - **Actions (Frontend - likely `page.tsx` and `TrendSidebar.tsx`):**
-          - [x] In `page.tsx` (or a relevant main content area): Add a `textarea` component for users to paste their existing script. Manage its state.
-          - [x] In `TrendSidebar.tsx`: Modify the keyword display. Clicking a keyword should toggle its selection state. Selected keywords should be visually distinct.
-          - [x] In `TrendSidebar.tsx` (or `page.tsx`): Maintain a list of currently selected keywords (e.g., in React state, possibly lifted to a shared parent or context).
-          - [x] In `page.tsx`: Add a "Modify Script" button, enabled when there's an existing script and at least one keyword is selected.
+        - [x] In `page.tsx` (or a relevant main content area): Add a `textarea` component for users to paste their existing script. Manage its state.
+        - [x] In `TrendSidebar.tsx`: Modify the keyword display. Clicking a keyword should toggle its selection state. Selected keywords should be visually distinct.
+        - [x] In `TrendSidebar.tsx` (or `page.tsx`): Maintain a list of currently selected keywords (e.g., in React state, possibly lifted to a shared parent or context).
+        - [x] In `page.tsx`: Add a "Modify Script" button, enabled when there's an existing script and at least one keyword is selected.
       - **Success Criteria**: User can paste script, select/deselect keywords, and "Modify Script" button behaves correctly.
     - [x] **Sub-Task 3.2.3.2: Backend - API Endpoint for Script Modification**
       - **Objective**: Create a backend API endpoint that accepts an existing script and selected keywords, then uses an LLM to infuse them.
       - **Actions (Backend):**
-          - [x] In `scriptRoutes.js`: Define a new POST route, e.g., `/api/v1/scripts/modify`.
-          - [x] In `scriptController.js`: Create `modifyScript(req, res)` method to validate input, call a service for modification logic, and return the modified script.
-          - [x] In `ScriptOrchestrationService.js` (or new `ScriptModificationService.js`): Create `infuseKeywordsIntoScript(existingScript, selectedKeywords)` method to construct an LLM prompt (for Gemini API) and get the modified script.
+        - [x] In `scriptRoutes.js`: Define a new POST route, e.g., `/api/v1/scripts/modify`.
+        - [x] In `scriptController.js`: Create `modifyScript(req, res)` method to validate input, call a service for modification logic, and return the modified script.
+        - [x] In `ScriptOrchestrationService.js` (or new `ScriptModificationService.js`): Create `infuseKeywordsIntoScript(existingScript, selectedKeywords)` method to construct an LLM prompt (for Gemini API) and get the modified script.
       - **Success Criteria**: POST to `/api/v1/scripts/modify` with valid data returns a modified script; errors are handled.
     - [x] **Sub-Task 3.2.3.3: Frontend - Integrate Script Modification Feature**
       - **Objective**: Connect the frontend UI to the new backend API endpoint.
       - **Actions (Frontend - likely `page.tsx`):**
-          - [x] On "Modify Script" button click: Gather script and selected keywords, call `/api/v1/scripts/modify`.
-          - [x] Handle API response: Display modified script or error message. Implement loading states.
+        - [x] On "Modify Script" button click: Gather script and selected keywords, call `/api/v1/scripts/modify`.
+        - [x] Handle API response: Display modified script or error message. Implement loading states.
       - **Success Criteria**: End-to-end flow works: user inputs script, selects keywords, clicks modify, sees modified script. Loading/error states are graceful.
   - [ ] **Phase 3.2 - Step 4: Advanced Features (AI Selection, Granular Volume, Filtering)**
     - **Objective**: Elevate the keyword analysis capabilities by integrating AI-driven suggestions, more detailed metrics, and advanced temporal filtering to provide users with deeper insights and more effective keyword choices.
     - [x] **Sub-Task 3.2.4.1: AI-Powered Keyword Relevance Scoring/Suggestion**
-        - **Objective**: Enhance keyword selection by providing AI-driven relevance scores or suggestions for the fetched YouTube keywords based on the user's existing script or primary topic. (COMPLETED)
-        - **Backend**:
-            - [x] Design a new service method (e.g., in `ScriptOrchestrationService` or a new `KeywordAnalysisService`) that takes the list of fetched YouTube keywords and the user's script/topic. (`KeywordAnalysisService.getRelevanceForKeywords` created)
-            - [x] Construct a prompt for an LLM (Gemini) to evaluate each keyword's relevance to the script/topic, potentially returning a relevance score (e.g., 1-5) or a short justification. (Implemented in `KeywordAnalysisService`)
-            - [x] Create/update an API endpoint (e.g., modify `/api/v1/trends/youtube-keywords` to optionally include this, or a new endpoint) to return keywords with AI relevance scores. (`TrendDiscoveryService.getYouTubeKeywordsByTopicAndTimeframe` now integrates AI scoring, serving the existing `/api/v1/trends/youtube-keywords` route via `trendController.js`)
-        - **Frontend**:
-            - [x] In `TrendSidebar.tsx`, update the UI to display the AI relevance score/suggestion alongside each keyword.
-            - [ ] Allow users to sort or filter keywords based on AI relevance. (Sorting/filtering by AI relevance is a future enhancement within this sub-task, core display is complete)
-        - **Success Criteria**: Users see AI-generated relevance indicators for YouTube keywords, aiding in their selection process. Backend returns augmented keyword data. (ACHIEVED)
+      - **Objective**: Enhance keyword selection by providing AI-driven relevance scores or suggestions for the fetched YouTube keywords based on the user's existing script or primary topic. (COMPLETED)
+      - **Backend**:
+        - [x] Design a new service method (e.g., in `ScriptOrchestrationService` or a new `KeywordAnalysisService`) that takes the list of fetched YouTube keywords and the user's script/topic. (`KeywordAnalysisService.getRelevanceForKeywords` created)
+        - [x] Construct a prompt for an LLM (Gemini) to evaluate each keyword's relevance to the script/topic, potentially returning a relevance score (e.g., 1-5) or a short justification. (Implemented in `KeywordAnalysisService`)
+        - [x] Create/update an API endpoint (e.g., modify `/api/v1/trends/youtube-keywords` to optionally include this, or a new endpoint) to return keywords with AI relevance scores. (`TrendDiscoveryService.getYouTubeKeywordsByTopicAndTimeframe` now integrates AI scoring, serving the existing `/api/v1/trends/youtube-keywords` route via `trendController.js`)
+      - **Frontend**:
+        - [x] In `TrendSidebar.tsx`, update the UI to display the AI relevance score/suggestion alongside each keyword.
+        - [ ] Allow users to sort or filter keywords based on AI relevance. (Sorting/filtering by AI relevance is a future enhancement within this sub-task, core display is complete)
+      - **Success Criteria**: Users see AI-generated relevance indicators for YouTube keywords, aiding in their selection process. Backend returns augmented keyword data. (ACHIEVED)
     - [x] **Sub-Task 3.2.4.2: Enhanced Keyword Metrics (Contextualizing "Volume")**
-        - **Objective**: Provide users with more insightful metrics for YouTube keywords, going beyond current "engagement_score" and "source_video_count" to better approximate "search interest" or "trend velocity" without direct search volume data. (Algorithmic refinement of engagement_score COMPLETED)
-        - **Backend**:
-            - [x] Research if YouTube Data API offers any other indirect indicators of trend velocity or search interest (e.g., comment counts if video details are fetched, rate of view accumulation if historical data could be tracked - likely too complex for MVP). (Research complete: `snippet` part has limited direct metrics. Recency from `publishedAt` is viable.)
-            - [x] Alternatively, refine the existing `engagement_score` calculation or use the LLM to provide a qualitative assessment of a keyword's "buzz" based on titles/descriptions. (Algorithmic refinement of `engagement_score` with recency weighting implemented in `TrendDiscoveryService._extractKeywordsFromVideos`.)
-            - [x] Update the API response for `/api/v1/trends/youtube-keywords` with these enhanced/new metrics. (Implicitly handled as `engagement_score` field is reused with new calculation.)
-        - **Frontend**:
-            - [x] In `TrendSidebar.tsx`, display these new/enhanced metrics clearly. (Implicitly handled as the `engagement_score` is already displayed; its calculation is now more sophisticated. No UI change needed for this iteration.)
-        - **Success Criteria**: Users have access to richer, more contextual data for each keyword to gauge its potential impact. (ACHIEVED for algorithmic refinement of engagement_score.)
+      - **Objective**: Provide users with more insightful metrics for YouTube keywords, going beyond current "engagement_score" and "source_video_count" to better approximate "search interest" or "trend velocity" without direct search volume data. (Algorithmic refinement of engagement_score COMPLETED)
+      - **Backend**:
+        - [x] Research if YouTube Data API offers any other indirect indicators of trend velocity or search interest (e.g., comment counts if video details are fetched, rate of view accumulation if historical data could be tracked - likely too complex for MVP). (Research complete: `snippet` part has limited direct metrics. Recency from `publishedAt` is viable.)
+        - [x] Alternatively, refine the existing `engagement_score` calculation or use the LLM to provide a qualitative assessment of a keyword's "buzz" based on titles/descriptions. (Algorithmic refinement of `engagement_score` with recency weighting implemented in `TrendDiscoveryService._extractKeywordsFromVideos`.)
+        - [x] Update the API response for `/api/v1/trends/youtube-keywords` with these enhanced/new metrics. (Implicitly handled as `engagement_score` field is reused with new calculation.)
+      - **Frontend**:
+        - [x] In `TrendSidebar.tsx`, display these new/enhanced metrics clearly. (Implicitly handled as the `engagement_score` is already displayed; its calculation is now more sophisticated. No UI change needed for this iteration.)
+      - **Success Criteria**: Users have access to richer, more contextual data for each keyword to gauge its potential impact. (ACHIEVED for algorithmic refinement of engagement_score.)
     - [x] **Sub-Task 3.2.4.3: Advanced Time-Based Trend Analysis (Custom Date Ranges - COMPLETED; Trajectory Deferred)**
-        - **Objective**: Offer more sophisticated time-based filtering or trend trajectory insights for keywords, beyond the current fixed timeframes.
-        - **Backend (Option A: Custom Date Range - COMPLETED)**:
-            - [x] Option A: Implement custom date range selection (e.g., `publishedAfter`, `publishedBefore`) in `TrendDiscoveryService.js` and API.
-                - `getYouTubeKeywordsByTopicAndTimeframe` modified to accept optional `publishedAfterISO` and `publishedBeforeISO` string parameters.
-                - If valid, these ISO dates are used for YouTube API's `publishedAfter` and `publishedBefore` query parameters, overriding the standard `timeframe` (24h, 48h, 72h) logic for date filtering.
-                - An `effectiveTimeframeLabel` (e.g., '24h', 'custom') is determined and passed to `_extractKeywordsFromVideos` to ensure keyword objects retain context about the query window.
-                - Basic validation for ISO date string format included.
-            - [D] Option B: Investigate feasibility of comparative analysis across time windows for trajectory inference (potential high API cost). - DEFERRED due to high API quota consumption and implementation complexity relative to current MVP goals.
-        - **Frontend (Option A: Custom Date Range UI - COMPLETED)**:
-            - [x] If Option A: Add UI for custom date range selection in `TrendSidebar.tsx`.
-                - Added `startDate`, `endDate` state variables.
-                - Added "Custom Range..." to timeframe selector; conditionally render date input fields.
-                - `fetchYouTubeKeywords` updated to validate and format custom dates (start of day for `publishedAfterISO`, end of day for `publishedBeforeISO`) and pass them to the backend.
-                - `useEffect` hook updated to re-fetch on `startDate`/`endDate` changes.
-                - Timeframe dropdown clears custom dates if a predefined option is re-selected.
-                - Enhanced "No keywords found" message for custom ranges.
-            - [D] If Option B: Design UI to display trend trajectory indicators. - DEFERRED along with Option B backend.
-        - **Success Criteria**: Users can analyze keyword trends with more flexible time controls via custom date ranges. (Backend & Frontend for custom date ranges achieved. Trajectory insights via Option B deferred).
+      - **Objective**: Offer more sophisticated time-based filtering or trend trajectory insights for keywords, beyond the current fixed timeframes.
+      - **Backend (Option A: Custom Date Range - COMPLETED)**:
+        - [x] Option A: Implement custom date range selection (e.g., `publishedAfter`, `publishedBefore`) in `TrendDiscoveryService.js` and API.
+          - `getYouTubeKeywordsByTopicAndTimeframe` modified to accept optional `publishedAfterISO` and `publishedBeforeISO` string parameters.
+          - If valid, these ISO dates are used for YouTube API's `publishedAfter` and `publishedBefore` query parameters, overriding the standard `timeframe` (24h, 48h, 72h) logic for date filtering.
+          - An `effectiveTimeframeLabel` (e.g., '24h', 'custom') is determined and passed to `_extractKeywordsFromVideos` to ensure keyword objects retain context about the query window.
+          - Basic validation for ISO date string format included.
+        - [D] Option B: Investigate feasibility of comparative analysis across time windows for trajectory inference (potential high API cost). - DEFERRED due to high API quota consumption and implementation complexity relative to current MVP goals.
+      - **Frontend (Option A: Custom Date Range UI - COMPLETED)**:
+        - [x] If Option A: Add UI for custom date range selection in `TrendSidebar.tsx`.
+          - Added `startDate`, `endDate` state variables.
+          - Added "Custom Range..." to timeframe selector; conditionally render date input fields.
+          - `fetchYouTubeKeywords` updated to validate and format custom dates (start of day for `publishedAfterISO`, end of day for `publishedBeforeISO`) and pass them to the backend.
+          - `useEffect` hook updated to re-fetch on `startDate`/`endDate` changes.
+          - Timeframe dropdown clears custom dates if a predefined option is re-selected.
+          - Enhanced "No keywords found" message for custom ranges.
+        - [D] If Option B: Design UI to display trend trajectory indicators. - DEFERRED along with Option B backend.
+      - **Success Criteria**: Users can analyze keyword trends with more flexible time controls via custom date ranges. (Backend & Frontend for custom date ranges achieved. Trajectory insights via Option B deferred).
 - [ ] **Phase 3.3: Implement AI Script Editor/Display**
-    - **Objective**: Empower users to view, edit, and save AI-generated scripts directly within the application.
-    - [ ] **Sub-Task 3.3.1: Basic Script Display & Editing UI**
-        - **Objective**: Create or enhance a UI component that displays the AI-generated script and allows users to make direct text edits.
-        - **Frontend**:
-            - [x] Identify/Create `ScriptEditor.tsx` component. (New file created with basic structure, props, state, textarea, and save button.)
-            - [x] Use `textarea` for script editing. (Implemented with styling and disabled state during loading.)
-            - [x] Component receives script content as a prop. (`initialScriptContent`, `isLoading`, `error`, `title` props defined and used.)
-            - [x] Manage edited script in local component state. (`editedScript` state variable implemented with `useEffect` to sync with `initialScriptContent`.)
-            - [x] Add "Save Edits" button. (Button implemented with loading state and calls `onSave` prop.)
-        - **Backend (Anticipatory for 3.3.2)**:
-            - No direct work. Plan for future endpoint (e.g., `PUT /api/v1/scripts/:scriptId/content`).
-        - **Success Criteria**:
-            1. Script viewable in an editable field.
-            2. User can modify script text.
-            3. Edits reflected in local state.
-            4. "Save Edits" button present.
-            5. UI is clean, responsive, user-friendly.
-    - [x] **Sub-Task 3.3.2: Backend Integration for Saving Edits (COMPLETED)**
-        - **Objective**: Connect frontend "Save" to backend API to persist script edits.
-        - **Frontend (Deferred to 3.3.3 Integration)**:
-            - [ ] Implement API call on "Save Edits" in the parent component that uses `ScriptEditor.tsx`.
-            - [ ] Handle API response (success/error) & provide user feedback (by passing `isLoading` and `error` props to `ScriptEditor`).
-        - **Backend (COMPLETED)**:
-            - [x] Define and implement API endpoint (`PUT /api/v1/scripts/:id`) in `scriptRoutes.js`.
-            - [x] Implement controller logic (`handleUpdateScriptContent` in `scriptController.js`) to update script in Supabase.
-        - **Success Criteria**: Backend ready for saving edits. Frontend logic to call save API will be part of editor integration (3.3.3). User gets feedback via `ScriptEditor` props.
-    - [x] **Sub-Task 3.3.3: Integrating Editor into Main Workflow (COMPLETED)**
-        - **Objective**: Ensure script editor is accessible post-generation or when selecting an existing script.
-        - **Backend Enhancement (COMPLETED)**:
-            - [x] Modified `handleGenerateScript` in `scriptController.js` to return `scriptId` along with `scriptText`.
-        - **Frontend (COMPLETED)**:
-            - [x] Determined placement of `ScriptEditor.tsx` in application layout (Created `ScriptWorkflowOrchestrator.tsx` as a dedicated view/container).
-            - [x] Implemented logic in the parent component (`ScriptWorkflowOrchestrator.tsx`):
-                - [x] Fetched script data (ID and content) for existing scripts (Added `useEffect` to fetch from `GET /api/v1/scripts`, UI to list, and `handleLoadScriptForEditing` function).
-                - [x] Handled receiving `scriptId` and `scriptText` for newly generated scripts (Implemented `handleGenerateNewScript`).
-                - [x] Passed `initialScriptContent` (via `currentScriptContent`) and `scriptId` (implicitly via `currentScriptId` context for editor title) to `ScriptEditor.tsx`.
-                - [x] Implemented the `onSave` handler for `ScriptEditor.tsx` to call the `PUT /api/v1/scripts/:id` endpoint (Implemented `handleSaveEditedScript`).
-            - [x] Managed loading and error states for script generation, fetching existing scripts, and saving (Implemented for all operations).
-        - **Success Criteria**: Script editor is a natural part of the user journey, allowing viewing and editing of new and existing scripts. (Full workflow for new and existing scripts established).
+  - **Objective**: Empower users to view, edit, and save AI-generated scripts directly within the application.
+  - [ ] **Sub-Task 3.3.1: Basic Script Display & Editing UI**
+    - **Objective**: Create or enhance a UI component that displays the AI-generated script and allows users to make direct text edits.
+    - **Frontend**:
+      - [x] Identify/Create `ScriptEditor.tsx` component. (New file created with basic structure, props, state, textarea, and save button.)
+      - [x] Use `textarea` for script editing. (Implemented with styling and disabled state during loading.)
+      - [x] Component receives script content as a prop. (`initialScriptContent`, `isLoading`, `error`, `title` props defined and used.)
+      - [x] Manage edited script in local component state. (`editedScript` state variable implemented with `useEffect` to sync with `initialScriptContent`.)
+      - [x] Add "Save Edits" button. (Button implemented with loading state and calls `onSave` prop.)
+    - **Backend (Anticipatory for 3.3.2)**:
+      - No direct work. Plan for future endpoint (e.g., `PUT /api/v1/scripts/:scriptId/content`).
+    - **Success Criteria**:
+      1. Script viewable in an editable field.
+      2. User can modify script text.
+      3. Edits reflected in local state.
+      4. "Save Edits" button present.
+      5. UI is clean, responsive, user-friendly.
+  - [x] **Sub-Task 3.3.2: Backend Integration for Saving Edits (COMPLETED)**
+    - **Objective**: Connect frontend "Save" to backend API to persist script edits.
+    - **Frontend (Deferred to 3.3.3 Integration)**:
+      - [ ] Implement API call on "Save Edits" in the parent component that uses `ScriptEditor.tsx`.
+      - [ ] Handle API response (success/error) & provide user feedback (by passing `isLoading` and `error` props to `ScriptEditor`).
+    - **Backend (COMPLETED)**:
+      - [x] Define and implement API endpoint (`PUT /api/v1/scripts/:id`) in `scriptRoutes.js`.
+      - [x] Implement controller logic (`handleUpdateScriptContent` in `scriptController.js`) to update script in Supabase.
+    - **Success Criteria**: Backend ready for saving edits. Frontend logic to call save API will be part of editor integration (3.3.3). User gets feedback via `ScriptEditor` props.
+  - [x] **Sub-Task 3.3.3: Integrating Editor into Main Workflow (COMPLETED)**
+    - **Objective**: Ensure script editor is accessible post-generation or when selecting an existing script.
+    - **Backend Enhancement (COMPLETED)**:
+      - [x] Modified `handleGenerateScript` in `scriptController.js` to return `scriptId` along with `scriptText`.
+    - **Frontend (COMPLETED)**:
+      - [x] Determined placement of `ScriptEditor.tsx` in application layout (Created `ScriptWorkflowOrchestrator.tsx` as a dedicated view/container).
+      - [x] Implemented logic in the parent component (`ScriptWorkflowOrchestrator.tsx`):
+        - [x] Fetched script data (ID and content) for existing scripts (Added `useEffect` to fetch from `GET /api/v1/scripts`, UI to list, and `handleLoadScriptForEditing` function).
+        - [x] Handled receiving `scriptId` and `scriptText` for newly generated scripts (Implemented `handleGenerateNewScript`).
+        - [x] Passed `initialScriptContent` (via `currentScriptContent`) and `scriptId` (implicitly via `currentScriptId` context for editor title) to `ScriptEditor.tsx`.
+        - [x] Implemented the `onSave` handler for `ScriptEditor.tsx` to call the `PUT /api/v1/scripts/:id` endpoint (Implemented `handleSaveEditedScript`).
+      - [x] Managed loading and error states for script generation, fetching existing scripts, and saving (Implemented for all operations).
+    - **Success Criteria**: Script editor is a natural part of the user journey, allowing viewing and editing of new and existing scripts. (Full workflow for new and existing scripts established).
 
 **Phase 3.3: AI Script Editor/Display (COMPLETED)**
 
 ### Phase 3.4: Application Integration and Testing for Script Editor
+
 - **Objective**: Seamlessly integrate the `ScriptWorkflowOrchestrator` into the main application and conduct thorough testing.
 - **Sub-Tasks**:
-    - [ ] **Sub-Task 3.4.1: Routing and Navigation**
-        - **Objective**: Make the Script Editor page accessible via application routing and navigation.
-        - **Frontend**:
-            - [ ] Add a new route (e.g., `/scripts` or `/script-editor`) in the application's router (e.g., Next.js `pages` directory or App Router).
-            - [ ] Create a page component that renders `ScriptWorkflowOrchestrator.tsx`.
-            - [ ] Add a link/button in the main navigation (e.g., sidebar, navbar) pointing to this new route.
-        - **Success Criteria**: Users can navigate to the script management page.
-    - [ ] **Sub-Task 3.4.2: End-to-End Testing and UI Polish**
-        - **Objective**: Ensure the entire script editing workflow is robust, user-friendly, and bug-free.
-        - **Testing**:
-            - [ ] Test script generation: topic input, API call, display of new script in editor.
-            - [ ] Test saving new script edits: content modification, save button, API call, success/error feedback, content update in editor.
-            - [ ] Test listing existing scripts: API call on load, display of script list, loading/error states.
-            - [ ] Test loading existing script for editing: selection from list, script content loaded into editor, topic updated.
-            - [ ] Test saving edits to an existing script: content modification, save button, API call, success/error feedback, content update in editor.
-            - [ ] Verify all loading indicators and error messages behave as expected across all operations.
-        - **UI/UX Polish**:
-            - [ ] Review and refine layout, styling, and responsiveness of `ScriptWorkflowOrchestrator.tsx` and `ScriptEditor.tsx`.
-            - [ ] Ensure clear visual feedback for all user actions (e.g., toast notifications for save success/failure, clear loading states).
-            - [ ] Check for accessibility best practices.
-        - **Success Criteria**: The script editing feature is stable, intuitive, and visually appealing.
+  - [x] **Sub-Task 3.4.1: Routing and Navigation (COMPLETED)**
+    - **Objective**: Make the Script Editor page accessible via application routing and navigation.
+    - **Frontend**:
+      - [x] Add a new route (`/scripts`) in the application's router (Next.js App Router: `frontend/src/app/scripts/page.tsx`).
+      - [x] Create a page component (`ScriptsPage`) that renders `ScriptWorkflowOrchestrator.tsx`.
+      - [x] Add a link/button in the main navigation (header of `/app/page.tsx`) pointing to the `/scripts` route.
+    - **Success Criteria**: Users can navigate to the script management page (`/scripts`) via a link on the main page. Sub-Task 3.4.1 COMPLETE.
+  - [ ] **Sub-Task 3.4.2: End-to-End Testing and UI Polish**
+    - **Objective**: Ensure the entire script editing workflow is robust, user-friendly, and bug-free.
+    - **Testing**:
+      - [x] Test script generation: topic input, API call, display of new script in editor. (COMPLETED)
+      - [x] Test saving new script edits: content modification, save button, API call, success/error feedback, content update in editor. (COMPLETED)
+      - [ ] Test listing existing scripts: API call on load, display of script list, loading/error states.
+      - [ ] Test loading existing script for editing: selection from list, script content loaded into editor, topic updated.
+      - [ ] Test saving edits to an existing script: content modification, save button, API call, success/error feedback, content update in editor.
+      - [ ] Verify all loading indicators and error messages behave as expected across all operations.
+    - **UI/UX Polish**:
+      - [ ] Review and refine layout, styling, and responsiveness of `ScriptWorkflowOrchestrator.tsx` and `ScriptEditor.tsx`.
+      - [ ] Ensure clear visual feedback for all user actions (e.g., toast notifications for save success/failure, clear loading states).
+      - [ ] Check for accessibility best practices.
+    - **Success Criteria**: The script editing feature is stable, intuitive, and visually appealing.
+  - [x] **Sub-Task 3.4.3: Implement Auto-Save for Modified Scripts (Main Page Feature)**
+    - **Objective**: Ensure scripts modified using the 'Modify Script with Selected Keywords' button on the main page are automatically saved to the database.
+    - **Backend**:
+      - [x] Modified `ScriptOrchestrationService.orchestrateScriptModification` to accept `userId`, save the AI-modified script to Supabase `scripts` table, and return `{ modifiedScriptText, savedScriptId }`.
+      - [x] Modified `scriptController.handleModifyScript` to extract `userId` (from `req.user` if available), pass it to the service, and include `savedScriptId` and a success message in the API response.
+    - **Success Criteria**: When a user modifies a script using this feature, the modified script is saved as a new entry in the `scripts` table, and the API response confirms this with a `savedScriptId`.
 - [~] Add action buttons and loading indicators (Initial loading/error states implemented in Task 3.1. Added 'Copy Script' button with success feedback, styled scrollbars for script display, and a loading spinner icon to the 'Generate Script' button.)
 - [~] Integrate frontend with backend APIs (Script generation API `/api/v1/scripts/generate` successfully integrated and tested end-to-end. Further API integrations may be needed for other features.)
 
 ### Phase 3: Frontend Development (Continued)
-
-
 
 ### Phase 4: Integration and Testing
 

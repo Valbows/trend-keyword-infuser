@@ -21,6 +21,7 @@ const getTrends = async (req, res) => {
 };
 
 const getYouTubeKeywords = async (req, res) => {
+  logger.info('[trendController.getYouTubeKeywords] Received request with query parameters:', req.query); // G.O.A.T. C.O.D.E.X. B.O.T. - Log all query params
   const { topic, timeframe = 'any', publishedAfterISO, publishedBeforeISO } = req.query;
 
   if (!topic) {

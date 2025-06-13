@@ -3,7 +3,8 @@
 // This will be the refactored/renamed scriptGenerationService.js in the future.
 // For now, it directly uses the existing service which handles LLM interaction.
 const llmService = require('./scriptGenerationService');
-const trendDiscoveryService = require('./trendDiscoveryService'); // Import TrendDiscoveryService 
+const trendDiscoveryService = require('./trendDiscoveryService'); // Import TrendDiscoveryService
+const supabase = require('../config/supabaseClient'); // G.O.A.T. C.O.D.E.X. B.O.T. - Import Supabase client 
 
 class ScriptOrchestrationService {
   /**
@@ -63,7 +64,7 @@ class ScriptOrchestrationService {
    * @returns {Promise<string>} The modified script text.
    * @throws {Error} If script modification fails.
    */
-  async orchestrateScriptModification(existingScript, selectedKeywords) {
+  async orchestrateScriptModification(existingScript, selectedKeywords, userId = null) { // G.O.A.T. C.O.D.E.X. B.O.T. - Added userId parameter
     console.log(`[OrchestrationService] Starting script modification with ${selectedKeywords.length} keywords.`);
 
     // Construct a detailed instructional prompt for the LLM. 
@@ -98,7 +99,34 @@ Return only the modified script content.`;
     // Future post-processing for modified script could go here.
     console.log('[OrchestrationService] Modified script post-processing (placeholder).');
 
-    return modifiedScriptText;
+    // G.O.A.T. C.O.D.E.X. B.O.T. - Save the modified script to Supabase
+    try {
+      const scriptDataToSave = {
+        generated_script: modifiedScriptText,
+        topic: `Modified: ${existingScript.substring(0, 75)}...`,
+        trends_used: selectedKeywords.map(keyword => ({ keyword, source: 'user_input_for_modification' })),
+        user_id: userId,
+        // Add any other relevant fields, e.g., a type field to distinguish modified scripts
+      };
+
+      const { data: savedScript, error: saveError } = await supabase
+        .from('scripts')
+        .insert(scriptDataToSave)
+        .select('id')
+        .single();
+
+      if (saveError) {
+        console.error('[OrchestrationService] Error saving modified script to Supabase:', saveError);
+        throw new Error(`Failed to save modified script to database: ${saveError.message}`);
+      }
+
+      console.log(`[OrchestrationService] Modified script saved with ID: ${savedScript.id}`);
+      return { modifiedScriptText, savedScriptId: savedScript.id };
+    } catch (dbError) {
+      console.error('[OrchestrationService] Database operation failed during script modification saving:', dbError);
+      // Re-throw or handle as appropriate. For now, re-throwing to be caught by controller.
+      throw dbError; // This ensures the controller gets a clear error if DB save fails.
+    }
   }
 }
 
