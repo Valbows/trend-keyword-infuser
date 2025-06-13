@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import TrendSidebar from '@/components/TrendSidebar'; // Import the new sidebar
 import Link from 'next/link';
 
@@ -14,6 +14,7 @@ export default function Home() {
   const [selectedKeywords, setSelectedKeywords] = useState<string[]>([]);
   const [isModifying, setIsModifying] = useState(false);
   const [modifyError, setModifyError] = useState('');
+  const [scriptDerivedTopic, setScriptDerivedTopic] = useState('');
 
   const handleGenerateScript = async () => {
     if (!topic.trim()) {
@@ -46,6 +47,15 @@ export default function Home() {
     }
     setIsLoading(false);
   };
+
+  useEffect(() => {
+    if (existingScript.trim()) {
+      const words = existingScript.trim().split(/\s+/).slice(0, 5).join(' ');
+      setScriptDerivedTopic(words);
+    } else {
+      setScriptDerivedTopic('');
+    }
+  }, [existingScript]);
 
   const handleCopyScript = async () => {
     if (!script) return;
@@ -109,7 +119,7 @@ export default function Home() {
   return (
     <>
       <div className="bg-white dark:bg-slate-800 shadow-xl rounded-lg p-6 sm:p-10 flex flex-col md:flex-row gap-6">
-        <TrendSidebar selectedKeywords={selectedKeywords} onSelectedKeywordsChange={setSelectedKeywords} />
+        <TrendSidebar selectedKeywords={selectedKeywords} onSelectedKeywordsChange={setSelectedKeywords} topic={scriptDerivedTopic || topic} />
         <div className="flex-1 flex flex-col items-center p-4 md:p-8 overflow-y-auto">
           <header className="mb-8 text-center">
             <h1 className="text-4xl sm:text-5xl font-bold text-sky-600 dark:text-sky-400">

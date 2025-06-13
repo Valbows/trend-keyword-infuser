@@ -25,11 +25,11 @@ interface YouTubeKeywordItem {
 interface TrendSidebarProps {
   selectedKeywords: string[];
   onSelectedKeywordsChange: (keywords: string[]) => void;
+  topic: string;
 }
 
-const TrendSidebar: React.FC<TrendSidebarProps> = ({ selectedKeywords, onSelectedKeywordsChange }) => {
+const TrendSidebar: React.FC<TrendSidebarProps> = ({ selectedKeywords, onSelectedKeywordsChange, topic }) => {
   const [keywords, setKeywords] = useState<YouTubeKeywordItem[]>([]);
-  const [topic, setTopic] = useState<string>('artificial intelligence'); // User's direct input
   const [debouncedTopic, setDebouncedTopic] = useState<string>(topic); // Debounced topic for API calls
   const [selectedTimeframe, setSelectedTimeframe] = useState<string>('24h'); // Default timeframe
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -142,18 +142,7 @@ const TrendSidebar: React.FC<TrendSidebarProps> = ({ selectedKeywords, onSelecte
   return (
     <aside className="w-full md:w-1/3 lg:w-1/4 bg-slate-800 p-6 space-y-4 h-screen overflow-y-auto text-slate-100 shadow-lg">
       <h2 className="text-2xl font-bold text-sky-400 mb-6 border-b border-slate-700 pb-3">Trending YouTube Keywords</h2>
-      {/* Temporary Topic Input - REMOVE/REFACTOR for integration with main page topic input */}
-      <div className="mb-4">
-        <label htmlFor="topicInput" className="block text-sm font-medium text-slate-300 mb-1">Enter Topic (Temporary):</label>
-        <input 
-          type="text" 
-          id="topicInput"
-          value={topic}
-          onChange={(e) => setTopic(e.target.value)}
-          placeholder="e.g., AI, React, Gaming"
-          className="w-full p-2 bg-slate-700 border border-slate-600 rounded-md focus:ring-sky-500 focus:border-sky-500 text-slate-100"
-        />
-      </div>
+
 
       <div className="mb-4">
         <label htmlFor="timeframeSelect" className="block text-sm font-medium text-slate-300 mb-1">Select Timeframe:</label>

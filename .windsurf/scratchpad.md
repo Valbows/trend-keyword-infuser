@@ -227,7 +227,7 @@ The system consists of:
 
 ### Phase 4: Integration and Testing
 
-- [ ] Connect all components end-to-end
+- [x] **Connect all components end-to-end** (COMPLETED - Home page/TrendSidebar topic integration)
 {{ ... }}
 - [ ] Perform unit and integration testing
 - [ ] Conduct user flow testing
@@ -246,6 +246,7 @@ The system consists of:
 - [ ] **Advanced NLP**: Integrate more sophisticated Natural Language Processing for keyword extraction (e.g., named entity recognition, stemming, TF-IDF) to improve relevance.
 - [ ] **Caching Layer**: Implement server-side caching (e.g., using Redis, as per your tech stack) for YouTube API responses to reduce redundant calls, manage API quotas, and improve response times.
 - [ ] **Error Handling & Resilience**: Further enhance error handling on both frontend and backend, providing more specific user feedback for API errors or unexpected data.
+- [ ] **LLM-Powered Industry Keyword Analysis**: Enhance keyword suggestions by having an LLM: 1. Summarize the pasted script and determine its industry. 2. Analyze other trending videos within that same industry to extract relevant keywords. 3. Label and present these as 'Industry Trend Keywords'.
 - [ ] **Rate Limiting**: Implement rate limiting on the backend API to protect against abuse.
 - [ ] **Comprehensive Testing**: Develop unit and integration tests for both backend services/controllers and frontend components to ensure 'Durable' quality.
 - [ ] **UI/UX Refinements**: Polish the `TrendSidebar` UI for an even more 'Elegant' user experience, perhaps with visualizations or more detailed keyword insights.
