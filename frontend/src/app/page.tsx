@@ -160,7 +160,7 @@ export default function Home() {
           <section className="mb-8 text-center">
             <button
               onClick={handleGenerateScript}
-              disabled={isLoading}
+              disabled={isLoading || !topic.trim()}
               className="px-8 py-3 bg-sky-600 hover:bg-sky-700 dark:bg-sky-500 dark:hover:bg-sky-600 text-white font-semibold rounded-lg shadow-md focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-opacity-75 transition-all duration-150 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-105 active:scale-95 flex items-center justify-center space-x-2"
             >
               {isLoading ? (
