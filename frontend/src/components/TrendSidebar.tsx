@@ -1,7 +1,7 @@
 // frontend/src/components/TrendSidebar.tsx
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 
 // Define the structure for YouTube Keyword items
 interface AIRelevance {
@@ -28,6 +28,14 @@ interface TrendSidebarProps {
   topic: string;
 }
 
+const timeframes = [
+  { value: '24h', label: 'Last 24 Hours' },
+  { value: '48h', label: 'Last 48 Hours' },
+  { value: '72h', label: 'Last 72 Hours' },
+  { value: 'any', label: 'All Time' },
+  { value: 'custom', label: 'Custom Range…' },
+];
+
 const TrendSidebar: React.FC<TrendSidebarProps> = ({ selectedKeywords, onSelectedKeywordsChange, topic }) => {
   const [keywords, setKeywords] = useState<YouTubeKeywordItem[]>([]);
   const [debouncedTopic, setDebouncedTopic] = useState<string>(topic); // Debounced topic for API calls
@@ -37,14 +45,6 @@ const TrendSidebar: React.FC<TrendSidebarProps> = ({ selectedKeywords, onSelecte
   const [endDate, setEndDate] = useState<string>('');
   const [error, setError] = useState<string | null>(null);
   const [isMobileListVisible, setIsMobileListVisible] = useState(false);
-
-  const timeframes = [
-    { value: '24h', label: 'Last 24 Hours' },
-    { value: '48h', label: 'Last 48 Hours' },
-    { value: '72h', label: 'Last 72 Hours' },
-    { value: 'any', label: 'All Time' },
-    { value: 'custom', label: 'Custom Range…' },
-  ];
 
   // Effect for debouncing the topic input
   useEffect(() => {
@@ -132,12 +132,12 @@ const TrendSidebar: React.FC<TrendSidebarProps> = ({ selectedKeywords, onSelecte
 
   }, [debouncedTopic, selectedTimeframe, startDate, endDate]); // Re-fetch on these changes
 
-  const handleKeywordClick = (keywordClicked: string) => {
+  const handleKeywordClick = useCallback((keywordClicked: string) => {
     const newSelectedKeywords = selectedKeywords.includes(keywordClicked)
       ? selectedKeywords.filter(k => k !== keywordClicked)
       : [...selectedKeywords, keywordClicked];
     onSelectedKeywordsChange(newSelectedKeywords);
-  };
+  }, [selectedKeywords, onSelectedKeywordsChange]);
 
   return (
     <aside className="w-full md:w-1/3 lg:w-1/4 bg-slate-800 p-6 space-y-4 h-screen overflow-y-auto text-slate-100 shadow-lg">

@@ -1,6 +1,7 @@
 const trendService = require('../services/trendService'); // This seems to be for a general trend service
 const TrendDiscoveryService = require('../services/TrendDiscoveryService'); // Our service for YouTube specific trends/keywords
 const logger = require('../utils/logger');
+const cache = require('../services/cacheService');
 
 const getTrends = async (req, res) => {
   const { topic } = req.query;
@@ -21,7 +22,7 @@ const getTrends = async (req, res) => {
 };
 
 const getYouTubeKeywords = async (req, res) => {
-  logger.info('[trendController.getYouTubeKeywords] Received request with query parameters:', req.query); // G.O.A.T. C.O.D.E.X. B.O.T. - Log all query params
+  logger.info('[trendController.getYouTubeKeywords] Received request with query parameters:', req.query);
   const { topic, timeframe = 'any', publishedAfterISO, publishedBeforeISO } = req.query;
 
   if (!topic) {
@@ -29,39 +30,42 @@ const getYouTubeKeywords = async (req, res) => {
     return res.status(400).json({ error: 'Missing required query parameter: topic' });
   }
 
-  // Validate timeframe
   const validTimeframes = ['24h', '48h', '72h', 'any'];
-  if (publishedAfterISO && publishedBeforeISO) {
-    // If custom dates are provided, timeframe can be 'custom' or one of the validTimeframes (though less meaningful).
-    // The primary determinants are publishedAfterISO and publishedBeforeISO.
-    // We won't strictly enforce timeframe to be 'custom' here, but log if it's unexpected.
-    if (timeframe && timeframe !== 'custom' && !validTimeframes.includes(timeframe)) {
-      logger.warn(`[trendController.getYouTubeKeywords] Received timeframe '${timeframe}' with custom dates. Proceeding with custom dates.`);
-      // Not returning an error, as custom dates take precedence.
-    }
-    logger.info(`[trendController.getYouTubeKeywords] Custom date range provided: ${publishedAfterISO} to ${publishedBeforeISO}`);
-  } else if (!validTimeframes.includes(timeframe)) {
-    // If no custom dates, timeframe must be one of the predefined valid values.
-    logger.warn(`[trendController.getYouTubeKeywords] Invalid timeframe: ${timeframe} (no custom dates provided)`);
-    return res.status(400).json({ error: `Invalid timeframe parameter. Valid values are: ${validTimeframes.join(', ')} when no custom dates are specified.` });
+  if (!(publishedAfterISO && publishedBeforeISO) && !validTimeframes.includes(timeframe)) {
+    logger.warn(`[trendController.getYouTubeKeywords] Invalid timeframe: ${timeframe}`);
+    return res.status(400).json({ error: `Invalid timeframe. Valid values are: ${validTimeframes.join(', ')}.` });
+  }
+
+  const cacheKey = `youtube-keywords:${topic}:${timeframe}:${publishedAfterISO || ''}:${publishedBeforeISO || ''}`;
+  const cachedData = cache.get(cacheKey);
+
+  if (cachedData) {
+    logger.info(`[trendController.getYouTubeKeywords] Serving from cache for key: ${cacheKey}`);
+    return res.status(200).json(cachedData);
   }
 
   try {
-    logger.info(`[trendController.getYouTubeKeywords] Fetching YouTube keywords for topic: "${topic}", timeframe: "${timeframe}", publishedAfter: "${publishedAfterISO}", publishedBefore: "${publishedBeforeISO}"`);
+    logger.info(`[trendController.getYouTubeKeywords] Fetching fresh YouTube keywords for topic: "${topic}"`);
     const keywords = await TrendDiscoveryService.getYouTubeKeywordsByTopicAndTimeframe(
       topic,
-      timeframe, // Pass timeframe along; service will decide how to use it with custom dates
-      publishedAfterISO, // Pass custom start date
-      publishedBeforeISO   // Pass custom end date
+      timeframe,
+      publishedAfterISO,
+      publishedBeforeISO
     );
-    res.status(200).json({ 
-      topic, 
-      timeframe, 
-      keywords, 
-      // Include these in response if they were part of the request, for clarity
-      ...(publishedAfterISO && { publishedAfterISO }), 
+
+    const responseData = {
+      topic,
+      timeframe,
+      keywords,
+      ...(publishedAfterISO && { publishedAfterISO }),
       ...(publishedBeforeISO && { publishedBeforeISO })
-    });
+    };
+
+    // Cache for 1 hour (3600 * 1000 ms)
+    cache.set(cacheKey, responseData, 3600000);
+    logger.info(`[trendController.getYouTubeKeywords] Caching new data for key: ${cacheKey}`);
+
+    res.status(200).json(responseData);
   } catch (error) {
     logger.error('[trendController.getYouTubeKeywords] Error fetching YouTube keywords:', { message: error.message, topic, timeframe, stack: error.stack });
     res.status(500).json({ error: 'Failed to fetch YouTube keywords due to an internal server error' });

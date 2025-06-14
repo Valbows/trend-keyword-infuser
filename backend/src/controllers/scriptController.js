@@ -1,5 +1,6 @@
 const scriptOrchestrationService = require('../services/scriptOrchestrationService');
 const supabase = require('../config/supabaseClient'); // Import Supabase client
+const cache = require('../services/cacheService');
 
 /**
  * Handles the request to generate a video script.
@@ -13,56 +14,53 @@ const handleGenerateScript = async (req, res) => {
     return res.status(400).json({ error: 'Missing required field: topic' });
   }
 
-  // Trends can be optional or an empty array if the user only provides a topic
-  // The scriptGenerationService is designed to handle empty trends.
   const validatedTrends = Array.isArray(trends) ? trends : [];
+  
+  // Create a stable cache key by sorting the trends array before stringifying.
+  const cacheKey = `script-generation:${topic}:${JSON.stringify(validatedTrends.sort())}`;
+  const cachedData = cache.get(cacheKey);
+
+  if (cachedData) {
+    console.log(`[scriptController.handleGenerateScript] Serving from cache for key: ${cacheKey}`);
+    return res.status(200).json(cachedData);
+  }
 
   try {
     console.log(`Controller: Received request to generate script for topic: ${topic}`);
     const scriptText = await scriptOrchestrationService.orchestrateScriptCreation(topic, validatedTrends);
 
-    // Save the generated script to Supabase
+    let scriptId = null;
     try {
       const { data: dbData, error: dbError } = await supabase
         .from('scripts')
         .insert([
-          { 
+          {
             topic: topic,
-            trends_used: validatedTrends, // Assuming validatedTrends is an array of strings
-            generated_script: scriptText
-          }
+            trends_used: validatedTrends,
+            generated_script: scriptText,
+          },
         ])
-        .select(); // Optionally .select() to get the inserted row back
+        .select();
 
       if (dbError) {
         console.error('Error saving script to Supabase:', dbError);
-        // Decide if this should be a fatal error for the client, or just log and proceed
-        // For now, we'll log it and still return the script if generation was successful.
-        // You might want to return a 500 error or a partial success message in a real app.
+      } else if (dbData && dbData.length > 0 && dbData[0].id) {
+        scriptId = dbData[0].id;
+        console.log(`Script ID ${scriptId} successfully retrieved for response.`);
       } else {
-        console.log('Script saved to Supabase:', dbData ? dbData[0].id : 'ID not returned by select');
+        console.error('Failed to retrieve script ID from Supabase after insert, or dbData is unexpected:', dbData);
       }
     } catch (e) {
       console.error('Unexpected error during Supabase insert:', e);
     }
 
-    // Ensure dbData is valid and contains the id before sending it back
-    let scriptId = null;
-    if (dbData && dbData.length > 0 && dbData[0].id) {
-      scriptId = dbData[0].id;
-      console.log(`Script ID ${scriptId} successfully retrieved for response.`);
-    } else {
-      // This case should ideally not happen if Supabase insert and select work as expected.
-      // Log an error, but still return the script text if generation was successful.
-      console.error('Failed to retrieve script ID from Supabase after insert, or dbData is unexpected:', dbData);
-      // Optionally, you could throw an error here or return a specific error response to the client
-      // if the scriptId is absolutely critical for the immediate next step on the client-side.
-      // For now, we allow proceeding without it if scriptText exists.
-    }
+    const responseData = { scriptId: scriptId, script: scriptText, topic: topic };
+    
+    // Cache for 1 hour
+    cache.set(cacheKey, responseData, 3600000);
+    console.log(`[scriptController.handleGenerateScript] Caching new data for key: ${cacheKey}`);
 
-    // If scriptId is null here, it means it wasn't successfully retrieved from dbData
-    // The client should be prepared to handle a missing scriptId in such edge cases if it proceeds.
-    res.status(200).json({ scriptId: scriptId, script: scriptText });
+    res.status(200).json(responseData);
   } catch (error) {
     console.error('Error in scriptController handling script generation:', error.message);
     if (error.message.includes('GEMINI_API_KEY is not set')) {
@@ -70,7 +68,6 @@ const handleGenerateScript = async (req, res) => {
     } else if (error.message.includes('Failed to get valid script content')) {
       return res.status(502).json({ error: 'Failed to generate script due to an issue with the AI service response.' });
     }
-    // Generic error for other cases from the service or unexpected issues
     res.status(500).json({ error: 'Failed to generate script due to an internal server error.' });
   }
 };

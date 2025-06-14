@@ -5,7 +5,7 @@ import TrendSidebar from '@/components/TrendSidebar'; // Import the new sidebar
 import Link from 'next/link';
 
 export default function Home() {
-  const [topic, setTopic] = useState('');
+  const [topic, setTopic] = useState('AI in 2025'); // Default topic for initial load
   const [script, setScript] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');

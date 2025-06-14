@@ -1,7 +1,7 @@
 // frontend/src/components/ScriptWorkflowOrchestrator.tsx
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import ScriptEditor from './ScriptEditor'; // Assuming ScriptEditor.tsx is in the same directory
 
 // Define a basic structure for Trend items if they are used for generation
@@ -28,6 +28,7 @@ const ScriptWorkflowOrchestrator: React.FC = () => {
 
   const [currentScriptId, setCurrentScriptId] = useState<string | null>(null);
   const [currentScriptContent, setCurrentScriptContent] = useState<string>('');
+  const [currentScriptTopic, setCurrentScriptTopic] = useState<string>('');
 
   const [isLoadingGeneration, setIsLoadingGeneration] = useState<boolean>(false);
   const [generationError, setGenerationError] = useState<string | null>(null);
@@ -64,10 +65,10 @@ const ScriptWorkflowOrchestrator: React.FC = () => {
     fetchExistingScripts();
   }, []);
 
-  const handleLoadScriptForEditing = (script: ScriptSummary) => {
+  const handleLoadScriptForEditing = useCallback((script: ScriptSummary) => {
     setCurrentScriptId(script.id);
     setCurrentScriptContent(script.generated_script);
-    setTopic(script.topic); // Also set the topic for context if desired
+    setCurrentScriptTopic(script.topic);
     // Clear any previous state related to generation or saving of another script
     setGenerationError(null);
     setSaveError(null);
@@ -77,9 +78,9 @@ const ScriptWorkflowOrchestrator: React.FC = () => {
     // const editorElement = document.getElementById('scriptEditorTextArea'); // Assuming ScriptEditor's textarea has such an ID
     // if (editorElement) editorElement.focus();
     console.log(`Loading script ID: ${script.id} for editing.`);
-  };
+  }, [setCurrentScriptId, setCurrentScriptContent, setCurrentScriptTopic, setGenerationError, setSaveError, setSaveSuccessMessage]);
 
-  const handleGenerateNewScript = async () => {
+  const handleGenerateNewScript = useCallback(async () => {
     if (!topic.trim()) {
       setGenerationError('Topic cannot be empty.');
       return;
@@ -88,6 +89,7 @@ const ScriptWorkflowOrchestrator: React.FC = () => {
     setGenerationError(null);
     setCurrentScriptId(null); // Clear previous script details
     setCurrentScriptContent('');
+    setCurrentScriptTopic('');
     setSaveSuccessMessage(null);
     setSaveError(null);
 
@@ -109,6 +111,7 @@ const ScriptWorkflowOrchestrator: React.FC = () => {
       if (data.scriptId && typeof data.script === 'string') {
         setCurrentScriptId(data.scriptId);
         setCurrentScriptContent(data.script);
+        setCurrentScriptTopic(data.topic || topic);
       } else {
         throw new Error('Invalid response from script generation: ID or content missing.');
       }
@@ -118,9 +121,9 @@ const ScriptWorkflowOrchestrator: React.FC = () => {
     } finally {
       setIsLoadingGeneration(false);
     }
-  };
+  }, [topic, setIsLoadingGeneration, setGenerationError, setCurrentScriptId, setCurrentScriptContent, setCurrentScriptTopic, setSaveSuccessMessage, setSaveError]);
 
-  const handleSaveEditedScript = async (editedContent: string) => {
+  const handleSaveEditedScript = useCallback(async (editedContent: string) => {
     if (!currentScriptId) {
       setSaveError('No script selected or ID missing to save.');
       return;
@@ -162,7 +165,7 @@ const ScriptWorkflowOrchestrator: React.FC = () => {
     } finally {
       setIsLoadingSave(false);
     }
-  };
+  }, [currentScriptId, setIsLoadingSave, setSaveError, setSaveSuccessMessage, setCurrentScriptContent]);
 
   console.log('[ScriptWorkflowOrchestrator] DEBUG: ScriptEditor render conditions:', {
     hasContent: !!currentScriptContent,
@@ -259,7 +262,7 @@ const ScriptWorkflowOrchestrator: React.FC = () => {
           onSave={handleSaveEditedScript}
           isLoading={isLoadingSave}
           error={saveError}
-          title={`Editing Script ID: ${currentScriptId.substring(0,8)}...`}
+          title={currentScriptTopic}
         />
       )}
       {saveSuccessMessage && (

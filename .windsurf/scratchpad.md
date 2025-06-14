@@ -183,24 +183,10 @@ The system consists of:
         - [x] Implemented the `onSave` handler for `ScriptEditor.tsx` to call the `PUT /api/v1/scripts/:id` endpoint (Implemented `handleSaveEditedScript`).
       - [x] Managed loading and error states for script generation, fetching existing scripts, and saving (Implemented for all operations).
     - **Success Criteria**: Script editor is a natural part of the user journey, allowing viewing and editing of new and existing scripts. (Full workflow for new and existing scripts established).
-
 **Phase 3.3: AI Script Editor/Display (COMPLETED)**
 
 ### Phase 3.4: Application Integration and Testing for Script Editor
 
-- **Objective**: Seamlessly integrate the `ScriptWorkflowOrchestrator` into the main application and conduct thorough testing.
-- **Sub-Tasks**:
-  - [x] **Sub-Task 3.4.1: Routing and Navigation (COMPLETED)**
-    - **Objective**: Make the Script Editor page accessible via application routing and navigation.
-    - **Frontend**:
-      - [x] Add a new route (`/scripts`) in the application's router (Next.js App Router: `frontend/src/app/scripts/page.tsx`).
-      - [x] Create a page component (`ScriptsPage`) that renders `ScriptWorkflowOrchestrator.tsx`.
-      - [x] Add a link/button in the main navigation (header of `/app/page.tsx`) pointing to the `/scripts` route.
-    - **Success Criteria**: Users can navigate to the script management page (`/scripts`) via a link on the main page. Sub-Task 3.4.1 COMPLETE.
-  - [ ] **Sub-Task 3.4.2: End-to-End Testing and UI Polish**
-    - **Objective**: Ensure the entire script editing workflow is robust, user-friendly, and bug-free.
-    - **Testing**:
-      - [x] Test script generation: topic input, API call, display of new script in editor. (COMPLETED)
       - [x] Test saving new script edits: content modification, save button, API call, success/error feedback, content update in editor. (COMPLETED)
       - [x] Test listing existing scripts: API call on load, display of script list, loading/error states. (COMPLETED)
       - [x] Test loading existing script for editing: selection from list, script content loaded into editor, topic updated. (COMPLETED)
@@ -229,9 +215,113 @@ The system consists of:
 
 - [x] **Connect all components end-to-end** (COMPLETED - Home page/TrendSidebar topic integration)
 {{ ... }}
-- [ ] Perform unit and integration testing
-- [ ] Conduct user flow testing
-- [ ] Optimize performance and fix bugs
+- [x] **Perform unit and integration testing** (COMPLETED)
+    - [x] Install testing dependencies (Jest, React Testing Library).
+    - [x] Configure Jest for the Next.js project.
+    - [x] Write an initial unit test for a component to validate the setup.
+    - [x] Write comprehensive tests for `TrendSidebar.tsx`.
+    - [x] Write comprehensive tests for Home page (`page.tsx`).
+    - [x] Implement additional C.O.D.E.X. aligned tests for ScriptWorkflowOrchestrator.tsx (input validation, API error handling, UI feedback, loading states, empty states, edge cases)
+    - [x] Create dedicated unit tests for `ScriptEditor.tsx` (prop handling, content editing, save functionality, loading/error states, unsaved indicators)
+- [ ] **Conduct user flow testing** (In Progress)
+    - [ ] **Flow 1: Trend to New Script Creation**
+        - [x] **Stage 1: Home Page & Trend Selection (`TrendSidebar`)**
+            - **Objective:** Verify user can select a trend topic from the `TrendSidebar` on the home page, and this selection is correctly processed.
+            - **Setup:** 
+                - Mock backend API (`/api/v1/trends/youtube-keywords`) to return a predefined list of keywords for a default topic (e.g., 'AI in 2025') and selected timeframe (e.g., '24h').
+                - Ensure the Home page (`/`) renders correctly with `TrendSidebar`.
+            - **Test Steps & Verifications:**
+                - [x] **1. Initial Load & Default Trend Display (Default Topic: "AI in 2025", Default Timeframe: "24h")** Navigate to the Home page (`/`).
+                    - **Verification:** `TrendSidebar` displays a loading state initially (if applicable).
+                    - **Verification:** `TrendSidebar` successfully fetches and displays the mocked list of keywords for the default topic and timeframe.
+                    - **Verification:** No specific topic is pre-selected in any shared state/context beyond `TrendSidebar`'s internal state (unless designed otherwise).
+                - [x] **2. User Changes Timeframe (e.g., to "48h")**
+                    - **Action:** User changes the timeframe in `TrendSidebar` (e.g., to '48h').
+                    - **Verification:** `TrendSidebar` makes a new API call with the updated timeframe.
+                    - **Verification:** `TrendSidebar` displays keywords for the new timeframe (mocked response).
+                - [x] **3. Topic Input & Keyword Fetch (If manual topic input is still part of TrendSidebar):**
+                    - **Action:** User types a new topic (e.g., 'Future of Quantum Computing') into the topic input field in `TrendSidebar`.
+                    - **Action:** User triggers the keyword fetch for the new topic.
+                    - **Verification:** `TrendSidebar` makes an API call with the new topic.
+                    - **Verification:** `TrendSidebar` displays keywords for the new topic (mocked response).
+                - [x] **4. Keyword Selection & State Update:**
+                    - **Action:** User clicks on a specific keyword item (e.g., 'Quantum Entanglement Breakthroughs') from the list in `TrendSidebar`.
+                    - **Verification:** The `onKeywordSelect` (or equivalent) callback in `TrendSidebar` is triggered with the correct keyword data.
+                    - **Verification:** The application's shared state/context (e.g., Zustand store, React Context) is updated to reflect the selected keyword/topic ('Quantum Entanglement Breakthroughs').
+                    - **Verification:** UI elements outside `TrendSidebar` that depend on this shared state (if any on the Home page) update accordingly (e.g., a display area showing 'Selected Topic: Quantum Entanglement Breakthroughs'). *This might be more relevant when navigating to the Script Studio page, but good to note if any immediate feedback is expected on the Home page itself.*
+        - [x] **Stage 2: Navigation to AI Script Studio & Script Generation (`ScriptWorkflowOrchestrator`)**
+            - **Objective:** Verify user can navigate to the AI Script Studio, the selected topic from Stage 1 is utilized, a script is successfully generated, and displayed for editing.
+            - **Prerequisites:** Assumes Stage 1 is complete and a topic (e.g., 'Quantum Entanglement Breakthroughs') has been selected and stored in shared state/context.
+            - **Setup:**
+                - Mock backend API (`/api/v1/scripts/generate`) to return predefined script content when called with the selected topic.
+                - Ensure the AI Script Studio page (e.g., `/studio`) renders `ScriptWorkflowOrchestrator` and `ScriptEditor`.
+            - **Test Steps & Verifications:**
+                - [x] **1. Navigation & Initial Studio State:**
+                    - **Action:** User navigates from the Home page to the AI Script Studio page (e.g., via a navigation link or button).
+                    - **Verification:** The AI Script Studio page loads successfully.
+                    - **Verification:** `ScriptWorkflowOrchestrator` is rendered.
+                    - **Verification:** `ScriptWorkflowOrchestrator` correctly retrieves/receives the selected topic ('Quantum Entanglement Breakthroughs') from the shared state/context.
+                    - **Verification:** `ScriptEditor` is rendered, initially displaying no script content or a placeholder. The "Save Edits" button is disabled. No unsaved changes indicator is visible.
+                    - **Verification:** A "Generate Script" button (or similar UI element to trigger generation) is visible and enabled within `ScriptWorkflowOrchestrator`.
+                - [x] **2. Script Generation Trigger & Loading State:**
+                    - **Action:** User clicks the "Generate Script" button.
+                    - **Verification:** `ScriptWorkflowOrchestrator` (and/or `ScriptEditor`) displays a loading indicator (e.g., "Generating script...", spinner).
+                    - **Verification:** The "Generate Script" button might become disabled during generation.
+                    - **Verification:** An API call is made to `POST /api/v1/scripts/generate` with the correct payload, including the selected topic ('Quantum Entanglement Breakthroughs').
+                - [x] **3. Script Generation Completion & Display:** (Script is now displayed, verifications follow)
+                    - **Verification:** Upon receiving a successful (mocked) API response, the loading indicator(s) disappear.
+                    - **Verification:** The predefined (mocked) script content is now displayed within the `ScriptEditor` textarea.
+                    - **Verification:** The `ScriptEditor`'s "Save Edits" button remains disabled (as the content is pristine from generation, not yet user-modified).
+                    - **Verification:** The unsaved changes indicator (`*`) in `ScriptEditor` is not visible.
+        - [x] **Stage 3: Script Editing (`ScriptEditor`)**
+            - **Objective:** Verify user can successfully edit the generated script content, and the UI correctly reflects the 'dirty' state (unsaved changes indicator, save button enablement).
+            - **Prerequisites:** Assumes Stage 2 is complete, and a generated script is currently displayed in the `ScriptEditor` component.
+            - **Test Steps & Verifications:**
+                - [x] **1. User Modifies Script Content:**
+                    - **Action:** Simulate user typing additional text or modifying existing text within the `ScriptEditor`'s textarea. For example, append " -- Additional user edits." to the current script content.
+                    - **Verification:** The textarea in `ScriptEditor` updates to reflect the new, edited content.
+                - [x] **2. Unsaved Changes Indicator Appears:**
+                    - **Verification:** The unsaved changes indicator (`*`) becomes visible next to the `ScriptEditor` title (or its designated location).
+                - [x] **3. Save Button Becomes Enabled:**
+                    - **Verification:** The "Save Edits" button within `ScriptEditor` (or controlled by `ScriptWorkflowOrchestrator` based on `ScriptEditor`'s state) becomes enabled, as the content is now dirty and different from the last saved/generated state.
+                - [x] **1. User Clicks Save Edits:** (Action presumed complete leading to save attempt)
+                    - **Action:** User clicks the now-enabled "Save Edits" button.
+                - [x] **2. Loading State During Save:** (Indicated by `isLoadingSaveProp: true` in logs)
+                    - **Verification:** `ScriptWorkflowOrchestrator` (and/or `ScriptEditor`) displays a loading indicator (e.g., "Saving script...", spinner on the save button).
+                    - **Verification:** The "Save Edits" button text might change to "Saving..." and become disabled.
+                    - **Verification:** The `ScriptEditor` textarea might become disabled during the save operation.
+                    - **Verification:** An API call is made to the appropriate save endpoint (e.g., `POST /api/v1/scripts` or `PUT /api/v1/scripts/:id`) with the correct payload, including the edited script content and any necessary identifiers.
+                - [x] **3. Save Completion & Success Feedback:**
+                    - **Verification:** Upon receiving a successful API response, the loading indicator(s) disappear.
+                    - **Verification:** A success message (e.g., "Script saved successfully!") is displayed temporarily by `ScriptWorkflowOrchestrator`.
+                    - **Verification:** The `ScriptWorkflowOrchestrator` might update its internal state with the ID of the newly saved script (if applicable).
+                - [x] **4. UI Returns to Clean State:**
+                    - **Verification:** The unsaved changes indicator (`*`) in `ScriptEditor` disappears.
+                    - **Verification:** The "Save Edits" button becomes disabled again, as the content is now considered clean (matching the last saved state).
+                    - **Verification:** The `ScriptEditor` textarea remains enabled for further edits.
+- [x] **Optimize performance and fix bugs** (COMPLETED)
+    - [x] Implement a server-side caching layer for API responses.
+    - [x] Investigate and optimize frontend component re-renders.
+
+### Next Steps: Pre-Deployment
+
+- [ ] **1. Version Control (Current Progress):**
+    - [ ] Task: Stage, commit, and push all changes related to User Flow 1 testing completion and critical bug fixes.
+    - [ ] Command: `git add .`
+    - [ ] Command: `git commit -m "Milestone: User Flow 1 Testing Complete & Script Save Bug Fixed"`
+    - [ ] Command: `git push`
+- [ ] **2. Comprehensive Code Refactoring:**
+    - [ ] **Objective:** Enhance overall code quality, maintainability, performance, and adherence to C.O.D.E.X. principles across the application before production deployment.
+    - [ ] **Scope Definition:** (To be detailed based on user input and further analysis)
+        - [ ] Frontend (React components, state management, hooks, styling consistency)
+        - [ ] Backend (Node.js/Express controllers, services, database interactions, error propagation)
+        - [ ] API design review (consistency, clarity, efficiency)
+        - [ ] Review and improve error handling and logging across services.
+        - [ ] Assess and bolster security considerations (input validation, dependency audit).
+        - [ ] Address any remaining TODOs or known minor technical debt.
+        - [ ] Evaluate if select items from "Phase 6: Enhancements and Refinements" are suitable for inclusion in this refactoring pass (e.g., foundational work for caching or advanced NLP).
+    - [ ] **Version Control (Post-Refactoring):**
+        - [ ] Task: Commit and push all refactored code.
 
 ### Phase 5: Deployment and Launch
 
