@@ -1,4 +1,3 @@
-const { GoogleGenerativeAI } = require('@google/generative-ai');
 const { generateScript } = require('../src/services/scriptGenerationService');
 
 // Mock the @google/generative-ai module

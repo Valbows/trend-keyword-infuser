@@ -1,0 +1,28 @@
+# Ignore lockfiles and package definitions (often better handled by package manager or specific linters)
+package-lock.json
+package.json
+
+# Ignore log files
+server.log
+
+# Ignore git files
+.gitignore
+
+# Ignore build output
+dist/
+build/
+
+# Ignore node_modules
+node_modules/
+
+# Ignore macOS metadata files
+.DS_Store
+**/.DS_Store
+
+# Ignore environment files
+.env*
+**/.env*
+
+# Ignore ESLint ignore files
+.eslintignore
+**/.eslintignore
