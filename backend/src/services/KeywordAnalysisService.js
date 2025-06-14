@@ -80,7 +80,7 @@ async function getRelevanceForKeywords(keywordsArray, contextTopic) {
   const promptLines = [
     'You are an expert SEO and content strategist. Your task is to evaluate a list of YouTube keywords based on their relevance to a given primary context topic.',
     '',
-    `Primary Context Topic: \"${contextTopic}\"`,
+    `Primary Context Topic: "${contextTopic}"`,
     '',
     'YouTube Keywords List:',
     JSON.stringify(keywordStringsForPrompt),
@@ -104,11 +104,11 @@ async function getRelevanceForKeywords(keywordsArray, contextTopic) {
     'Ensure the output is ONLY the JSON array, with no other text, comments, or markdown formatting before or after it.',
     'The number of objects in your JSON array response MUST exactly match the number of keywords in the input list.',
   ];
-  const prompt = promptLines.join('\\n');
+  const prompt = promptLines.join('\n');
 
   try {
     console.debug(
-      `KeywordAnalysisService: Sending prompt to Gemini for topic \"${contextTopic}\" and ${keywordsArray.length} keywords.`
+      `KeywordAnalysisService: Sending prompt to Gemini for topic "${contextTopic}" and ${keywordsArray.length} keywords.`
     );
     const result = await model.generateContent({
       contents: [{ role: 'user', parts: [{ text: prompt }] }],

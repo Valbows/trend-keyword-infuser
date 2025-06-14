@@ -514,7 +514,7 @@ class TrendDiscoveryService {
         logger.debug(
           `[TrendDiscoveryService] Applying custom publishedAfter filter: ${params.publishedAfter}`
         );
-      } catch (e) {
+      } catch (_e) {
         logger.warn(
           `[TrendDiscoveryService] Invalid publishedAfterISO format: ${publishedAfterISO}. Ignoring.`
         );
@@ -528,7 +528,7 @@ class TrendDiscoveryService {
         logger.debug(
           `[TrendDiscoveryService] Applying custom publishedBefore filter: ${params.publishedBefore}`
         );
-      } catch (e) {
+      } catch (_e) {
         logger.warn(
           `[TrendDiscoveryService] Invalid publishedBeforeISO format: ${publishedBeforeISO}. Ignoring.`
         );

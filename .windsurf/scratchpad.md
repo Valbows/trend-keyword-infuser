@@ -170,20 +170,8 @@ The system consists of:
       - [x] Define and implement API endpoint (`PUT /api/v1/scripts/:id`) in `scriptRoutes.js`.
       - [x] Implement controller logic (`handleUpdateScriptContent` in `scriptController.js`) to update script in Supabase.
     - **Success Criteria**: Backend ready for saving edits. Frontend logic to call save API will be part of editor integration (3.3.3). User gets feedback via `ScriptEditor` props.
-  - [x] **Sub-Task 3.3.3: Integrating Editor into Main Workflow (COMPLETED)**
-    - **Objective**: Ensure script editor is accessible post-generation or when selecting an existing script.
-    - **Backend Enhancement (COMPLETED)**:
-      - [x] Modified `handleGenerateScript` in `scriptController.js` to return `scriptId` along with `scriptText`.
-    - **Frontend (COMPLETED)**:
-      - [x] Determined placement of `ScriptEditor.tsx` in application layout (Created `ScriptWorkflowOrchestrator.tsx` as a dedicated view/container).
-      - [x] Implemented logic in the parent component (`ScriptWorkflowOrchestrator.tsx`):
-        - [x] Fetched script data (ID and content) for existing scripts (Added `useEffect` to fetch from `GET /api/v1/scripts`, UI to list, and `handleLoadScriptForEditing` function).
-        - [x] Handled receiving `scriptId` and `scriptText` for newly generated scripts (Implemented `handleGenerateNewScript`).
-        - [x] Passed `initialScriptContent` (via `currentScriptContent`) and `scriptId` (implicitly via `currentScriptId` context for editor title) to `ScriptEditor.tsx`.
-        - [x] Implemented the `onSave` handler for `ScriptEditor.tsx` to call the `PUT /api/v1/scripts/:id` endpoint (Implemented `handleSaveEditedScript`).
-      - [x] Managed loading and error states for script generation, fetching existing scripts, and saving (Implemented for all operations).
-    - **Success Criteria**: Script editor is a natural part of the user journey, allowing viewing and editing of new and existing scripts. (Full workflow for new and existing scripts established).
-**Phase 3.3: AI Script Editor/Display (COMPLETED)**
+  - [x] **Sub-Task 3.3.3: Integrating Editor into Main Workflow (COMPLETED)** - **Objective**: Ensure script editor is accessible post-generation or when selecting an existing script. - **Backend Enhancement (COMPLETED)**: - [x] Modified `handleGenerateScript` in `scriptController.js` to return `scriptId` along with `scriptText`. - **Frontend (COMPLETED)**: - [x] Determined placement of `ScriptEditor.tsx` in application layout (Created `ScriptWorkflowOrchestrator.tsx` as a dedicated view/container). - [x] Implemented logic in the parent component (`ScriptWorkflowOrchestrator.tsx`): - [x] Fetched script data (ID and content) for existing scripts (Added `useEffect` to fetch from `GET /api/v1/scripts`, UI to list, and `handleLoadScriptForEditing` function). - [x] Handled receiving `scriptId` and `scriptText` for newly generated scripts (Implemented `handleGenerateNewScript`). - [x] Passed `initialScriptContent` (via `currentScriptContent`) and `scriptId` (implicitly via `currentScriptId` context for editor title) to `ScriptEditor.tsx`. - [x] Implemented the `onSave` handler for `ScriptEditor.tsx` to call the `PUT /api/v1/scripts/:id` endpoint (Implemented `handleSaveEditedScript`). - [x] Managed loading and error states for script generation, fetching existing scripts, and saving (Implemented for all operations). - **Success Criteria**: Script editor is a natural part of the user journey, allowing viewing and editing of new and existing scripts. (Full workflow for new and existing scripts established).
+        **Phase 3.3: AI Script Editor/Display (COMPLETED)**
 
 ### Phase 3.4: Application Integration and Testing for Script Editor
 
@@ -192,20 +180,20 @@ The system consists of:
       - [x] Test loading existing script for editing: selection from list, script content loaded into editor, topic updated. (COMPLETED)
       - [x] Test saving edits to an existing script: content modification, save button, API call, success/error feedback, content update in editor. (COMPLETED)
       - [x] Verify all loading indicators and error messages behave as expected across all operations. (COMPLETED)
-  - [x] **Phase 5: UI/UX Polish and Final Testing**
-    - [x] **Task 5.1: Detailed UI/UX Polish**: Conduct a thorough review of `ScriptWorkflowOrchestrator.tsx` and `ScriptEditor.tsx`. Refine layout, styling, visual feedback (e.g., unsaved changes indicators), and accessibility best practices. - `COMPLETED`
-    - [x] Review and refine layout, styling, and responsiveness of `ScriptWorkflowOrchestrator.tsx` and `ScriptEditor.tsx`.
-    - [x] Ensure clear visual feedback for all user actions (e.g., toast notifications for save success/failure, clear loading states).
-    - [x] Check for accessibility best practices.
-    - **Success Criteria**: The script editing feature is stable, intuitive, and visually appealing.
-  - [x] **Sub-Task 3.4.3: Implement Auto-Save for Modified Scripts (Main Page Feature)**
-    - **Objective**: Ensure scripts modified using the 'Modify Script with Selected Keywords' button on the main page are automatically saved to the database.
-    - **Backend**:
-{{ ... }}
+
+- [x] **Phase 5: UI/UX Polish and Final Testing**
+  - [x] **Task 5.1: Detailed UI/UX Polish**: Conduct a thorough review of `ScriptWorkflowOrchestrator.tsx` and `ScriptEditor.tsx`. Refine layout, styling, visual feedback (e.g., unsaved changes indicators), and accessibility best practices. - `COMPLETED`
+  - [x] Review and refine layout, styling, and responsiveness of `ScriptWorkflowOrchestrator.tsx` and `ScriptEditor.tsx`.
+  - [x] Ensure clear visual feedback for all user actions (e.g., toast notifications for save success/failure, clear loading states).
+  - [x] Check for accessibility best practices.
+  - **Success Criteria**: The script editing feature is stable, intuitive, and visually appealing.
+- [x] **Sub-Task 3.4.3: Implement Auto-Save for Modified Scripts (Main Page Feature)** - **Objective**: Ensure scripts modified using the 'Modify Script with Selected Keywords' button on the main page are automatically saved to the database. - **Backend**:
+      {{ ... }}
 
 ### Phase 3: Frontend Development (Continued)
 
 ### Task 4: Implement Responsive Navigation and Site-Wide Responsiveness (COMPLETED)
+
 - [x] Create reusable, responsive Navbar component with logo and navigation links.
 - [x] Integrate Navbar into the main application layout to appear on all pages.
 - [x] Ensure main content areas on Home and AI Script Studio pages are mobile-responsive.
@@ -214,114 +202,183 @@ The system consists of:
 ### Phase 4: Integration and Testing
 
 - [x] **Connect all components end-to-end** (COMPLETED - Home page/TrendSidebar topic integration)
-{{ ... }}
+      {{ ... }}
 - [x] **Perform unit and integration testing** (COMPLETED)
-    - [x] Install testing dependencies (Jest, React Testing Library).
-    - [x] Configure Jest for the Next.js project.
-    - [x] Write an initial unit test for a component to validate the setup.
-    - [x] Write comprehensive tests for `TrendSidebar.tsx`.
-    - [x] Write comprehensive tests for Home page (`page.tsx`).
-    - [x] Implement additional C.O.D.E.X. aligned tests for ScriptWorkflowOrchestrator.tsx (input validation, API error handling, UI feedback, loading states, empty states, edge cases)
-    - [x] Create dedicated unit tests for `ScriptEditor.tsx` (prop handling, content editing, save functionality, loading/error states, unsaved indicators)
+  - [x] Install testing dependencies (Jest, React Testing Library).
+  - [x] Configure Jest for the Next.js project.
+  - [x] Write an initial unit test for a component to validate the setup.
+  - [x] Write comprehensive tests for `TrendSidebar.tsx`.
+  - [x] Write comprehensive tests for Home page (`page.tsx`).
+  - [x] Implement additional C.O.D.E.X. aligned tests for ScriptWorkflowOrchestrator.tsx (input validation, API error handling, UI feedback, loading states, empty states, edge cases)
+  - [x] Create dedicated unit tests for `ScriptEditor.tsx` (prop handling, content editing, save functionality, loading/error states, unsaved indicators)
 - [ ] **Conduct user flow testing** (In Progress)
-    - [ ] **Flow 1: Trend to New Script Creation**
-        - [x] **Stage 1: Home Page & Trend Selection (`TrendSidebar`)**
-            - **Objective:** Verify user can select a trend topic from the `TrendSidebar` on the home page, and this selection is correctly processed.
-            - **Setup:** 
-                - Mock backend API (`/api/v1/trends/youtube-keywords`) to return a predefined list of keywords for a default topic (e.g., 'AI in 2025') and selected timeframe (e.g., '24h').
-                - Ensure the Home page (`/`) renders correctly with `TrendSidebar`.
-            - **Test Steps & Verifications:**
-                - [x] **1. Initial Load & Default Trend Display (Default Topic: "AI in 2025", Default Timeframe: "24h")** Navigate to the Home page (`/`).
-                    - **Verification:** `TrendSidebar` displays a loading state initially (if applicable).
-                    - **Verification:** `TrendSidebar` successfully fetches and displays the mocked list of keywords for the default topic and timeframe.
-                    - **Verification:** No specific topic is pre-selected in any shared state/context beyond `TrendSidebar`'s internal state (unless designed otherwise).
-                - [x] **2. User Changes Timeframe (e.g., to "48h")**
-                    - **Action:** User changes the timeframe in `TrendSidebar` (e.g., to '48h').
-                    - **Verification:** `TrendSidebar` makes a new API call with the updated timeframe.
-                    - **Verification:** `TrendSidebar` displays keywords for the new timeframe (mocked response).
-                - [x] **3. Topic Input & Keyword Fetch (If manual topic input is still part of TrendSidebar):**
-                    - **Action:** User types a new topic (e.g., 'Future of Quantum Computing') into the topic input field in `TrendSidebar`.
-                    - **Action:** User triggers the keyword fetch for the new topic.
-                    - **Verification:** `TrendSidebar` makes an API call with the new topic.
-                    - **Verification:** `TrendSidebar` displays keywords for the new topic (mocked response).
-                - [x] **4. Keyword Selection & State Update:**
-                    - **Action:** User clicks on a specific keyword item (e.g., 'Quantum Entanglement Breakthroughs') from the list in `TrendSidebar`.
-                    - **Verification:** The `onKeywordSelect` (or equivalent) callback in `TrendSidebar` is triggered with the correct keyword data.
-                    - **Verification:** The application's shared state/context (e.g., Zustand store, React Context) is updated to reflect the selected keyword/topic ('Quantum Entanglement Breakthroughs').
-                    - **Verification:** UI elements outside `TrendSidebar` that depend on this shared state (if any on the Home page) update accordingly (e.g., a display area showing 'Selected Topic: Quantum Entanglement Breakthroughs'). *This might be more relevant when navigating to the Script Studio page, but good to note if any immediate feedback is expected on the Home page itself.*
-        - [x] **Stage 2: Navigation to AI Script Studio & Script Generation (`ScriptWorkflowOrchestrator`)**
-            - **Objective:** Verify user can navigate to the AI Script Studio, the selected topic from Stage 1 is utilized, a script is successfully generated, and displayed for editing.
-            - **Prerequisites:** Assumes Stage 1 is complete and a topic (e.g., 'Quantum Entanglement Breakthroughs') has been selected and stored in shared state/context.
-            - **Setup:**
-                - Mock backend API (`/api/v1/scripts/generate`) to return predefined script content when called with the selected topic.
-                - Ensure the AI Script Studio page (e.g., `/studio`) renders `ScriptWorkflowOrchestrator` and `ScriptEditor`.
-            - **Test Steps & Verifications:**
-                - [x] **1. Navigation & Initial Studio State:**
-                    - **Action:** User navigates from the Home page to the AI Script Studio page (e.g., via a navigation link or button).
-                    - **Verification:** The AI Script Studio page loads successfully.
-                    - **Verification:** `ScriptWorkflowOrchestrator` is rendered.
-                    - **Verification:** `ScriptWorkflowOrchestrator` correctly retrieves/receives the selected topic ('Quantum Entanglement Breakthroughs') from the shared state/context.
-                    - **Verification:** `ScriptEditor` is rendered, initially displaying no script content or a placeholder. The "Save Edits" button is disabled. No unsaved changes indicator is visible.
-                    - **Verification:** A "Generate Script" button (or similar UI element to trigger generation) is visible and enabled within `ScriptWorkflowOrchestrator`.
-                - [x] **2. Script Generation Trigger & Loading State:**
-                    - **Action:** User clicks the "Generate Script" button.
-                    - **Verification:** `ScriptWorkflowOrchestrator` (and/or `ScriptEditor`) displays a loading indicator (e.g., "Generating script...", spinner).
-                    - **Verification:** The "Generate Script" button might become disabled during generation.
-                    - **Verification:** An API call is made to `POST /api/v1/scripts/generate` with the correct payload, including the selected topic ('Quantum Entanglement Breakthroughs').
-                - [x] **3. Script Generation Completion & Display:** (Script is now displayed, verifications follow)
-                    - **Verification:** Upon receiving a successful (mocked) API response, the loading indicator(s) disappear.
-                    - **Verification:** The predefined (mocked) script content is now displayed within the `ScriptEditor` textarea.
-                    - **Verification:** The `ScriptEditor`'s "Save Edits" button remains disabled (as the content is pristine from generation, not yet user-modified).
-                    - **Verification:** The unsaved changes indicator (`*`) in `ScriptEditor` is not visible.
-        - [x] **Stage 3: Script Editing (`ScriptEditor`)**
-            - **Objective:** Verify user can successfully edit the generated script content, and the UI correctly reflects the 'dirty' state (unsaved changes indicator, save button enablement).
-            - **Prerequisites:** Assumes Stage 2 is complete, and a generated script is currently displayed in the `ScriptEditor` component.
-            - **Test Steps & Verifications:**
-                - [x] **1. User Modifies Script Content:**
-                    - **Action:** Simulate user typing additional text or modifying existing text within the `ScriptEditor`'s textarea. For example, append " -- Additional user edits." to the current script content.
-                    - **Verification:** The textarea in `ScriptEditor` updates to reflect the new, edited content.
-                - [x] **2. Unsaved Changes Indicator Appears:**
-                    - **Verification:** The unsaved changes indicator (`*`) becomes visible next to the `ScriptEditor` title (or its designated location).
-                - [x] **3. Save Button Becomes Enabled:**
-                    - **Verification:** The "Save Edits" button within `ScriptEditor` (or controlled by `ScriptWorkflowOrchestrator` based on `ScriptEditor`'s state) becomes enabled, as the content is now dirty and different from the last saved/generated state.
-                - [x] **1. User Clicks Save Edits:** (Action presumed complete leading to save attempt)
-                    - **Action:** User clicks the now-enabled "Save Edits" button.
-                - [x] **2. Loading State During Save:** (Indicated by `isLoadingSaveProp: true` in logs)
-                    - **Verification:** `ScriptWorkflowOrchestrator` (and/or `ScriptEditor`) displays a loading indicator (e.g., "Saving script...", spinner on the save button).
-                    - **Verification:** The "Save Edits" button text might change to "Saving..." and become disabled.
-                    - **Verification:** The `ScriptEditor` textarea might become disabled during the save operation.
-                    - **Verification:** An API call is made to the appropriate save endpoint (e.g., `POST /api/v1/scripts` or `PUT /api/v1/scripts/:id`) with the correct payload, including the edited script content and any necessary identifiers.
-                - [x] **3. Save Completion & Success Feedback:**
-                    - **Verification:** Upon receiving a successful API response, the loading indicator(s) disappear.
-                    - **Verification:** A success message (e.g., "Script saved successfully!") is displayed temporarily by `ScriptWorkflowOrchestrator`.
-                    - **Verification:** The `ScriptWorkflowOrchestrator` might update its internal state with the ID of the newly saved script (if applicable).
-                - [x] **4. UI Returns to Clean State:**
-                    - **Verification:** The unsaved changes indicator (`*`) in `ScriptEditor` disappears.
-                    - **Verification:** The "Save Edits" button becomes disabled again, as the content is now considered clean (matching the last saved state).
-                    - **Verification:** The `ScriptEditor` textarea remains enabled for further edits.
+    - **Sub-Task:** Test `TrendSidebar.tsx` and its children (`TimeframeSelector`, `CustomDateRangePicker`, `LoadingSpinner`, `SidebarErrorMessage`, `KeywordList`, `KeywordListItem`) across various screen sizes and with assistive technology (e.g., screen reader) for expected behavior and A11Y compliance.
+      - **Executor:** G.O.A.T. C.O.D.E.X. B.O.T. / USER
+      - **Success Criteria:** All interactive elements are keyboard navigable, focus states are clear, ARIA attributes function as expected, responsive layouts adapt correctly, no console errors related to A11Y or layout.
+      - **Status:** Pending
+  - [ ] **Flow 1: Trend to New Script Creation**
+    - [x] **Stage 1: Home Page & Trend Selection (`TrendSidebar`)**
+      - **Objective:** Verify user can select a trend topic from the `TrendSidebar` on the home page, and this selection is correctly processed.
+      - **Setup:**
+        - Mock backend API (`/api/v1/trends/youtube-keywords`) to return a predefined list of keywords for an initial topic (if any is automatically fetched on load, otherwise for the first user-entered topic) and selected timeframe (e.g., '24h').
+        - Ensure the Home page (`/`) renders correctly with `TrendSidebar`.
+      - **Test Steps & Verifications:**
+        - [x] **1. Initial Load & Trend Display (Default Timeframe: "24h")** Navigate to the Home page (`/`).
+          - **Verification:** `TrendSidebar` displays a loading state initially (if applicable).
+          - **Verification:** `TrendSidebar` initially displays no keywords (or keywords for a default, empty topic if backend handles it gracefully) until a topic is entered. If a default timeframe is set, it's respected.
+          - **Verification:** No specific topic is pre-selected in any shared state/context beyond `TrendSidebar`'s internal state (unless designed otherwise).
+        - [x] **2. User Changes Timeframe (e.g., to "48h")**
+          - **Action:** User changes the timeframe in `TrendSidebar` (e.g., to '48h').
+          - **Verification:** `TrendSidebar` makes a new API call with the updated timeframe.
+          - **Verification:** `TrendSidebar` displays keywords for the new timeframe (mocked response).
+        - [x] **3. Topic Input & Keyword Fetch (If manual topic input is still part of TrendSidebar):**
+          - **Action:** User types a new topic into the topic input field in `TrendSidebar`.
+          - **Action:** User types a new topic (e.g., 'Future of Quantum Computing') into the topic input field in `TrendSidebar`.
+          - **Action:** User triggers the keyword fetch for the new topic.
+          - **Verification:** `TrendSidebar` makes an API call with the new topic.
+          - **Verification:** `TrendSidebar` displays keywords for the new topic (mocked response).
+        - [x] **4. Keyword Selection & State Update:**
+          - **Action:** User clicks on a specific keyword item (e.g., 'Quantum Entanglement Breakthroughs') from the list in `TrendSidebar`.
+          - **Verification:** The `onKeywordSelect` (or equivalent) callback in `TrendSidebar` is triggered with the correct keyword data.
+          - **Verification:** The application's shared state/context (e.g., Zustand store, React Context) is updated to reflect the selected keyword/topic ('Quantum Entanglement Breakthroughs').
+          - **Verification:** UI elements outside `TrendSidebar` that depend on this shared state (if any on the Home page) update accordingly (e.g., a display area showing 'Selected Topic: Quantum Entanglement Breakthroughs'). _This might be more relevant when navigating to the Script Studio page, but good to note if any immediate feedback is expected on the Home page itself._
+    - [x] **Stage 2: Navigation to AI Script Studio & Script Generation (`ScriptWorkflowOrchestrator`)**
+      - **Objective:** Verify user can navigate to the AI Script Studio, the selected topic from Stage 1 is utilized, a script is successfully generated, and displayed for editing.
+      - **Prerequisites:** Assumes Stage 1 is complete and a topic (e.g., 'Quantum Entanglement Breakthroughs') has been selected and stored in shared state/context.
+      - **Setup:**
+        - Mock backend API (`/api/v1/scripts/generate`) to return predefined script content when called with the selected topic.
+        - Ensure the AI Script Studio page (e.g., `/studio`) renders `ScriptWorkflowOrchestrator` and `ScriptEditor`.
+      - **Test Steps & Verifications:**
+        - [x] **1. Navigation & Initial Studio State:**
+          - **Action:** User navigates from the Home page to the AI Script Studio page (e.g., via a navigation link or button).
+          - **Verification:** The AI Script Studio page loads successfully.
+          - **Verification:** `ScriptWorkflowOrchestrator` is rendered.
+          - **Verification:** `ScriptWorkflowOrchestrator` correctly retrieves/receives the selected topic ('Quantum Entanglement Breakthroughs') from the shared state/context.
+          - **Verification:** `ScriptEditor` is rendered, initially displaying no script content or a placeholder. The "Save Edits" button is disabled. No unsaved changes indicator is visible.
+          - **Verification:** A "Generate Script" button (or similar UI element to trigger generation) is visible and enabled within `ScriptWorkflowOrchestrator`.
+        - [x] **2. Script Generation Trigger & Loading State:**
+          - **Action:** User clicks the "Generate Script" button.
+          - **Verification:** `ScriptWorkflowOrchestrator` (and/or `ScriptEditor`) displays a loading indicator (e.g., "Generating script...", spinner).
+          - **Verification:** The "Generate Script" button might become disabled during generation.
+          - **Verification:** An API call is made to `POST /api/v1/scripts/generate` with the correct payload, including the selected topic ('Quantum Entanglement Breakthroughs').
+        - [x] **3. Script Generation Completion & Display:** (Script is now displayed, verifications follow)
+          - **Verification:** Upon receiving a successful (mocked) API response, the loading indicator(s) disappear.
+          - **Verification:** The predefined (mocked) script content is now displayed within the `ScriptEditor` textarea.
+          - **Verification:** The `ScriptEditor`'s "Save Edits" button remains disabled (as the content is pristine from generation, not yet user-modified).
+          - **Verification:** The unsaved changes indicator (`*`) in `ScriptEditor` is not visible.
+    - [x] **Stage 3: Script Editing (`ScriptEditor`)**
+      - **Objective:** Verify user can successfully edit the generated script content, and the UI correctly reflects the 'dirty' state (unsaved changes indicator, save button enablement).
+      - **Prerequisites:** Assumes Stage 2 is complete, and a generated script is currently displayed in the `ScriptEditor` component.
+      - **Test Steps & Verifications:**
+        - [x] **1. User Modifies Script Content:**
+          - **Action:** Simulate user typing additional text or modifying existing text within the `ScriptEditor`'s textarea. For example, append " -- Additional user edits." to the current script content.
+          - **Verification:** The textarea in `ScriptEditor` updates to reflect the new, edited content.
+        - [x] **2. Unsaved Changes Indicator Appears:**
+          - **Verification:** The unsaved changes indicator (`*`) becomes visible next to the `ScriptEditor` title (or its designated location).
+        - [x] **3. Save Button Becomes Enabled:**
+          - **Verification:** The "Save Edits" button within `ScriptEditor` (or controlled by `ScriptWorkflowOrchestrator` based on `ScriptEditor`'s state) becomes enabled, as the content is now dirty and different from the last saved/generated state.
+        - [x] **1. User Clicks Save Edits:** (Action presumed complete leading to save attempt)
+          - **Action:** User clicks the now-enabled "Save Edits" button.
+        - [x] **2. Loading State During Save:** (Indicated by `isLoadingSaveProp: true` in logs)
+          - **Verification:** `ScriptWorkflowOrchestrator` (and/or `ScriptEditor`) displays a loading indicator (e.g., "Saving script...", spinner on the save button).
+          - **Verification:** The "Save Edits" button text might change to "Saving..." and become disabled.
+          - **Verification:** The `ScriptEditor` textarea might become disabled during the save operation.
+          - **Verification:** An API call is made to the appropriate save endpoint (e.g., `POST /api/v1/scripts` or `PUT /api/v1/scripts/:id`) with the correct payload, including the edited script content and any necessary identifiers.
+        - [x] **3. Save Completion & Success Feedback:**
+          - **Verification:** Upon receiving a successful API response, the loading indicator(s) disappear.
+          - **Verification:** A success message (e.g., "Script saved successfully!") is displayed temporarily by `ScriptWorkflowOrchestrator`.
+          - **Verification:** The `ScriptWorkflowOrchestrator` might update its internal state with the ID of the newly saved script (if applicable).
+        - [x] **4. UI Returns to Clean State:**
+          - **Verification:** The unsaved changes indicator (`*`) in `ScriptEditor` disappears.
+          - **Verification:** The "Save Edits" button becomes disabled again, as the content is now considered clean (matching the last saved state).
+          - **Verification:** The `ScriptEditor` textarea remains enabled for further edits.
 - [x] **Optimize performance and fix bugs** (COMPLETED)
-    - [x] Implement a server-side caching layer for API responses.
-    - [x] Investigate and optimize frontend component re-renders.
+  - [x] Implement a server-side caching layer for API responses.
+  - [x] Investigate and optimize frontend component re-renders.
 
 ### Next Steps: Pre-Deployment
 
-- [ ] **1. Version Control (Current Progress):**
-    - [ ] Task: Stage, commit, and push all changes related to User Flow 1 testing completion and critical bug fixes.
-    - [ ] Command: `git add .`
-    - [ ] Command: `git commit -m "Milestone: User Flow 1 Testing Complete & Script Save Bug Fixed"`
-    - [ ] Command: `git push`
+- [x] **1. Version Control (Current Progress):**
+  - [x] Task: Stage, commit, and push all changes related to User Flow 1 testing completion and critical bug fixes.
+  - [x] Command: `git add .`
+  - [x] Command: `git commit -m "Milestone: User Flow 1 Testing Complete & Script Save Bug Fixed"`
+  - [x] Command: `git push`
 - [ ] **2. Comprehensive Code Refactoring:**
-    - [ ] **Objective:** Enhance overall code quality, maintainability, performance, and adherence to C.O.D.E.X. principles across the application before production deployment.
-    - [ ] **Scope Definition:** (To be detailed based on user input and further analysis)
-        - [ ] Frontend (React components, state management, hooks, styling consistency)
-        - [ ] Backend (Node.js/Express controllers, services, database interactions, error propagation)
-        - [ ] API design review (consistency, clarity, efficiency)
-        - [ ] Review and improve error handling and logging across services.
-        - [ ] Assess and bolster security considerations (input validation, dependency audit).
-        - [ ] Address any remaining TODOs or known minor technical debt.
-        - [ ] Evaluate if select items from "Phase 6: Enhancements and Refinements" are suitable for inclusion in this refactoring pass (e.g., foundational work for caching or advanced NLP).
-    - [ ] **Version Control (Post-Refactoring):**
-        - [ ] Task: Commit and push all refactored code.
+  - [ ] **Objective:** Enhance overall code quality, maintainability, performance, and adherence to C.O.D.E.X. principles across the application before production deployment.
+  - [ ] **Scope Definition:** The following areas will be targeted for refactoring, with specific tasks and success criteria outlined for each, ensuring adherence to G.O.A.T. C.O.D.E.X. B.O.T. principles:
+    - [ ] **I. Frontend Refinements (React, State, Styling, TypeScript) - Ensuring 'Elegant' and 'Optimized' UI:**
+      - [x] **A. Component Architecture & Reusability:** (Completed for page.tsx, TrendSidebar.tsx, ScriptWorkflowOrchestrator.tsx, ScriptEditor.tsx)
+        - [x] Task: Review `page.tsx` for opportunities to extract smaller, reusable presentational and container components from its main content area. (Completed - `AppHeader.tsx`, `TopicInputSection.tsx`, `ErrorDisplay.tsx` (reused), `GenerateScriptButton.tsx`, `ExistingScriptInputSection.tsx`, `ModifyScriptButton.tsx`, `GeneratedScriptDisplay.tsx`, `CopyScriptButton.tsx` extracted from `page.tsx`'s main content area)
+        - [x] Task: Review `TrendSidebar.tsx` for further component extraction opportunities. (Completed - `TimeframeSelector.tsx`, `CustomDateRangePicker.tsx`, `LoadingSpinner.tsx`, `SidebarErrorMessage.tsx`, `KeywordListItem.tsx`, `KeywordList.tsx` extracted)
+        - [x] Task: Review `ScriptWorkflowOrchestrator.tsx` for further component extraction opportunities. (Completed - `NewScriptGenerator.tsx`, `ExistingScriptListItem.tsx`, `ExistingScriptsList.tsx`, `SaveSuccessToast.tsx` extracted)
+        - [x] Task: Review `ScriptEditor.tsx` for further component extraction opportunities. (Completed - `ScriptEditorHeader.tsx`, `ScriptEditorSaveButton.tsx` extracted)
+        - [x] Task: Ensure components adhere to the Single Responsibility Principle (SRP) for 'Clairvoyant' maintainability. (Achieved through granular component extraction)
+        - [ ] *Success Criteria:* Reduced component complexity, increased code reusability, improved maintainability, adherence to SRP.
+      - [ ] **B. State Management Optimization:**
+        - [x] Task: Analyze state flow, particularly in `page.tsx` and its interaction with child components. Evaluate the necessity and impact of current prop-drilling. (Analysis complete: Prop-drilling identified for `topic`, `selectedKeywords`, loading/error states. Necessity seems justified for current component depth; impact is manageable. Global state manager not immediately critical but worth considering for future scalability if shared state complexity increases.)
+        - [x] Task: Consider if a lightweight global state solution (e.g., Zustand, Jotai, or strategic React Context) would simplify state management for shared data like `topic`, `selectedKeywords`, `script` without over-engineering, maintaining MVP agility while promoting 'Xtensible' design. (Implemented React Context for `selectedKeywords` via `SelectedKeywordsContext.tsx`)
+        - [x] Task: Ensure `useState` and `useEffect` hooks are used efficiently, with correct dependencies to prevent unnecessary re-renders (building upon existing `useCallback` optimizations for 'Optimized' performance). (Review complete for `page.tsx` and `TrendSidebar.tsx`; hooks deemed efficient.)
+        - [ ] *Success Criteria:* Clearer state ownership, potentially reduced prop-drilling, optimal component rendering performance.
+      - [ ] **C. Custom Hooks for Reusable Logic:**
+        - [ ] *Success Criteria:* DRYer component logic, leading to cleaner, more modular, and 'Elegant' components.
+      - [ ] **D. Styling Consistency & Tailwind CSS Best Practices:**
+        - [x] Task: Conduct a review of Tailwind CSS usage for consistency and efficiency across all components. (Completed: `page.tsx`, `TrendSidebar.tsx` and its children, and all main content components - `AppHeader.tsx`, `TopicInputSection.tsx`, `ErrorDisplay.tsx`, `GenerateScriptButton.tsx`, `ModifyScriptButton.tsx`, `CopyScriptButton.tsx`, `ExistingScriptInputSection.tsx`, `GeneratedScriptDisplay.tsx` - reviewed. All found to be consistent and efficient. Minor refinements made to `LoadingSpinner.tsx`, `CopyScriptButton.tsx`, and `ExistingScriptInputSection.tsx`.)
+        - [x] Task: Identify and refactor overly complex or duplicated class strings. Consider creating reusable component-level styles or utility functions if appropriate, promoting 'Elegant' and maintainable styles. (Completed: Button components - `GenerateScriptButton`, `ModifyScriptButton`, `CopyScriptButton` - refactored to use common utility classes `.btn-action` and `.btn-copy` defined in `globals.css`.)
+        - [x] Task: Verify responsiveness and accessibility (A11Y) of all styled components. (Completed: Main content components previously verified. `TrendSidebar.tsx` and its children - `TimeframeSelector.tsx`, `CustomDateRangePicker.tsx`, `LoadingSpinner.tsx`, `SidebarErrorMessage.tsx`, `KeywordList.tsx`, and `KeywordListItem.tsx` - verified and enhanced for responsiveness and accessibility. Semantic HTML, ARIA roles (alert, button, pressed, expanded, controls), and responsive/sticky styling for the sidebar were refined. G.O.A.T. C.O.D.E.X. B.O.T. - Session `{{SESSION_ID}}`)
+        - [ ] *Success Criteria:* Consistent and 'Elegant' UI, maintainable and performant styling, improved accessibility.
+        - [ ] Task: Review all component props, state variables, and function signatures for accurate, comprehensive, and strict TypeScript typings.
+        - [ ] Task: Ensure all interfaces (e.g., `YouTubeKeywordItem`) are well-defined and consistently applied for 'Durable' code.
+        - [ ] *Success Criteria:* Enhanced type safety, improved developer experience, reduced runtime errors.
+    - [ ] **II. Backend Robustness (Node.js/Express, Services, Supabase) - Building a 'Durable' and 'Optimized' Core:**
+{{ ... }}
+        - [ ] Task: Review `trendController.js` and `scriptController.js`. Ensure controllers are lean, focusing on request/response handling and delegating business logic to service layers, embodying separation of concerns.
+        - [ ] Task: Implement/Verify thorough validation of all request parameters and payloads using a consistent validation strategy.
+        - [ ] *Success Criteria:* Slim, focused controllers, clear separation of concerns, improved security through robust validation.
+      - [ ] **B. Service Layer Integrity:**
+        - [ ] Task: Review `TrendDiscoveryService.js` and any business logic currently within controllers that should be moved to dedicated services.
+        - [ ] Task: Ensure services fully encapsulate business logic, interactions with external APIs (YouTube, Gemini), and database operations, making them 'Clairvoyant' to controller changes.
+        - [ ] *Success Criteria:* A robust, testable, and well-defined service layer, promoting modularity.
+      - [ ] **C. Database Interaction Optimization (Supabase):**
+        - [ ] Task: Review all Supabase client calls for efficiency (query structure, indexing considerations) and correctness.
+        - [ ] Task: Ensure proper error handling for all database operations, returning meaningful errors.
+        - [ ] Task: Re-evaluate `updated_at` column behavior for the `scripts` table (Ref: Memory `ab2cda3d-a233-4d71-ab18-c7d102069be6`). Determine if the current `DEFAULT now()` is sufficient for all update scenarios or if a database trigger (e.g., `moddatetime`) or explicit application-level updates are needed to ensure 'Durable' timestamp accuracy on modifications. This aligns with 'Truth-Seeking' data integrity.
+        - [ ] *Success Criteria:* Efficient, reliable, and 'Durable' database operations with accurate data lifecycle tracking.
+    - [ ] **III. API Design & Consistency - Crafting an 'Elegant' and 'Xtensible' Interface:**
+      - [ ] Task: Review all API endpoints (`/api/v1/trends/youtube-keywords`, `/api/v1/scripts/generate`, `/api/v1/scripts/:id`, `/api/v1/scripts/modify`).
+      - [ ] Task: Ensure consistent naming conventions (endpoints, request/response fields), request/response structures (e.g., for errors, success payloads), and adherence to RESTful principles (HTTP verb usage, status codes).
+      - [ ] Task: Evaluate API payload sizes and ensure data transfer is 'Optimized' and efficient.
+      - [ ] *Success Criteria:* A clear, consistent, and 'Elegant' API design that is easy for clients to consume and evolve.
+    - [ ] **IV. Cross-Cutting Concerns: Error Handling & Logging - For 'Clairvoyant' Diagnostics and 'Durable' Operation:**
+      - [ ] **A. Frontend Error Presentation:**
+        - [ ] Task: Ensure all potential error states (API errors, validation failures, unexpected issues) are handled gracefully in the UI.
+        - [ ] Task: Provide clear, user-friendly error messages and feedback, avoiding generic or unhelpful alerts.
+        - [ ] *Success Criteria:* Improved user experience during error scenarios, fostering trust.
+      - [ ] **B. Backend Structured Logging:**
+        - [ ] Task: Implement structured logging (e.g., using a library like Winston or Pino) for all backend requests, significant operations, and errors. Logs should be 'Truth-Seeking' records of events.
+        - [ ] Task: Ensure logs include sufficient context (e.g., request IDs, timestamps, relevant parameters, user identifiers if applicable and privacy-compliant) for effective debugging and monitoring.
+        - [ ] *Success Criteria:* Enhanced diagnosability and operational visibility for the backend, enabling 'Tactical' issue resolution.
+    - [ ] **V. Security Hardening - Building a 'Durable' and Trustworthy Application:**
+      - [ ] **A. Input Validation (Backend Authoritative):**
+        - [ ] Task: Verify comprehensive and strict input validation on the backend for all incoming data as the authoritative source of truth. Frontend validation should be considered a UX enhancement.
+        - [ ] Task: Protect against common web vulnerabilities (e.g., XSS, SQLi (though Supabase helps), CSRF if applicable, parameter tampering).
+        - [ ] *Success Criteria:* Reduced attack surface, more 'Durable' and secure application.
+      - [ ] **B. Dependency Audit:**
+        - [ ] Task: Perform a dependency audit (e.g., `npm audit --production`, `yarn audit`) and address or mitigate any identified vulnerabilities in third-party packages.
+        - [ ] *Success Criteria:* Minimized risk from third-party library vulnerabilities, maintaining a 'Truth-Seeking' approach to security.
+      - [ ] **C. API Key & Sensitive Data Management:**
+        - [ ] Task: Re-confirm that all API keys and sensitive configurations are securely managed (e.g., via `.env` files on the backend, properly gitignored) and not exposed client-side or in version control.
+        - [ ] *Success Criteria:* Protection of sensitive credentials, adhering to 'Durable' security practices.
+    - [ ] **VI. Technical Debt Reduction - For an 'Elegant' and Maintainable Future:**
+      - [ ] Task: Systematically scan the codebase for `// TODO:`, `// FIXME:`, and other markers of technical debt.
+      - [ ] Task: Prioritize and address identified items, including any known shortcuts or temporary solutions implemented during earlier MVP development. This is 'Altruistic' to future developers.
+      - [ ] *Success Criteria:* A cleaner, more maintainable codebase, reducing friction for future 'Xtensible' development.
+    - [ ] **VII. Foundational Work for Phase 6 (Strategic & 'Clairvoyant' Evaluation):**
+      - [ ] Task: Evaluate if specific refactoring in this phase can lay strategic groundwork for Phase 6 enhancements, making the codebase more 'Xtensible'. Examples:
+        - [ ] Caching: Structure `TrendDiscoveryService.js` and other relevant services to easily integrate a caching layer (e.g., Redis) for external API responses.
+        - [ ] `updated_at` trigger: If not addressed in II.C, implement the Supabase `moddatetime` trigger for the `scripts` table to ensure 'Durable' data timestamps.
+      - [ ] *Success Criteria:* 'Xtensible' design choices that facilitate future development and align with long-term 'Optimized' performance goals.
+  - [ ] **Version Control (Post-Refactoring):**
+    - [ ] Task: Commit and push all refactored code.
 
 ### Phase 5: Deployment and Launch
 
@@ -346,7 +403,7 @@ The system consists of:
 
 - **Frontend**: React with Next.js, Tailwind CSS
 - **Backend**: Node.js, Express
-- **Database**: MongoDB for MVP simplicity
+- **Database**: Supabase for MVP simplicity
 - **Caching**: Redis
 - **AI/ML**: Gemini 2.0 Flash API (key provided)
 - **External APIs**: YouTube Data API v3 (key provided)

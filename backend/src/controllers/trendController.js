@@ -22,11 +22,9 @@ const getTrends = async (req, res) => {
     });
     // It's good practice to not expose internal server errors directly to the client.
     // Log the actual error and return a generic error message.
-    res
-      .status(500)
-      .json({
-        error: 'Failed to fetch trends due to an internal server error',
-      });
+    res.status(500).json({
+      error: 'Failed to fetch trends due to an internal server error',
+    });
   }
 };
 
@@ -59,11 +57,9 @@ const getYouTubeKeywords = async (req, res) => {
     logger.warn(
       `[trendController.getYouTubeKeywords] Invalid timeframe: ${timeframe}`
     );
-    return res
-      .status(400)
-      .json({
-        error: `Invalid timeframe. Valid values are: ${validTimeframes.join(', ')}.`,
-      });
+    return res.status(400).json({
+      error: `Invalid timeframe. Valid values are: ${validTimeframes.join(', ')}.`,
+    });
   }
 
   const cacheKey = `youtube-keywords:${topic}:${timeframe}:${publishedAfterISO || ''}:${publishedBeforeISO || ''}`;
@@ -108,12 +104,9 @@ const getYouTubeKeywords = async (req, res) => {
       '[trendController.getYouTubeKeywords] Error fetching YouTube keywords:',
       { message: error.message, topic, timeframe, stack: error.stack }
     );
-    res
-      .status(500)
-      .json({
-        error:
-          'Failed to fetch YouTube keywords due to an internal server error',
-      });
+    res.status(500).json({
+      error: 'Failed to fetch YouTube keywords due to an internal server error',
+    });
   }
 };
 

@@ -5,7 +5,7 @@ async function testConnection() {
   try {
     // Attempt to count rows in the 'scripts' table
     // The .select() method with 'count' option is efficient for this.
-    const { data, error, count } = await supabase
+    const { error, count } = await supabase
       .from('scripts')
       .select('*', { count: 'exact', head: true }); // head:true makes it faster as it doesn't return data
 

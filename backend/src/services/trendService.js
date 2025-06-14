@@ -1,5 +1,4 @@
 require('dotenv').config();
-const axios = require('axios');
 const Parser = require('rss-parser');
 const { google } = require('googleapis');
 

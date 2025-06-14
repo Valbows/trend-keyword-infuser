@@ -90,18 +90,14 @@ const handleGenerateScript = async (req, res) => {
         .status(500)
         .json({ error: 'Script generation service is not configured.' });
     } else if (error.message.includes('Failed to get valid script content')) {
-      return res
-        .status(502)
-        .json({
-          error:
-            'Failed to generate script due to an issue with the AI service response.',
-        });
-    }
-    res
-      .status(500)
-      .json({
-        error: 'Failed to generate script due to an internal server error.',
+      return res.status(502).json({
+        error:
+          'Failed to generate script due to an issue with the AI service response.',
       });
+    }
+    res.status(500).json({
+      error: 'Failed to generate script due to an internal server error.',
+    });
   }
 };
 
@@ -171,12 +167,10 @@ const handleModifyScript = async (req, res) => {
     typeof existingScript !== 'string' ||
     existingScript.trim() === ''
   ) {
-    return res
-      .status(400)
-      .json({
-        error:
-          'Missing or invalid required field: existingScript (must be a non-empty string).',
-      });
+    return res.status(400).json({
+      error:
+        'Missing or invalid required field: existingScript (must be a non-empty string).',
+    });
   }
 
   if (
@@ -184,22 +178,18 @@ const handleModifyScript = async (req, res) => {
     !Array.isArray(selectedKeywords) ||
     selectedKeywords.length === 0
   ) {
-    return res
-      .status(400)
-      .json({
-        error:
-          'Missing or invalid required field: selectedKeywords (must be a non-empty array of strings).',
-      });
+    return res.status(400).json({
+      error:
+        'Missing or invalid required field: selectedKeywords (must be a non-empty array of strings).',
+    });
   }
   if (
     selectedKeywords.some((kw) => typeof kw !== 'string' || kw.trim() === '')
   ) {
-    return res
-      .status(400)
-      .json({
-        error:
-          'Invalid field: selectedKeywords must be an array of non-empty strings.',
-      });
+    return res.status(400).json({
+      error:
+        'Invalid field: selectedKeywords must be an array of non-empty strings.',
+    });
   }
 
   try {
@@ -242,30 +232,24 @@ const handleModifyScript = async (req, res) => {
     );
 
     if (errorMessageString.includes('GEMINI_API_KEY is not set')) {
-      return res
-        .status(500)
-        .json({
-          error:
-            'Script modification service is not configured (API Key missing).',
-        });
+      return res.status(500).json({
+        error:
+          'Script modification service is not configured (API Key missing).',
+      });
     } else if (
       errorMessageString.includes('Failed to get valid modified script content')
     ) {
-      return res
-        .status(502)
-        .json({
-          error:
-            'Failed to modify script due to an issue with the AI service response.',
-        });
+      return res.status(502).json({
+        error:
+          'Failed to modify script due to an issue with the AI service response.',
+      });
     } else if (
       errorMessageString.includes('Failed to get response from Gemini API')
     ) {
-      return res
-        .status(502)
-        .json({
-          error:
-            'Failed to get response from the AI service for script modification.',
-        });
+      return res.status(502).json({
+        error:
+          'Failed to get response from the AI service for script modification.',
+      });
     }
 
     // Generic error for other cases
@@ -322,11 +306,9 @@ const handleUpdateScriptContent = async (req, res) => {
     res.status(200).json(data[0]); // Return the updated script object
   } catch (e) {
     console.error('Unexpected error in handleUpdateScriptContent:', e);
-    res
-      .status(500)
-      .json({
-        error: 'An unexpected error occurred while updating the script.',
-      });
+    res.status(500).json({
+      error: 'An unexpected error occurred while updating the script.',
+    });
   }
 };
 
