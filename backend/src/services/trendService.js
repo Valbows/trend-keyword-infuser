@@ -6,7 +6,8 @@ const { google } = require('googleapis');
 const parser = new Parser();
 // const GEMINI_API_KEY = process.env.GEMINI_API_KEY; // Will be used later for script generation
 
-const GOOGLE_TRENDS_RSS_URL_US = 'https://trends.google.com/trends/trendingsearches/daily/rss?geo=US';
+const GOOGLE_TRENDS_RSS_URL_US =
+  'https://trends.google.com/trends/trendingsearches/daily/rss?geo=US';
 
 // Helper function to get YouTube client; ensures API key is checked at call time
 const getYoutubeClient = () => {
@@ -33,7 +34,7 @@ const fetchGoogleTrends = async (topic) => {
       console.warn('Google Trends RSS feed did not return items.');
       return [];
     }
-    return feed.items.map(item => ({
+    return feed.items.map((item) => ({
       source: 'Google Trends',
       keyword: item.title,
       link: item.link,
@@ -41,7 +42,10 @@ const fetchGoogleTrends = async (topic) => {
       snippet: item.contentSnippet || item.content, // Some feeds use contentSnippet, others content
     }));
   } catch (error) {
-    console.error('Error fetching or parsing Google Trends RSS:', error.message);
+    console.error(
+      'Error fetching or parsing Google Trends RSS:',
+      error.message
+    );
     // It's important not to let one source failure bring down the whole service if possible
     return []; // Return empty array on error for this source
   }
@@ -57,7 +61,9 @@ const fetchYouTubeTrends = async (topic) => {
   const youtubeClient = getYoutubeClient();
 
   if (!youtubeClient) {
-    console.warn('YouTube API Key is not configured or client could not be initialized. Skipping YouTube trends.');
+    console.warn(
+      'YouTube API Key is not configured or client could not be initialized. Skipping YouTube trends.'
+    );
     return [];
   }
 
@@ -67,8 +73,8 @@ const fetchYouTubeTrends = async (topic) => {
       q: `${topic} trending`, // Append 'trending' to focus the search
       type: 'video',
       order: 'viewCount', // Order by view count to find popular videos
-      maxResults: 5,        // Limit to 5 results for MVP
-      regionCode: 'US',     // Focus on US region for now
+      maxResults: 5, // Limit to 5 results for MVP
+      regionCode: 'US', // Focus on US region for now
       relevanceLanguage: 'en',
     });
 
@@ -77,7 +83,7 @@ const fetchYouTubeTrends = async (topic) => {
       return [];
     }
 
-    return response.data.items.map(item => ({
+    return response.data.items.map((item) => ({
       source: 'YouTube',
       keyword: item.snippet.title,
       link: `https://www.youtube.com/watch?v=${item.id.videoId}`,
@@ -86,10 +92,16 @@ const fetchYouTubeTrends = async (topic) => {
       thumbnail: item.snippet.thumbnails.default.url,
     }));
   } catch (error) {
-    console.error(`Error fetching YouTube trends for topic "${topic}":`, error.message);
+    console.error(
+      `Error fetching YouTube trends for topic "${topic}":`,
+      error.message
+    );
     // Check for specific API errors, e.g., quota exceeded
     if (error.response && error.response.data && error.response.data.error) {
-      console.error('YouTube API Error Details:', JSON.stringify(error.response.data.error.errors));
+      console.error(
+        'YouTube API Error Details:',
+        JSON.stringify(error.response.data.error.errors)
+      );
     }
     return []; // Return empty array on error for this source
   }
@@ -114,7 +126,10 @@ const fetchTrendsFromSources = async (topic) => {
 
     return [...googleTrends, ...youtubeTrends];
   } catch (error) {
-    console.error('Error in trendService fetching trends from sources:', error.message);
+    console.error(
+      'Error in trendService fetching trends from sources:',
+      error.message
+    );
     throw new Error('Failed to fetch trends from aggregated sources');
   }
 };

@@ -5,7 +5,9 @@ const logger = require('../utils/logger'); // Import the logger
 
 // Middleware to log requests to this router
 router.use((req, res, next) => {
-  logger.info(`[TrendRoutes] Received request: ${req.method} ${req.originalUrl} (Path: ${req.path})`);
+  logger.info(
+    `[TrendRoutes] Received request: ${req.method} ${req.originalUrl} (Path: ${req.path})`
+  );
   next();
 });
 

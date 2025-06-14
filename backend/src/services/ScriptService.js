@@ -34,7 +34,9 @@ const createScript = (topic, trends, content) => {
     throw new Error('Topic is required and must be a non-empty string.');
   }
   if (!content || typeof content !== 'string' || content.trim() === '') {
-    throw new Error('Script content is required and must be a non-empty string.');
+    throw new Error(
+      'Script content is required and must be a non-empty string.'
+    );
   }
 
   const id = crypto.randomUUID();
@@ -77,7 +79,11 @@ const updateScriptContent = (scriptId, newContent) => {
     console.warn('updateScriptContent called with no scriptId');
     return null;
   }
-  if (newContent === undefined || newContent === null || typeof newContent !== 'string') {
+  if (
+    newContent === undefined ||
+    newContent === null ||
+    typeof newContent !== 'string'
+  ) {
     // Allow empty string for content, but not undefined/null or wrong type
     throw new Error('New content must be a string.');
   }
@@ -109,6 +115,6 @@ module.exports = {
   updateScriptContent,
   getAllScripts,
   // For testing/clearing purposes if needed, not typically for production use by other services
-  _clearAllScripts_TEST_ONLY: () => scripts.clear(), 
-  _getScriptsMap_TEST_ONLY: () => scripts 
+  _clearAllScripts_TEST_ONLY: () => scripts.clear(),
+  _getScriptsMap_TEST_ONLY: () => scripts,
 };

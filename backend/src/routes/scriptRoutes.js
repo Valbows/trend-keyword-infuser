@@ -1,21 +1,46 @@
 const express = require('express');
 const scriptController = require('../controllers/scriptController');
 
-// --- BEGIN G.O.A.T. C.O.D.E.X. B.O.T. DIAGNOSTIC LOG --- 
-console.log('================================================================================');
-console.log('[scriptRoutes.js] DIAGNOSTIC: Checking imported scriptController...');
+// --- BEGIN G.O.A.T. C.O.D.E.X. B.O.T. DIAGNOSTIC LOG ---
+console.log(
+  '================================================================================'
+);
+console.log(
+  '[scriptRoutes.js] DIAGNOSTIC: Checking imported scriptController...'
+);
 if (scriptController) {
-  console.log('[scriptRoutes.js] DIAGNOSTIC: scriptController object IS imported.');
-  console.log('[scriptRoutes.js] DIAGNOSTIC: typeof scriptController.handleGenerateScript:', typeof scriptController.handleGenerateScript);
-  console.log('[scriptRoutes.js] DIAGNOSTIC: typeof scriptController.handleGetAllScripts:', typeof scriptController.handleGetAllScripts);
-  console.log('[scriptRoutes.js] DIAGNOSTIC: typeof scriptController.handleGetScriptById:', typeof scriptController.handleGetScriptById);
-  console.log('[scriptRoutes.js] DIAGNOSTIC: typeof scriptController.handleModifyScript:', typeof scriptController.handleModifyScript);
+  console.log(
+    '[scriptRoutes.js] DIAGNOSTIC: scriptController object IS imported.'
+  );
+  console.log(
+    '[scriptRoutes.js] DIAGNOSTIC: typeof scriptController.handleGenerateScript:',
+    typeof scriptController.handleGenerateScript
+  );
+  console.log(
+    '[scriptRoutes.js] DIAGNOSTIC: typeof scriptController.handleGetAllScripts:',
+    typeof scriptController.handleGetAllScripts
+  );
+  console.log(
+    '[scriptRoutes.js] DIAGNOSTIC: typeof scriptController.handleGetScriptById:',
+    typeof scriptController.handleGetScriptById
+  );
+  console.log(
+    '[scriptRoutes.js] DIAGNOSTIC: typeof scriptController.handleModifyScript:',
+    typeof scriptController.handleModifyScript
+  );
   // Log all keys to see what's actually available if a specific function is undefined
-  console.log('[scriptRoutes.js] DIAGNOSTIC: Keys in scriptController:', Object.keys(scriptController));
+  console.log(
+    '[scriptRoutes.js] DIAGNOSTIC: Keys in scriptController:',
+    Object.keys(scriptController)
+  );
 } else {
-  console.error('[scriptRoutes.js] CRITICAL DIAGNOSTIC: scriptController object FAILED TO IMPORT and is undefined/null.');
+  console.error(
+    '[scriptRoutes.js] CRITICAL DIAGNOSTIC: scriptController object FAILED TO IMPORT and is undefined/null.'
+  );
 }
-console.log('================================================================================');
+console.log(
+  '================================================================================'
+);
 // --- END G.O.A.T. C.O.D.E.X. B.O.T. DIAGNOSTIC LOG ---
 
 const {

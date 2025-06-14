@@ -5,7 +5,7 @@ const app = express();
 // CORS Configuration
 const corsOptions = {
   origin: 'http://localhost:3003', // Allow only your frontend to access
-  optionsSuccessStatus: 200 // For legacy browser support
+  optionsSuccessStatus: 200, // For legacy browser support
 };
 app.use(cors(corsOptions));
 
@@ -21,10 +21,16 @@ app.get('/health', (req, res) => {
 });
 
 // API Routes
-app.use('/api/v1/trends', (req, res, next) => {
-  console.log(`[APP.JS] Request received for: ${req.method} ${req.originalUrl}`);
-  next();
-}, trendRoutes);
+app.use(
+  '/api/v1/trends',
+  (req, res, next) => {
+    console.log(
+      `[APP.JS] Request received for: ${req.method} ${req.originalUrl}`
+    );
+    next();
+  },
+  trendRoutes
+);
 app.use('/api/v1/scripts', scriptRoutes); // Use script routes
 
 module.exports = app;

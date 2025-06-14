@@ -1,4 +1,6 @@
-require('dotenv').config({ path: require('path').resolve(__dirname, '../../.env') }); // Ensure .env at backend root is loaded
+require('dotenv').config({
+  path: require('path').resolve(__dirname, '../../.env'),
+}); // Ensure .env at backend root is loaded
 
 const { createClient } = require('@supabase/supabase-js');
 
@@ -18,8 +20,8 @@ const supabase = createClient(supabaseUrl, supabaseServiceKey, {
     // as they typically use service_role keys which don't expire or rely on user sessions.
     autoRefreshToken: false,
     persistSession: false,
-    detectSessionInUrl: false
-  }
+    detectSessionInUrl: false,
+  },
 });
 
 module.exports = supabase;

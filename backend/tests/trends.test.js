@@ -43,34 +43,58 @@ describe('GET /api/v1/trends', () => {
   it('should return 400 if topic query parameter is missing', async () => {
     const res = await request(app).get('/api/v1/trends');
     expect(res.statusCode).toEqual(400);
-    expect(res.body).toHaveProperty('error', 'Missing required query parameter: topic');
+    expect(res.body).toHaveProperty(
+      'error',
+      'Missing required query parameter: topic'
+    );
   });
 
   it('should return 200 and combined trend data if topic is provided', async () => {
     // Mock Google Trends Data
     const mockGoogleFeedItems = [
-      { title: 'Google Trend 1', link: 'http://google.com/trend1', pubDate: new Date().toISOString(), contentSnippet: 'Google Snippet 1' },
+      {
+        title: 'Google Trend 1',
+        link: 'http://google.com/trend1',
+        pubDate: new Date().toISOString(),
+        contentSnippet: 'Google Snippet 1',
+      },
     ];
     Parser.prototype.parseURL.mockResolvedValue({ items: mockGoogleFeedItems });
 
     // Mock YouTube Data
     const mockYouTubeItems = [
-      { id: { videoId: 'yt1' }, snippet: { title: 'YouTube Trend 1', publishedAt: new Date().toISOString(), description: 'YT Desc 1', thumbnails: { default: { url: 'http://yt.com/thumb1.jpg' } } } },
+      {
+        id: { videoId: 'yt1' },
+        snippet: {
+          title: 'YouTube Trend 1',
+          publishedAt: new Date().toISOString(),
+          description: 'YT Desc 1',
+          thumbnails: { default: { url: 'http://yt.com/thumb1.jpg' } },
+        },
+      },
     ];
     const mockYoutubeClient = google.youtube();
-    mockYoutubeClient.search.list.mockResolvedValue({ data: { items: mockYouTubeItems } });
+    mockYoutubeClient.search.list.mockResolvedValue({
+      data: { items: mockYouTubeItems },
+    });
 
     const res = await request(app).get('/api/v1/trends?topic=AI');
     expect(res.statusCode).toEqual(200);
     expect(res.body).toHaveProperty('trends');
     expect(Array.isArray(res.body.trends)).toBe(true);
-    expect(res.body.trends.length).toBe(mockGoogleFeedItems.length + mockYouTubeItems.length);
+    expect(res.body.trends.length).toBe(
+      mockGoogleFeedItems.length + mockYouTubeItems.length
+    );
 
-    const googleTrendResult = res.body.trends.find(t => t.source === 'Google Trends');
+    const googleTrendResult = res.body.trends.find(
+      (t) => t.source === 'Google Trends'
+    );
     expect(googleTrendResult).toBeDefined();
     expect(googleTrendResult.keyword).toBe(mockGoogleFeedItems[0].title);
 
-    const youtubeTrendResult = res.body.trends.find(t => t.source === 'YouTube');
+    const youtubeTrendResult = res.body.trends.find(
+      (t) => t.source === 'YouTube'
+    );
     expect(youtubeTrendResult).toBeDefined();
     expect(youtubeTrendResult.keyword).toBe(mockYouTubeItems[0].snippet.title);
 
@@ -92,10 +116,20 @@ describe('GET /api/v1/trends', () => {
     Parser.prototype.parseURL.mockResolvedValue({ items: [] }); // Mock empty Google Trends
 
     const mockYouTubeItems = [
-      { id: { videoId: 'ytTech' }, snippet: { title: 'Tech YouTube Trend', publishedAt: new Date().toISOString(), description: 'Tech YT Desc', thumbnails: { default: { url: 'http://yt.com/thumbTech.jpg' } } } },
+      {
+        id: { videoId: 'ytTech' },
+        snippet: {
+          title: 'Tech YouTube Trend',
+          publishedAt: new Date().toISOString(),
+          description: 'Tech YT Desc',
+          thumbnails: { default: { url: 'http://yt.com/thumbTech.jpg' } },
+        },
+      },
     ];
     const mockYoutubeClient = google.youtube();
-    mockYoutubeClient.search.list.mockResolvedValue({ data: { items: mockYouTubeItems } });
+    mockYoutubeClient.search.list.mockResolvedValue({
+      data: { items: mockYouTubeItems },
+    });
 
     const res = await request(app).get('/api/v1/trends?topic=Technology');
     expect(res.statusCode).toEqual(200);
@@ -107,10 +141,20 @@ describe('GET /api/v1/trends', () => {
     Parser.prototype.parseURL.mockRejectedValue(new Error('Network error')); // Mock Google Trends failure
 
     const mockYouTubeItems = [
-      { id: { videoId: 'ytFinance' }, snippet: { title: 'Finance YouTube Trend', publishedAt: new Date().toISOString(), description: 'Finance YT Desc', thumbnails: { default: { url: 'http://yt.com/thumbFinance.jpg' } } } },
+      {
+        id: { videoId: 'ytFinance' },
+        snippet: {
+          title: 'Finance YouTube Trend',
+          publishedAt: new Date().toISOString(),
+          description: 'Finance YT Desc',
+          thumbnails: { default: { url: 'http://yt.com/thumbFinance.jpg' } },
+        },
+      },
     ];
     const mockYoutubeClient = google.youtube();
-    mockYoutubeClient.search.list.mockResolvedValue({ data: { items: mockYouTubeItems } });
+    mockYoutubeClient.search.list.mockResolvedValue({
+      data: { items: mockYouTubeItems },
+    });
 
     const res = await request(app).get('/api/v1/trends?topic=Finance');
     expect(res.statusCode).toEqual(200);
@@ -120,12 +164,19 @@ describe('GET /api/v1/trends', () => {
 
   it('should return 200 and only Google trends if YouTube fetching fails', async () => {
     const mockGoogleFeedItems = [
-      { title: 'Google Trend Error Case', link: 'http://google.com/trendError', pubDate: new Date().toISOString(), contentSnippet: 'Google Snippet Error' },
+      {
+        title: 'Google Trend Error Case',
+        link: 'http://google.com/trendError',
+        pubDate: new Date().toISOString(),
+        contentSnippet: 'Google Snippet Error',
+      },
     ];
     Parser.prototype.parseURL.mockResolvedValue({ items: mockGoogleFeedItems });
 
     const mockYoutubeClient = google.youtube();
-    mockYoutubeClient.search.list.mockRejectedValue(new Error('YouTube API Error'));
+    mockYoutubeClient.search.list.mockRejectedValue(
+      new Error('YouTube API Error')
+    );
 
     const res = await request(app).get('/api/v1/trends?topic=ErrorHandling');
     expect(res.statusCode).toEqual(200);
@@ -136,7 +187,9 @@ describe('GET /api/v1/trends', () => {
   it('should return 200 and an empty array if both sources fail', async () => {
     Parser.prototype.parseURL.mockRejectedValue(new Error('Network error'));
     const mockYoutubeClient = google.youtube();
-    mockYoutubeClient.search.list.mockRejectedValue(new Error('YouTube API Error'));
+    mockYoutubeClient.search.list.mockRejectedValue(
+      new Error('YouTube API Error')
+    );
 
     const res = await request(app).get('/api/v1/trends?topic=TotalFailure');
     expect(res.statusCode).toEqual(200);
