@@ -13,7 +13,7 @@ interface TrendItem {
 }
 
 // Interface for the script object expected from the backend (especially for listing)
-interface ScriptSummary {
+export interface ScriptSummary {
   id: string;
   topic: string;
   generated_script: string; // Full content for now, might be summary later
