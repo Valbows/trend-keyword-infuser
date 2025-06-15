@@ -31,6 +31,8 @@ export default [
           ignoreRestSiblings: true,
           argsIgnorePattern: '^_',
           varsIgnorePattern: '^_',
+          caughtErrors: 'all', // Ensure caught errors are checked
+          caughtErrorsIgnorePattern: '^_', // Apply ignore pattern specifically to caught errors
         },
       ],
     },
