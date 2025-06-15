@@ -24,14 +24,14 @@ describe('Script Generation Service', () => {
       source: 'Google Trends',
       keyword: 'AI in education',
       link: 'http://example.com/ai-edu',
-      pubDate: '2024-05-01',
+      published_at: '2024-05-01T10:00:00Z', // Changed pubDate to published_at and made it an ISO-like string
       snippet: 'AI is transforming education.',
     },
     {
       source: 'YouTube',
       keyword: 'Top 5 AI tools',
       link: 'http://youtube.com/top-ai',
-      pubDate: '2024-05-02',
+      published_at: '2024-05-02T12:00:00Z', // Changed pubDate to published_at and made it an ISO-like string
       snippet: 'Discover the best AI tools.',
     },
   ];
@@ -116,7 +116,7 @@ describe('Script Generation Service', () => {
 
     const expectedPromptStart = `Generate a concise and engaging video script (approx. 1-2 minutes, suitable for a platform like Synthesia) about "Future of AI".`;
     const expectedTrendIncorporation = `Incorporate the following current trends and keywords seamlessly into the script:`;
-    const trend1Text = `- "${mockTrends[0].keyword}": ${mockTrends[0].snippet} (Source: ${mockTrends[0].source}, Published: 2024-04-30)`;
+    const trend1Text = `- "${mockTrends[0].keyword}": ${mockTrends[0].snippet} (Source: ${mockTrends[0].source}, Published: ${mockTrends[0].published_at.split('T')[0]})`;
     const trend2Text = `- "${mockTrends[1].keyword}": ${mockTrends[1].snippet} (Source: ${mockTrends[1].source}, Published: ${mockTrends[1].published_at.split('T')[0]})`;
     const expectedEnding = `The script should be informative, engaging, and suitable for a general audience. Focus on clarity and a positive or insightful tone.
 Provide only the script content itself, without any surrounding text, titles, or introductions like "Here's the script:".
