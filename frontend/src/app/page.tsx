@@ -41,9 +41,15 @@ export default function Home() {
 
       const data = await response.json();
       setScript(data.script);
-    } catch (e: any) {
+    } catch (e: unknown) {
       console.error('Failed to generate script:', e);
-      setError(e.message || 'Failed to generate script. Please try again.');
+      let errorMessage = 'Failed to generate script. Please try again.';
+      if (e instanceof Error) {
+        errorMessage = e.message;
+      } else if (typeof e === 'string') {
+        errorMessage = e;
+      }
+      setError(errorMessage);
     }
     setIsLoading(false);
   };
@@ -106,9 +112,15 @@ export default function Home() {
       // setExistingScript(''); 
       // setSelectedKeywords([]);
 
-    } catch (e: any) {
+    } catch (e: unknown) {
       console.error('Failed to modify script:', e);
-      setModifyError(e.message || 'Failed to modify script. Please try again.');
+      let modifyErrorMessage = 'Failed to modify script. Please try again.';
+      if (e instanceof Error) {
+        modifyErrorMessage = e.message;
+      } else if (typeof e === 'string') {
+        modifyErrorMessage = e;
+      }
+      setModifyError(modifyErrorMessage);
       // Optionally clear the main script display on error, or leave it as is
       // setScript(''); 
     } finally {

@@ -100,9 +100,15 @@ const TrendSidebar: React.FC<TrendSidebarProps> = ({ selectedKeywords, onSelecte
           const publishedBeforeISO = new Date(endDate + 'T23:59:59.999Z').toISOString();
           queryParams += `&publishedAfterISO=${publishedAfterISO}&publishedBeforeISO=${publishedBeforeISO}`;
           queryParams += `&timeframe=custom`; // Explicitly tell backend custom dates are used
-        } catch (e: any) {
-          console.error("Error processing custom date range:", e.message);
-          setError(`Date Error: ${e.message}`);
+        } catch (e: unknown) {
+          let errorMessage = 'Error processing custom date range.';
+          if (e instanceof Error) {
+            errorMessage = e.message;
+          } else if (typeof e === 'string') {
+            errorMessage = e;
+          }
+          console.error("Error processing custom date range:", errorMessage);
+          setError(`Date Error: ${errorMessage}`);
           setIsLoading(false);
           setKeywords([]);
           return; 
@@ -119,9 +125,15 @@ const TrendSidebar: React.FC<TrendSidebarProps> = ({ selectedKeywords, onSelecte
         }
         const data = await response.json();
         setKeywords((data.keywords || []).slice(0, 10));
-      } catch (err: any) {
+      } catch (err: unknown) {
         console.error('Failed to fetch YouTube Keywords:', err);
-        setError(err.message || 'Failed to load keywords.');
+        let errorMessage = 'Failed to load keywords.';
+        if (err instanceof Error) {
+          errorMessage = err.message;
+        } else if (typeof err === 'string') {
+          errorMessage = err;
+        }
+        setError(errorMessage);
         setKeywords([]);
       } finally {
         setIsLoading(false);
@@ -202,7 +214,7 @@ const TrendSidebar: React.FC<TrendSidebarProps> = ({ selectedKeywords, onSelecte
       {error && <p className="text-red-400 bg-red-900/30 p-3 rounded-md">Error: {error}</p>}
       {!isLoading && !error && keywords.length === 0 && debouncedTopic.trim() && (
         <p className="text-slate-400">
-          No keywords found for "{debouncedTopic}"
+          No keywords found for &quot;{debouncedTopic}&quot;
           {selectedTimeframe === 'custom' && startDate && endDate ? ` between ${startDate} and ${endDate}` : 
            selectedTimeframe === 'any' ? ' for all time' : ` within the last ${selectedTimeframe}`}
           .

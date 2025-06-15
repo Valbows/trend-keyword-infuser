@@ -12,7 +12,7 @@ interface ApiRequestState<T> {
  * @param initialData Optional initial data.
  * @returns An object containing data, isLoading, error, and an execute function to trigger the API call.
  */
-function useApiRequest<T, Args extends any[] = any[]>(
+function useApiRequest<T, Args extends unknown[] = unknown[]>(
   apiCallFunction: (...args: Args) => Promise<T>,
   initialData: T | null = null
 ) {
@@ -28,8 +28,13 @@ function useApiRequest<T, Args extends any[] = any[]>(
       const responseData = await apiCallFunction(...args);
       setState(prevState => ({ ...prevState, data: responseData, isLoading: false }));
       return responseData; // Optionally return data for immediate use
-    } catch (err: any) {
-      const errorMessage = err.message || 'An unknown error occurred';
+    } catch (err: unknown) {
+      let errorMessage = 'An unknown error occurred';
+      if (err instanceof Error) {
+        errorMessage = err.message;
+      } else if (typeof err === 'string') {
+        errorMessage = err;
+      }
       setState(prevState => ({ ...prevState, error: errorMessage, isLoading: false, data: initialData })); // Reset data on error
       throw err; // Re-throw to allow caller to handle if needed
     }

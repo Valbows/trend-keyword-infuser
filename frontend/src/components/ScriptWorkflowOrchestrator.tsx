@@ -4,14 +4,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import ScriptEditor from './ScriptEditor'; // Assuming ScriptEditor.tsx is in the same directory
 
-// Define a basic structure for Trend items if they are used for generation
-interface TrendItem {
-  keyword: string;
-  snippet?: string;
-  source?: string;
-  pubDate?: string;
-}
-
 // Interface for the script object expected from the backend (especially for listing)
 export interface ScriptSummary {
   id: string;
@@ -54,9 +46,15 @@ const ScriptWorkflowOrchestrator: React.FC = () => {
         }
         const data: ScriptSummary[] = await response.json();
         setExistingScripts(data);
-      } catch (error: any) {
+      } catch (error: unknown) {
         console.error('Failed to fetch existing scripts:', error);
-        setLoadExistingScriptsError(error.message || 'An unknown error occurred while fetching scripts.');
+        let errorMessage = 'An unknown error occurred while fetching scripts.';
+        if (error instanceof Error) {
+          errorMessage = error.message;
+        } else if (typeof error === 'string') {
+          errorMessage = error;
+        }
+        setLoadExistingScriptsError(errorMessage);
       } finally {
         setIsLoadingExistingScripts(false);
       }
@@ -115,9 +113,15 @@ const ScriptWorkflowOrchestrator: React.FC = () => {
       } else {
         throw new Error('Invalid response from script generation: ID or content missing.');
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Failed to generate script:', error);
-      setGenerationError(error.message || 'An unknown error occurred during script generation.');
+      let errorMessage = 'An unknown error occurred during script generation.';
+      if (error instanceof Error) {
+        errorMessage = error.message;
+      } else if (typeof error === 'string') {
+        errorMessage = error;
+      }
+      setGenerationError(errorMessage);
     } finally {
       setIsLoadingGeneration(false);
     }
@@ -159,9 +163,15 @@ const ScriptWorkflowOrchestrator: React.FC = () => {
       // Auto-clear success message after a few seconds
       setTimeout(() => setSaveSuccessMessage(null), 3000);
 
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Failed to save script:', error);
-      setSaveError(error.message || 'An unknown error occurred while saving the script.');
+      let errorMessage = 'An unknown error occurred while saving the script.';
+      if (error instanceof Error) {
+        errorMessage = error.message;
+      } else if (typeof error === 'string') {
+        errorMessage = error;
+      }
+      setSaveError(errorMessage);
     } finally {
       setIsLoadingSave(false);
     }

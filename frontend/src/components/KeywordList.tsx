@@ -39,7 +39,7 @@ const KeywordList: React.FC<KeywordListProps> = ({
     if (debouncedTopic.trim()) {
       return (
         <p className="text-slate-400 mt-4">
-          No keywords found for "{debouncedTopic}"
+          No keywords found for &quot;{debouncedTopic}&quot;
           {selectedTimeframe === 'custom' && startDate && endDate 
             ? ` between ${startDate} and ${endDate}` 
             : selectedTimeframe === 'any' 
