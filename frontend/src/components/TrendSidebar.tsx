@@ -132,11 +132,9 @@ const TrendSidebar: React.FC<TrendSidebarProps> = ({
           `/api/v1/trends/youtube-keywords?${queryParams}`
         );
         if (!response.ok) {
-          const errorData = await response
-            .json()
-            .catch(() => ({
-              message: `HTTP error! status: ${response.status}`,
-            }));
+          const errorData = await response.json().catch(() => ({
+            message: `HTTP error! status: ${response.status}`,
+          }));
           throw new Error(
             errorData.error || `HTTP error! status: ${response.status}`
           );
