@@ -77,7 +77,7 @@ const getYouTubeKeywords = async (req, res) => {
       `[trendController.getYouTubeKeywords] Fetching fresh YouTube keywords for topic: "${topic}"`
     );
     const keywords =
-      await TrendDiscoveryService.getYouTubeKeywordsByTopicAndTimeframe(
+      await trendDiscoveryService.getYouTubeKeywordsByTopicAndTimeframe(
         topic,
         timeframe,
         publishedAfterISO,
