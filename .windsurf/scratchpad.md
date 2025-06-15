@@ -425,6 +425,89 @@ The system consists of:
 2. Content moderation strategy
 3. Performance optimization for real-time interactions
 
+## Updated Implementation Plan
+
+### Phase 1: Core Application Deployment (Critical Priority)
+
+**Current Blockers to Deployment:**
+1. **Backend CI Failures:**
+   - Parsing error in `.prettierrc.json`
+   - `no-unused-vars` errors in `trendDiscoveryService.js`
+2. **Frontend Netlify Deployment Issues:**
+   - TypeScript/ESLint errors in frontend components
+   - Node.js version configuration in Netlify
+
+**Action Plan for Immediate Deployment:**
+
+1. **Fix Backend Configuration:**
+   - [ ] Remove any remaining references to `.prettierrc.json`
+   - [ ] Ensure `.prettierrc.yaml` is properly committed
+   - [ ] Fix or properly suppress unused variable warnings in `trendDiscoveryService.js`
+
+2. **Fix Frontend TypeScript Errors:**
+   - [ ] Address `no-explicit-any` errors in components:
+     - `src/app/page.tsx` (lines 44:17 and 109:17)
+     - `src/components/ScriptWorkflowOrchestrator.tsx` (lines 57:23, 118:21, 162:21)
+     - `src/components/TrendSidebar.tsx` (lines 103:21, 122:21)
+     - `src/hooks/useApiRequest.ts` (lines 15:40, 15:48, 31:19)
+   - [ ] Fix unescaped entities errors in:
+     - `src/components/KeywordList.tsx` (lines 42:33, 42:50)
+     - `src/components/TrendSidebar.tsx` (lines 205:33, 205:50)
+   - [ ] Fix unused variable:
+     - `src/components/ScriptWorkflowOrchestrator.tsx` (line 8:11 - `TrendItem`)
+
+3. **Netlify Configuration:**
+   - [ ] Ensure `NODE_VERSION` environment variable is properly set
+   - [ ] Add build caching configuration as recommended
+
+### Phase 2: YouTube Engagement Feature Implementation (Post-Deployment)
+
+1. **Database Schema Updates:**
+   ```sql
+   ALTER TABLE script_versions
+   ADD COLUMN published_video_id VARCHAR(255) UNIQUE, -- YouTube video ID (e.g., "dQw4w9WgXcQ")
+   ADD COLUMN engagement_rate NUMERIC(5,2),          -- e.g., 5.75 for 5.75%
+   ADD COLUMN views BIGINT,                           -- Raw views count
+   ADD COLUMN likes BIGINT,                           -- Raw likes count
+   ADD COLUMN comments BIGINT,                        -- Raw comments count
+   ADD COLUMN engagement_retrieved_at TIMESTAMP WITH TIME ZONE; -- When engagement data was last pulled
+   ```
+
+2. **New Components and Services:**
+   - [ ] **Engagement Recording Service:**
+     - New endpoint: `/api/v1/record-engagement`
+     - Handles processing YouTube video URLs/IDs
+     - Calculates engagement metrics
+     - Updates database
+
+   - [ ] **YouTube Data Fetcher Service:**
+     - Abstracts YouTube Data API v3 integration
+     - Manages API key securely
+     - Handles rate limiting and error cases
+
+   - [ ] **Historical Lookup Service:**
+     - Finds similar past videos based on topic/keywords
+     - Aggregates engagement metrics
+     - Returns statistical insights
+
+3. **API Usage Optimization:**
+   - [ ] Implement YouTube API request batching
+   - [ ] Add rate limiting for engagement recording
+   - [ ] Create a cache layer for YouTube data
+
+4. **Rollout Strategy:**
+   - [ ] Phase 2.1: Read-only implementation (display historical data)
+   - [ ] Phase 2.2: Manual engagement recording
+   - [ ] Phase 2.3: Automated YouTube data fetching (optional enhancement)
+
+5. **Security & Privacy Considerations:**
+   - [ ] Ensure engagement recording endpoints require authentication
+   - [ ] Review data privacy implications (GDPR compliance)
+   - [ ] Implement YouTube API quota monitoring
+
 ## Next Steps
 
-Awaiting confirmation to switch to executor mode before proceeding with implementation.
+Awaiting confirmation to switch to executor mode before proceeding with implementation. The plan will be executed as follows:
+
+1. First, we will address the CI/Deployment blockers to get the core application live
+2. After successful deployment, we will incrementally implement the YouTube Engagement Tracking features
