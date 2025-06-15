@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 
@@ -7,13 +7,19 @@ interface SelectedKeywordsContextType {
   setSelectedKeywords: React.Dispatch<React.SetStateAction<string[]>>;
 }
 
-const SelectedKeywordsContext = createContext<SelectedKeywordsContextType | undefined>(undefined);
+const SelectedKeywordsContext = createContext<
+  SelectedKeywordsContextType | undefined
+>(undefined);
 
-export const SelectedKeywordsProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+export const SelectedKeywordsProvider: React.FC<{ children: ReactNode }> = ({
+  children,
+}) => {
   const [selectedKeywords, setSelectedKeywords] = useState<string[]>([]);
 
   return (
-    <SelectedKeywordsContext.Provider value={{ selectedKeywords, setSelectedKeywords }}>
+    <SelectedKeywordsContext.Provider
+      value={{ selectedKeywords, setSelectedKeywords }}
+    >
       {children}
     </SelectedKeywordsContext.Provider>
   );
@@ -22,7 +28,9 @@ export const SelectedKeywordsProvider: React.FC<{ children: ReactNode }> = ({ ch
 export const useSelectedKeywords = (): SelectedKeywordsContextType => {
   const context = useContext(SelectedKeywordsContext);
   if (context === undefined) {
-    throw new Error('useSelectedKeywords must be used within a SelectedKeywordsProvider');
+    throw new Error(
+      'useSelectedKeywords must be used within a SelectedKeywordsProvider'
+    );
   }
   return context;
 };

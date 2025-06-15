@@ -35,12 +35,14 @@ describe('TrendSidebar Component', () => {
       <TrendSidebar
         selectedKeywords={[]}
         onSelectedKeywordsChange={mockOnSelectedKeywordsChange}
-        topic=""
+        topic=''
       />
     );
 
     // Check for the main title
-    expect(screen.getByRole('heading', { name: /Trending YouTube Keywords/i })).toBeInTheDocument();
+    expect(
+      screen.getByRole('heading', { name: /Trending YouTube Keywords/i })
+    ).toBeInTheDocument();
 
     // Check for the timeframe selector label
     expect(screen.getByLabelText(/Select Timeframe:/i)).toBeInTheDocument();
@@ -56,11 +58,9 @@ describe('TrendSidebar Component', () => {
       <TrendSidebar
         selectedKeywords={[]}
         onSelectedKeywordsChange={mockOnSelectedKeywordsChange}
-        topic="AI"
+        topic='AI'
       />
     );
-
-
 
     // Wait for keywords to be displayed
     await waitFor(() => {
@@ -74,7 +74,9 @@ describe('TrendSidebar Component', () => {
 
   it('shows an error message if the keyword fetch fails', async () => {
     // Suppress console.error for this specific test, as it's an expected part of the behavior.
-    const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+    const consoleErrorSpy = jest
+      .spyOn(console, 'error')
+      .mockImplementation(() => {});
 
     (fetch as jest.Mock).mockRejectedValueOnce(new Error('API Failure'));
 
@@ -82,7 +84,7 @@ describe('TrendSidebar Component', () => {
       <TrendSidebar
         selectedKeywords={[]}
         onSelectedKeywordsChange={mockOnSelectedKeywordsChange}
-        topic="ErrorCase"
+        topic='ErrorCase'
       />
     );
 
@@ -104,12 +106,14 @@ describe('TrendSidebar Component', () => {
       <TrendSidebar
         selectedKeywords={[]}
         onSelectedKeywordsChange={mockOnSelectedKeywordsChange}
-        topic="AI"
+        topic='AI'
       />
     );
 
     // Wait for the keyword to appear
-    const keywordButton = await screen.findByRole('button', { name: /AI in 2025/i });
+    const keywordButton = await screen.findByRole('button', {
+      name: /AI in 2025/i,
+    });
 
     // Click the keyword
     fireEvent.click(keywordButton);

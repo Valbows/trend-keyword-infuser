@@ -7,15 +7,15 @@ interface LoadingSpinnerProps {
 
 const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
   size = 'h-12 w-12',
-  borderColor = 'border-sky-500'
+  borderColor = 'border-sky-500',
 }) => {
   return (
-    <div 
+    <div
       className={`animate-spin rounded-full ${size} border-t-2 border-b-2 ${borderColor}`}
-      role="status"
-      aria-label="loading"
+      role='status'
+      aria-label='loading'
     >
-      <span className="sr-only">Loading...</span>
+      <span className='sr-only'>Loading...</span>
     </div>
   );
 };

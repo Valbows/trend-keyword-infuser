@@ -5,7 +5,10 @@ interface SaveSuccessToastProps {
   duration?: number; // Duration in milliseconds
 }
 
-const SaveSuccessToast: React.FC<SaveSuccessToastProps> = ({ message, duration = 3000 }) => {
+const SaveSuccessToast: React.FC<SaveSuccessToastProps> = ({
+  message,
+  duration = 3000,
+}) => {
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
@@ -25,7 +28,7 @@ const SaveSuccessToast: React.FC<SaveSuccessToastProps> = ({ message, duration =
   }
 
   return (
-    <div className="fixed bottom-5 right-5 bg-green-600 text-white py-2 px-4 rounded-lg shadow-lg animate-pulse z-50">
+    <div className='fixed bottom-5 right-5 bg-green-600 text-white py-2 px-4 rounded-lg shadow-lg animate-pulse z-50'>
       {message}
     </div>
   );

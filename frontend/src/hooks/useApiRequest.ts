@@ -22,23 +22,35 @@ function useApiRequest<T, Args extends unknown[] = unknown[]>(
     error: null,
   });
 
-  const execute = useCallback(async (...args: Args) => {
-    setState(prevState => ({ ...prevState, isLoading: true, error: null }));
-    try {
-      const responseData = await apiCallFunction(...args);
-      setState(prevState => ({ ...prevState, data: responseData, isLoading: false }));
-      return responseData; // Optionally return data for immediate use
-    } catch (err: unknown) {
-      let errorMessage = 'An unknown error occurred';
-      if (err instanceof Error) {
-        errorMessage = err.message;
-      } else if (typeof err === 'string') {
-        errorMessage = err;
+  const execute = useCallback(
+    async (...args: Args) => {
+      setState((prevState) => ({ ...prevState, isLoading: true, error: null }));
+      try {
+        const responseData = await apiCallFunction(...args);
+        setState((prevState) => ({
+          ...prevState,
+          data: responseData,
+          isLoading: false,
+        }));
+        return responseData; // Optionally return data for immediate use
+      } catch (err: unknown) {
+        let errorMessage = 'An unknown error occurred';
+        if (err instanceof Error) {
+          errorMessage = err.message;
+        } else if (typeof err === 'string') {
+          errorMessage = err;
+        }
+        setState((prevState) => ({
+          ...prevState,
+          error: errorMessage,
+          isLoading: false,
+          data: initialData,
+        })); // Reset data on error
+        throw err; // Re-throw to allow caller to handle if needed
       }
-      setState(prevState => ({ ...prevState, error: errorMessage, isLoading: false, data: initialData })); // Reset data on error
-      throw err; // Re-throw to allow caller to handle if needed
-    }
-  }, [apiCallFunction, initialData]);
+    },
+    [apiCallFunction, initialData]
+  );
 
   return { ...state, execute };
 }

@@ -20,7 +20,10 @@ function useCopyToClipboard(): UseCopyToClipboardReturn {
     if (!navigator.clipboard) {
       setMessage('Clipboard API not available.');
       setCopyStatus('error');
-      setTimeout(() => { setCopyStatus('idle'); setMessage(null); }, 2000);
+      setTimeout(() => {
+        setCopyStatus('idle');
+        setMessage(null);
+      }, 2000);
       return;
     }
 
