@@ -93,7 +93,7 @@ describe('Script Generation Service', () => {
       new Error('Gemini API error')
     );
     await expect(generateScript(topic, mockTrends)).rejects.toThrow(
-      'Failed to generate script from Gemini API: Gemini API error'
+      'Gemini API Error: Gemini API error'
     );
   });
 
@@ -102,7 +102,7 @@ describe('Script Generation Service', () => {
       response: { text: () => undefined },
     }); // Simulate unexpected response
     await expect(generateScript(topic, mockTrends)).rejects.toThrow(
-      'Failed to get valid script content from Gemini API response.'
+      'Gemini API Error: Failed to get valid script content from Gemini API response (empty or invalid).'
     );
   });
 
@@ -117,7 +117,7 @@ describe('Script Generation Service', () => {
     const expectedPromptStart = `Generate a concise and engaging video script (approx. 1-2 minutes, suitable for a platform like Synthesia) about "Future of AI".`;
     const expectedTrendIncorporation = `Incorporate the following current trends and keywords seamlessly into the script:`;
     const trend1Text = `- "${mockTrends[0].keyword}": ${mockTrends[0].snippet} (Source: ${mockTrends[0].source}, Published: 2024-04-30)`;
-    const trend2Text = `- "${mockTrends[1].keyword}": ${mockTrends[1].snippet} (Source: ${mockTrends[1].source}, Published: 2024-05-01)`;
+    const trend2Text = `- "${mockTrends[1].keyword}": ${mockTrends[1].snippet} (Source: ${mockTrends[1].source}, Published: ${mockTrends[1].published_at.split('T')[0]})`;
     const expectedEnding = `The script should be informative, engaging, and suitable for a general audience. Focus on clarity and a positive or insightful tone.
 Provide only the script content itself, without any surrounding text, titles, or introductions like "Here's the script:".
 Do not use markdown formatting in the script output (e.g., no ### or **).

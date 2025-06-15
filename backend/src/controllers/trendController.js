@@ -1,5 +1,5 @@
 const trendService = require('../services/trendService'); // This seems to be for a general trend service
-const TrendDiscoveryService = require('../services/TrendDiscoveryService'); // Our service for YouTube specific trends/keywords
+const trendDiscoveryService = require('../services/trendDiscoveryService'); // Our service for YouTube specific trends/keywords
 const logger = require('../utils/logger');
 const cache = require('../services/cacheService');
 
