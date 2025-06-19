@@ -53,7 +53,7 @@ const generateScript = async (topic, trends) => {
   let trendDetails = trends
     .map(
       (trend) =>
-        `- "${trend.keyword}": ${trend.snippet || 'No snippet available.'} (Source: ${trend.source}, Published: ${formatDateYYYYMMDD(new Date(trend.pubDate))})`
+        `- "${trend.keyword}": ${trend.snippet || 'No snippet available.'} (Source: ${trend.source}, Published: ${trend.published_at ? trend.published_at.split('T')[0] : 'N/A'})`
     )
     .join('\n');
   if (!trends || trends.length === 0) {
