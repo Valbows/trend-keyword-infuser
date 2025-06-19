@@ -39,7 +39,11 @@ describe('POST /api/v1/scripts/generate', () => {
       .send({ topic: mockTopic, trends: mockTrends });
 
     expect(response.status).toBe(200);
-    expect(response.body).toEqual({ script: mockGeneratedScript });
+    expect(response.body).toEqual({
+      script: mockGeneratedScript,
+      scriptId: expect.any(String),
+      topic: mockTopic,
+    });
     expect(scriptGenerationService.generateScript).toHaveBeenCalledWith(
       mockTopic,
       mockTrends
@@ -56,7 +60,11 @@ describe('POST /api/v1/scripts/generate', () => {
       .send({ topic: mockTopic }); // No trends array sent
 
     expect(response.status).toBe(200);
-    expect(response.body).toEqual({ script: mockGeneratedScript });
+    expect(response.body).toEqual({
+      script: mockGeneratedScript,
+      scriptId: expect.any(String),
+      topic: mockTopic,
+    });
     // The controller defaults trends to [] if not provided or not an array
     expect(scriptGenerationService.generateScript).toHaveBeenCalledWith(
       mockTopic,
