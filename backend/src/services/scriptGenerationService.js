@@ -26,7 +26,6 @@ try {
 
 const { GoogleGenerativeAI } = require('@google/generative-ai');
 
-
 /**
  * Generates a video script using the Gemini API based on a topic and a list of trends.
  * @param {string} topic - The main topic for the script.
