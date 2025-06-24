@@ -87,10 +87,7 @@ const KeywordList: React.FC<KeywordListProps> = ({
         className={`space-y-3 mt-2 md:mt-0 ${isMobileListVisible ? 'block' : 'hidden'} md:block`}
       >
         {keywords.map((kw, index) => (
-          <KeywordListItem
-            key={`${kw.keyword}-${index}`}
-            keywordItem={kw}
-          />
+          <KeywordListItem key={`${kw.keyword}-${index}`} keywordItem={kw} />
         ))}
       </ul>
     </div>
