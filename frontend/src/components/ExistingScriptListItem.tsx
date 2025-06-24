@@ -7,7 +7,7 @@ export interface ScriptSummary {
   topic: string;
   created_at: string;
   // 'Clairvoyant' inclusion of optional engagement metrics
-  published_video_id?: string;
+  published_video_id?: string | null;
   engagement_rate?: number;
   views?: number;
   likes?: number;
