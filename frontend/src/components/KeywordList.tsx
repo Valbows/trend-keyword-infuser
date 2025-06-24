@@ -4,8 +4,6 @@ import KeywordListItem from './KeywordListItem';
 
 interface KeywordListProps {
   keywords: YouTubeKeywordItem[];
-  selectedKeywords: string[];
-  onKeywordClick: (keyword: string) => void;
   isLoading: boolean;
   error: string | null;
   debouncedTopic: string;
@@ -17,8 +15,6 @@ interface KeywordListProps {
 
 const KeywordList: React.FC<KeywordListProps> = ({
   keywords,
-  selectedKeywords,
-  onKeywordClick,
   isLoading,
   error,
   debouncedTopic,
@@ -94,8 +90,6 @@ const KeywordList: React.FC<KeywordListProps> = ({
           <KeywordListItem
             key={`${kw.keyword}-${index}`}
             keywordItem={kw}
-            isSelected={selectedKeywords.includes(kw.keyword)}
-            onKeywordClick={onKeywordClick}
           />
         ))}
       </ul>
