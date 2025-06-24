@@ -1,0 +1,211 @@
+openapi: 3.0.3
+info:
+  title: YouTube Engagement Recording API
+  description: API endpoints for recording and managing YouTube engagement metrics for scripts
+  version: 1.0.0
+  contact:
+    name: Trend Keyword Infuser API Support
+    email: support@trendkeywordinfuser.com
+
+servers:
+  - url: http://localhost:3001/api/v1
+    description: Development server
+  - url: https://api.trendkeywordinfuser.com/v1
+    description: Production server
+
+paths:
+  /scripts/{scriptId}/record-engagement:
+    post:
+      summary: Record YouTube engagement metrics for a script
+      description: |
+        Associates a YouTube video with a script and records engagement metrics including views, likes, comments, and calculated engagement rate.
+        
+        **Engagement Rate Calculation:** `(likes + comments) / views * 100`
+        
+        **Conflict Resolution:** If the video ID is already associated with another script, it will be cleared from the other script before being assigned to the current script.
+      operationId: recordEngagement
+      tags:
+        - Engagement Recording
+      parameters:
+        - name: scriptId
+          in: path
+          required: true
+          description: Unique identifier of the script to associate with the YouTube video
+          schema:
+            type: string
+            format: uuid
+            example: "123e4567-e89b-12d3-a456-426614174000"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - videoUrl
+              properties:
+                videoUrl:
+                  type: string
+                  format: uri
+                  description: YouTube video URL in any supported format
+                  example: "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
+                  pattern: '^https?://(www\.)?(youtube\.com/(watch\?v=|embed/)|youtu\.be/|m\.youtube\.com/watch\?v=)'
+            examples:
+              standard_url:
+                summary: Standard YouTube URL
+                value:
+                  videoUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
+              short_url:
+                summary: YouTube Short URL
+                value:
+                  videoUrl: "https://youtu.be/dQw4w9WgXcQ"
+              embed_url:
+                summary: YouTube Embed URL
+                value:
+                  videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ"
+              mobile_url:
+                summary: Mobile YouTube URL
+                value:
+                  videoUrl: "https://m.youtube.com/watch?v=dQw4w9WgXcQ"
+      responses:
+        '200':
+          description: Engagement metrics successfully recorded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EngagementResponse'
+              examples:
+                successful_recording:
+                  summary: Successful engagement recording
+                  value:
+                    id: "123e4567-e89b-12d3-a456-426614174000"
+                    published_video_id: "dQw4w9WgXcQ"
+                    views: 1000000
+                    likes: 50000
+                    comments: 2500
+                    engagement_rate: 5.25
+                    engagement_retrieved_at: "2025-06-24T04:00:00.000Z"
+        '400':
+          description: Bad request - Invalid input parameters
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                missing_video_url:
+                  summary: Missing video URL
+                  value:
+                    error: "videoUrl is required in request body"
+                invalid_youtube_url:
+                  summary: Invalid YouTube URL
+                  value:
+                    error: "Invalid YouTube URL provided. Could not extract video ID."
+                missing_script_id:
+                  summary: Missing or invalid script ID
+                  value:
+                    error: "Script ID and YouTube URL are required."
+        '404':
+          description: Resource not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                script_not_found:
+                  summary: Script not found
+                  value:
+                    error: "Script with ID 123e4567-e89b-12d3-a456-426614174000 not found for update."
+                video_not_found:
+                  summary: YouTube video not found or inaccessible
+                  value:
+                    error: "Could not retrieve video statistics from YouTube. The video may be private, deleted, or have stats disabled."
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                internal_error:
+                  summary: Internal server error
+                  value:
+                    error: "An unexpected error occurred while recording engagement for scriptId 123e4567-e89b-12d3-a456-426614174000."
+
+components:
+  schemas:
+    EngagementResponse:
+      type: object
+      description: Response containing script with updated engagement metrics
+      required:
+        - id
+        - published_video_id
+        - views
+        - likes
+        - comments
+        - engagement_rate
+        - engagement_retrieved_at
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique identifier of the script
+          example: "123e4567-e89b-12d3-a456-426614174000"
+        published_video_id:
+          type: string
+          description: YouTube video ID extracted from the provided URL
+          example: "dQw4w9WgXcQ"
+          pattern: '^[a-zA-Z0-9_-]{11}$'
+        views:
+          type: integer
+          minimum: 0
+          description: Total number of views on the YouTube video
+          example: 1000000
+        likes:
+          type: integer
+          minimum: 0
+          description: Total number of likes on the YouTube video
+          example: 50000
+        comments:
+          type: integer
+          minimum: 0
+          description: Total number of comments on the YouTube video
+          example: 2500
+        engagement_rate:
+          type: number
+          format: float
+          minimum: 0
+          maximum: 100
+          description: |
+            Calculated engagement rate as a percentage.
+            Formula: (likes + comments) / views * 100
+          example: 5.25
+        engagement_retrieved_at:
+          type: string
+          format: date-time
+          description: ISO 8601 timestamp when the engagement metrics were retrieved
+          example: "2025-06-24T04:00:00.000Z"
+
+    ErrorResponse:
+      type: object
+      description: Error response structure
+      required:
+        - error
+      properties:
+        error:
+          type: string
+          description: Human-readable error message describing what went wrong
+          example: "Invalid YouTube URL provided. Could not extract video ID."
+
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT token for user authentication
+
+security:
+  - BearerAuth: []
+
+tags:
+  - name: Engagement Recording
+    description: Operations for recording and managing YouTube engagement metrics
