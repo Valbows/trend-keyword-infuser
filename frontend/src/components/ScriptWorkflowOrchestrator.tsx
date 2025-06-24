@@ -9,6 +9,7 @@ import ExistingScriptsList from './ExistingScriptsList';
 export interface ScriptSummary {
   id: string;
   topic: string;
+  title?: string;
   generated_script: string;
   created_at: string;
   updated_at: string;

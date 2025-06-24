@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 // G.O.A.T. C.O.D.E.X. B.O.T. - 'Elegant' and 'Xtensible' type definitions
 export interface ScriptSummary {
   id: string;
-  title: string;
+  title?: string;
   topic: string;
   created_at: string;
   // 'Clairvoyant' inclusion of optional engagement metrics
@@ -77,7 +77,7 @@ const ExistingScriptListItem: React.FC<ExistingScriptListItemProps> = ({
     >
       <div className='flex justify-between items-start'>
         <div>
-          <h3 className='text-xl font-bold text-indigo-400'>{script.title}</h3>
+                    <h3 className='text-xl font-bold text-indigo-400'>{script.title || script.topic}</h3>
           <p className='text-gray-400 text-sm'>Topic: {script.topic}</p>
           <p className='text-gray-500 text-xs mt-1'>
             Created: {new Date(script.created_at).toLocaleString()}
