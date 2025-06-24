@@ -7,6 +7,7 @@ interface ExistingScriptsListProps {
   isLoading: boolean;
   error: string | null;
   onLoadScript: (script: ScriptSummary) => void;
+  onEngagementRecorded: (updatedScript: ScriptSummary) => void;
 }
 
 const ExistingScriptsList: React.FC<ExistingScriptsListProps> = ({
@@ -14,6 +15,7 @@ const ExistingScriptsList: React.FC<ExistingScriptsListProps> = ({
   isLoading,
   error,
   onLoadScript,
+  onEngagementRecorded,
 }) => {
   return (
     <div className='existing-scripts-section space-y-4 bg-slate-800 p-6 rounded-lg shadow-lg'>
@@ -36,6 +38,7 @@ const ExistingScriptsList: React.FC<ExistingScriptsListProps> = ({
               key={script.id}
               script={script}
               onLoadScript={onLoadScript}
+              onEngagementRecorded={onEngagementRecorded}
             />
           ))}
         </ul>

@@ -2,16 +2,22 @@
 'use client';
 
 import React, { useState, useEffect, useCallback } from 'react';
-import ScriptEditor from './ScriptEditor'; // Assuming ScriptEditor.tsx is in the same directory
+import ScriptEditor from './ScriptEditor';
+import ExistingScriptsList from './ExistingScriptsList';
 
 // Interface for the script object expected from the backend (especially for listing)
 export interface ScriptSummary {
   id: string;
   topic: string;
-  generated_script: string; // Full content for now, might be summary later
+  generated_script: string;
   created_at: string;
   updated_at: string;
-  // Add other fields if returned by GET /api/v1/scripts and useful for display
+  published_video_id?: string | null;
+  engagement_rate?: number | null;
+  views?: number | null;
+  likes?: number | null;
+  comments?: number | null;
+  engagement_retrieved_at?: string | null;
 }
 
 const ScriptWorkflowOrchestrator: React.FC = () => {
@@ -218,6 +224,23 @@ const ScriptWorkflowOrchestrator: React.FC = () => {
     ]
   );
 
+  const handleEngagementRecorded = useCallback((updatedScript: ScriptSummary) => {
+    // This 'Clairvoyant' check ensures we don't crash if a child component provides invalid data.
+    if (!updatedScript || !updatedScript.id) {
+      console.error(
+        '[ScriptWorkflowOrchestrator] handleEngagementRecorded received an invalid script object:',
+        updatedScript
+      );
+      return; // Exit gracefully
+    }
+
+    setExistingScripts(prevScripts =>
+      prevScripts.map(script =>
+        script.id === updatedScript.id ? updatedScript : script
+      )
+    );
+  }, []);
+
   console.log(
     '[ScriptWorkflowOrchestrator] DEBUG: ScriptEditor render conditions:',
     {
@@ -302,50 +325,13 @@ const ScriptWorkflowOrchestrator: React.FC = () => {
 
       {/* Section to Load Existing Scripts */}
       <div className='existing-scripts-section space-y-4 bg-slate-800 p-6 rounded-lg shadow-lg'>
-        <h2 className='text-2xl font-semibold text-teal-400 border-b border-slate-700 pb-2'>
-          Load Existing Script
-        </h2>
-        {isLoadingExistingScripts && (
-          <p className='text-slate-400'>Loading scripts...</p>
-        )}
-        {loadExistingScriptsError && (
-          <p className='text-sm text-red-400 bg-red-900/30 p-3 rounded-md'>
-            Error loading scripts: {loadExistingScriptsError}
-          </p>
-        )}
-        {!isLoadingExistingScripts &&
-          !loadExistingScriptsError &&
-          existingScripts.length === 0 && (
-            <p className='text-slate-400'>No existing scripts found.</p>
-          )}
-        {!isLoadingExistingScripts &&
-          !loadExistingScriptsError &&
-          existingScripts.length > 0 && (
-            <ul className='space-y-2 max-h-60 overflow-y-auto pr-2'>
-              {existingScripts.map((script) => (
-                <li
-                  key={script.id}
-                  className='p-3 bg-slate-700 rounded-md hover:bg-slate-600 transition-colors duration-150 flex justify-between items-center'
-                >
-                  <div>
-                    <span className='font-medium text-sky-300 block'>
-                      {script.topic || 'Untitled Script'}
-                    </span>
-                    <span className='text-xs text-slate-400'>
-                      ID: {script.id.substring(0, 8)}... | Updated:{' '}
-                      {new Date(script.updated_at).toLocaleDateString()}
-                    </span>
-                  </div>
-                  <button
-                    onClick={() => handleLoadScriptForEditing(script)}
-                    className='px-4 py-1.5 bg-teal-600 hover:bg-teal-500 text-white text-sm rounded-md font-medium transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-teal-400 focus:ring-offset-2 focus:ring-offset-slate-800'
-                  >
-                    Load for Editing
-                  </button>
-                </li>
-              ))}
-            </ul>
-          )}
+        <ExistingScriptsList
+          scripts={existingScripts}
+          isLoading={isLoadingExistingScripts}
+          error={loadExistingScriptsError}
+          onLoadScript={handleLoadScriptForEditing}
+          onEngagementRecorded={handleEngagementRecorded}
+        />
       </div>
 
       {currentScriptId && (

@@ -1,9 +1,12 @@
 const request = require('supertest');
 const app = require('../src/app'); // Adjust path as necessary
-const scriptGenerationService = require('../src/services/scriptGenerationService');
+const scriptGenerationService = require('../src/services/scriptGenerationService'); // Will be orchestrated
+const scriptOrchestrationService = require('../src/services/scriptOrchestrationService');
+const cacheService = require('../src/services/cacheService'); // For clearing cache
 
-// Mock the scriptGenerationService
-jest.mock('../src/services/scriptGenerationService');
+// Mock the services
+jest.mock('../src/services/scriptGenerationService'); // Mocked as it's a deeper dependency
+jest.mock('../src/services/scriptOrchestrationService'); // Controller's direct dependency for core logic
 
 describe('POST /api/v1/scripts/generate', () => {
   const mockTopic = 'Future of AI';
@@ -26,50 +29,61 @@ describe('POST /api/v1/scripts/generate', () => {
 
   beforeEach(() => {
     // Reset all mocks before each test
-    scriptGenerationService.generateScript.mockReset();
+    scriptGenerationService.generateScript.mockReset(); // For completeness
+    scriptOrchestrationService.orchestrateScriptCreation.mockReset();
+    cacheService.clear(); // Clear cache before each test to prevent interference
   });
 
   it('should generate a script successfully with topic and trends', async () => {
-    scriptGenerationService.generateScript.mockResolvedValue(
-      mockGeneratedScript
-    );
+    // Mock what scriptOrchestrationService returns
+    const orchestratedScriptData = {
+      script: mockGeneratedScript, // The actual script text
+      scriptId: 'orchestration-mock-id-1', // An ID that might come from orchestration if it saved it first
+      topic: mockTopic,
+    };
+    scriptOrchestrationService.orchestrateScriptCreation.mockResolvedValue(orchestratedScriptData);
 
     const response = await request(app)
       .post('/api/v1/scripts/generate')
       .send({ topic: mockTopic, trends: mockTrends });
 
     expect(response.status).toBe(200);
+    // Assert the final response structure from the controller
     expect(response.body).toEqual({
-      script: mockGeneratedScript,
-      scriptId: expect.any(String),
+      scriptId: expect.any(String), // This is the ID from the controller's Supabase save
+      script: orchestratedScriptData, // The controller nests the orchestration result here
       topic: mockTopic,
     });
-    expect(scriptGenerationService.generateScript).toHaveBeenCalledWith(
-      mockTopic,
-      mockTrends
-    );
+    expect(
+      scriptOrchestrationService.orchestrateScriptCreation
+    ).toHaveBeenCalledWith(mockTopic, mockTrends);
   });
 
   it('should generate a script successfully with only a topic (empty trends)', async () => {
-    scriptGenerationService.generateScript.mockResolvedValue(
-      mockGeneratedScript
-    );
+    // Mock what scriptOrchestrationService returns
+    const orchestratedScriptData = {
+      script: mockGeneratedScript,
+      scriptId: 'orchestration-mock-id-2',
+      topic: mockTopic,
+    };
+    scriptOrchestrationService.orchestrateScriptCreation.mockResolvedValue(orchestratedScriptData);
 
     const response = await request(app)
       .post('/api/v1/scripts/generate')
       .send({ topic: mockTopic }); // No trends array sent
 
     expect(response.status).toBe(200);
+    // Assert the final response structure from the controller
     expect(response.body).toEqual({
-      script: mockGeneratedScript,
-      scriptId: expect.any(String),
+      scriptId: expect.any(String), // This is the ID from the controller's Supabase save
+      script: orchestratedScriptData, // The controller nests the orchestration result here
       topic: mockTopic,
     });
     // The controller defaults trends to [] if not provided or not an array
-    expect(scriptGenerationService.generateScript).toHaveBeenCalledWith(
-      mockTopic,
-      []
-    );
+    // and passes this to the orchestration service
+    expect(
+      scriptOrchestrationService.orchestrateScriptCreation
+    ).toHaveBeenCalledWith(mockTopic, []);
   });
 
   it('should return 400 if topic is missing', async () => {
@@ -79,12 +93,14 @@ describe('POST /api/v1/scripts/generate', () => {
 
     expect(response.status).toBe(400);
     expect(response.body).toEqual({ error: 'Missing required field: topic' });
-    expect(scriptGenerationService.generateScript).not.toHaveBeenCalled();
+    expect(
+      scriptOrchestrationService.orchestrateScriptCreation
+    ).not.toHaveBeenCalled();
   });
 
   it('should return 500 if GEMINI_API_KEY is not set in service', async () => {
-    scriptGenerationService.generateScript.mockRejectedValue(
-      new Error('GEMINI_API_KEY is not set.')
+    scriptOrchestrationService.orchestrateScriptCreation.mockRejectedValue(
+      new Error('GEMINI_API_KEY is not set.') // This specific error message is checked by controller
     );
 
     const response = await request(app)
@@ -98,8 +114,8 @@ describe('POST /api/v1/scripts/generate', () => {
   });
 
   it('should return 502 if Gemini API returns an invalid response', async () => {
-    scriptGenerationService.generateScript.mockRejectedValue(
-      new Error('Failed to get valid script content from Gemini API response.')
+    scriptOrchestrationService.orchestrateScriptCreation.mockRejectedValue(
+      new Error('Failed to get valid script content from Gemini API response.') // This specific error message is checked by controller
     );
 
     const response = await request(app)
@@ -114,8 +130,8 @@ describe('POST /api/v1/scripts/generate', () => {
   });
 
   it('should return 500 for other service errors', async () => {
-    scriptGenerationService.generateScript.mockRejectedValue(
-      new Error('Some other internal service error.')
+    scriptOrchestrationService.orchestrateScriptCreation.mockRejectedValue(
+      new Error('Some other internal service error.') // Generic error
     );
 
     const response = await request(app)

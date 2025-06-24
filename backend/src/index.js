@@ -24,10 +24,7 @@ if (process.env.NODE_ENV !== 'test') {
     console.log(`Server running on port ${PORT}`);
   });
 
-  // Keep-alive check
-  setInterval(() => {
-    console.log('[INDEX.JS] Backend process still alive...');
-  }, 5000);
+
 }
 
 module.exports = app; // Export app for testing or other modules if needed

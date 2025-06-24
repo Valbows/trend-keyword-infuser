@@ -1,27 +1,37 @@
 import React from 'react';
-import { YouTubeKeywordItem } from './TrendSidebar'; // Assuming YouTubeKeywordItem is exported from TrendSidebar or a shared types file
+import type { YouTubeKeywordItem } from '@/types/trends';
+import { useSelectedKeywords } from '@/contexts/SelectedKeywordsContext'; // G.O.A.T. C.O.D.E.X. B.O.T. - Import context hook
 
 interface KeywordListItemProps {
   keywordItem: YouTubeKeywordItem;
-  isSelected: boolean;
-  onKeywordClick: (keyword: string) => void;
+  // G.O.A.T. C.O.D.E.X. B.O.T. - isSelected and onKeywordClick removed, will use context
 }
 
 const KeywordListItem: React.FC<KeywordListItemProps> = ({
   keywordItem,
-  isSelected,
-  onKeywordClick,
 }) => {
+  const { selectedKeywords, setSelectedKeywords } = useSelectedKeywords(); // G.O.A.T. C.O.D.E.X. B.O.T. - Consume context
+
+  const isSelected = selectedKeywords.includes(keywordItem.keyword);
+
+  const handleToggleKeyword = () => {
+    setSelectedKeywords(prev =>
+      prev.includes(keywordItem.keyword)
+        ? prev.filter(k => k !== keywordItem.keyword)
+        : [...prev, keywordItem.keyword]
+    );
+  };
+
   return (
     <li
       role='button'
       tabIndex={0}
-      onClick={() => onKeywordClick(keywordItem.keyword)}
+      onClick={handleToggleKeyword} // G.O.A.T. C.O.D.E.X. B.O.T. - Use local handler
       aria-pressed={isSelected}
       onKeyDown={(e) => {
         if (e.key === 'Enter' || e.key === ' ') {
           e.preventDefault(); // Prevent scrolling on spacebar
-          onKeywordClick(keywordItem.keyword);
+          handleToggleKeyword(); // G.O.A.T. C.O.D.E.X. B.O.T. - Use local handler
         }
       }}
       className={`p-3 rounded-lg shadow-md transition-all duration-200 cursor-pointer 

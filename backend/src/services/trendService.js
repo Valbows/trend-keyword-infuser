@@ -26,11 +26,10 @@ const getYoutubeClient = () => {
  * @returns {Promise<Array<Object>>} A promise that resolves to an array of trend objects from Google Trends.
  */
 const fetchGoogleTrends = async (topic) => {
-  console.log(`Fetching Google Trends for topic: ${topic}`);
   try {
     const feed = await parser.parseURL(GOOGLE_TRENDS_RSS_URL_US);
     if (!feed.items) {
-      console.warn('Google Trends RSS feed did not return items.');
+      // Consider logger.warn('Google Trends RSS feed did not return items.');
       return [];
     }
     return feed.items.map((item) => ({
@@ -41,10 +40,7 @@ const fetchGoogleTrends = async (topic) => {
       snippet: item.contentSnippet || item.content, // Some feeds use contentSnippet, others content
     }));
   } catch (error) {
-    console.error(
-      'Error fetching or parsing Google Trends RSS:',
-      error.message
-    );
+    // Consider logger.error('Error fetching or parsing Google Trends RSS:', error.message);
     // It's important not to let one source failure bring down the whole service if possible
     return []; // Return empty array on error for this source
   }
@@ -56,13 +52,10 @@ const fetchGoogleTrends = async (topic) => {
  * @returns {Promise<Array<Object>>} A promise that resolves to an array of trend objects from YouTube.
  */
 const fetchYouTubeTrends = async (topic) => {
-  console.log(`Fetching YouTube trends for topic: ${topic}`);
   const youtubeClient = getYoutubeClient();
 
   if (!youtubeClient) {
-    console.warn(
-      'YouTube API Key is not configured or client could not be initialized. Skipping YouTube trends.'
-    );
+    // Consider logger.warn('YouTube API Key is not configured or client could not be initialized. Skipping YouTube trends.');
     return [];
   }
 
@@ -78,7 +71,7 @@ const fetchYouTubeTrends = async (topic) => {
     });
 
     if (!response.data.items) {
-      console.warn('YouTube API did not return items for topic:', topic);
+      // Consider logger.warn('YouTube API did not return items for topic:', topic);
       return [];
     }
 
@@ -91,16 +84,10 @@ const fetchYouTubeTrends = async (topic) => {
       thumbnail: item.snippet.thumbnails.default.url,
     }));
   } catch (error) {
-    console.error(
-      `Error fetching YouTube trends for topic "${topic}":`,
-      error.message
-    );
+    // Consider logger.error(`Error fetching YouTube trends for topic "${topic}":`, error.message);
     // Check for specific API errors, e.g., quota exceeded
     if (error.response && error.response.data && error.response.data.error) {
-      console.error(
-        'YouTube API Error Details:',
-        JSON.stringify(error.response.data.error.errors)
-      );
+      // Consider logger.error('YouTube API Error Details:', JSON.stringify(error.response.data.error.errors));
     }
     return []; // Return empty array on error for this source
   }
@@ -112,7 +99,6 @@ const fetchYouTubeTrends = async (topic) => {
  * @returns {Promise<Array<Object>>} A promise that resolves to an array of trend objects.
  */
 const fetchTrendsFromSources = async (topic) => {
-  console.log(`Fetching all trends for topic: ${topic} in trendService`);
   try {
     const googleTrendsPromise = fetchGoogleTrends(topic);
     const youtubeTrendsPromise = fetchYouTubeTrends(topic);
@@ -125,10 +111,7 @@ const fetchTrendsFromSources = async (topic) => {
 
     return [...googleTrends, ...youtubeTrends];
   } catch (error) {
-    console.error(
-      'Error in trendService fetching trends from sources:',
-      error.message
-    );
+    // Consider logger.error('Error in trendService fetching trends from sources:', error.message);
     throw new Error('Failed to fetch trends from aggregated sources');
   }
 };

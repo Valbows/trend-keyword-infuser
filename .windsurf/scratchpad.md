@@ -296,6 +296,70 @@ The system consists of:
   - [x] Implement a server-side caching layer for API responses.
   - [x] Investigate and optimize frontend component re-renders.
 
+### Feature Implementation: Gemini 2.0 Flash LLM Integration & YouTube Engagement Tracking
+
+- [ ] **Feature: LLM Integration with Gemini 2.0 Flash via OpenRouter**
+  - [ ] **Task 1: Backend Integration**
+    - [ ] **Objective**: Replace or extend current LLM service to explicitly support Gemini 2.0 Flash via OpenRouter
+    - [ ] **Actions**:
+      - [ ] Update LLM service configuration to use OpenRouter API with Gemini 2.0 Flash model ID
+      - [ ] Modify prompt templates to optimize for Gemini 2.0 Flash's capabilities
+      - [ ] Implement fallback mechanism for API availability issues
+      - [ ] Add appropriate error handling for model-specific responses
+    - [ ] **Success Criteria**: Successfully generate scripts using Gemini 2.0 Flash model via OpenRouter
+
+- [ ] **Feature: My Script History with Infused Keyword & Performance Recall**
+  - [ ] **Task 1: Database Schema Enhancement**
+    - [ ] **Objective**: Extend the database schema to store YouTube engagement metrics for scripts
+    - [ ] **Actions**:
+      - [ ] Add columns to scripts table: published_video_id (TEXT), engagement_rate (FLOAT), views (INT), likes (INT), comments (INT), engagement_retrieved_at (TIMESTAMP)
+      - [ ] Update or verify Row Level Security (RLS) policies to ensure proper data isolation
+    - [ ] **Success Criteria**: Schema updates applied without data loss, ability to store and retrieve engagement metrics
+
+  - [ ] **Task 2: Backend API Enhancement**
+    - [ ] **Task 2.1: /record-engagement Endpoint**
+      - [ ] **Objective**: Create new API endpoint to associate scripts with YouTube videos and record engagement metrics
+      - [ ] **Actions**:
+        - [ ] Implement POST /api/v1/scripts/:id/record-engagement endpoint
+        - [ ] Extract video ID from YouTube URL in request body
+        - [ ] Call YouTube Data API to retrieve video statistics
+        - [ ] Calculate engagement rate and store all metrics in database
+        - [ ] Implement error handling (invalid URL, API limits, etc.)
+      - [ ] **Success Criteria**: Successfully parse YouTube URLs, retrieve metrics, and update database
+
+    - [ ] **Task 2.2: Update Existing Scripts Endpoint**
+      - [ ] **Objective**: Ensure existing scripts endpoint returns engagement metrics when available
+      - [ ] **Actions**:
+        - [ ] Update scripts retrieval logic to include engagement fields
+        - [ ] Optimize query performance for fetching scripts with engagement data
+      - [ ] **Success Criteria**: API returns complete script data including engagement metrics when available
+
+  - [ ] **Task 3: Frontend Enhancement**
+    - [ ] **Task 3.1: Script List Item Enhancement**
+      - [ ] **Objective**: Update script list items to display engagement metrics and provide video linking
+      - [ ] **Actions**:
+        - [ ] Extend ScriptSummary interface with engagement fields
+        - [ ] Update ExistingScriptListItem component to display metrics
+        - [ ] Add YouTube URL input form for recording engagement
+      - [ ] **Success Criteria**: Users can view engagement metrics and easily add YouTube URLs to scripts
+
+    - [ ] **Task 3.2: State Management Optimization**
+      - [ ] **Objective**: Ensure real-time UI updates when engagement metrics are recorded
+      - [ ] **Actions**:
+        - [ ] Implement engagement recording callback system
+        - [ ] Update existingScripts state when engagement is recorded
+        - [ ] Add loading and error states for engagement recording
+      - [ ] **Success Criteria**: UI automatically reflects newly recorded engagement data without page refresh
+
+  - [ ] **Task 4: Testing & Documentation**
+    - [ ] **Objective**: Ensure feature reliability and maintainability
+    - [ ] **Actions**:
+      - [ ] Create unit tests for YouTube URL parsing and engagement calculation
+      - [ ] Test API endpoints with valid and invalid inputs
+      - [ ] Document API schema with Swagger
+      - [ ] Create user documentation for engagement recording feature
+    - [ ] **Success Criteria**: All tests pass, documentation complete and accurate
+
 ### Next Steps: Pre-Deployment
 
 - [x] **1. Version Control (Current Progress):**

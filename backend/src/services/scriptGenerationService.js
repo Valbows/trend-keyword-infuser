@@ -36,7 +36,6 @@ const { GoogleGenerativeAI } = require('@google/generative-ai');
 const generateScript = async (topic, trends) => {
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) {
-    console.error('GEMINI_API_KEY is not set.');
     throw new Error('GEMINI_API_KEY is not set.');
   }
 
@@ -67,7 +66,6 @@ Example of desired output format:
 "Welcome back to our channel! Today, we're diving deep into ${topic}. Did you know that ${trends.length > 0 ? trends[0].keyword : 'a recent development'} is making waves? Let's explore..."
 `;
 
-  console.log(`Generating script with prompt for topic: ${topic}`);
   // console.debug('Full prompt:', prompt); // Uncomment for debugging prompt issues
 
   try {
@@ -75,23 +73,17 @@ Example of desired output format:
     const response = result.response;
     // It's possible for response to be undefined if the model call itself fails severely.
     if (!response) {
-      console.error('Gemini API call did not return a response object.');
       throw new Error('Failed to get response from Gemini API.');
     }
     const scriptText = response.text();
 
     if (typeof scriptText !== 'string' || scriptText.trim() === '') {
-      console.error('Gemini API returned an empty or invalid script.');
       throw new Error(
         'Failed to get valid script content from Gemini API response (empty or invalid).'
       );
     }
     return scriptText.trim();
   } catch (error) {
-    console.error(
-      'Error generating script from Gemini API (raw object):',
-      error
-    );
     let detailMessage = 'An unknown error occurred with the AI service.';
 
     if (
@@ -115,12 +107,10 @@ Example of desired output format:
           try {
             tempDetail = JSON.stringify(error.details);
           } catch (stringifyDetailsError) {
-            console.error(
-              'Failed to stringify error.details:',
-              stringifyDetailsError
-            );
+            // This internal log could be reinstated if deep debugging of error structures is needed.
+            // console.error('Failed to stringify error.details:', stringifyDetailsError);
             tempDetail =
-              'Could not stringify error.details. Check logs for stringifyDetailsError.';
+              'Could not stringify error.details.';
           }
         } else {
           try {
@@ -138,20 +128,15 @@ Example of desired output format:
                 'Complex error object received (non-informative when stringified).';
             }
           } catch (stringifyError) {
-            console.error(
-              'Failed to stringify the entire error object:',
-              stringifyError
-            );
+            // This internal log could be reinstated if deep debugging of error structures is needed.
+            // console.error('Failed to stringify the entire error object:', stringifyError);
             tempDetail =
-              'The entire error object could not be stringified. Check logs for stringifyError.';
+              'The entire error object could not be stringified.';
           }
         }
       } catch (accessError) {
         // This catches errors if accessing error.cause, error.statusMessage, etc., itself fails
-        console.error(
-          'Error while accessing properties of the original error object:',
-          accessError
-        );
+        // console.error('Error while accessing properties of the original error object:', accessError);
         tempDetail =
           'Error encountered while trying to access properties of the original error object.';
       }
@@ -159,10 +144,6 @@ Example of desired output format:
     }
 
     const finalErrorMessage = `Gemini API Error: ${detailMessage}`;
-    console.error(
-      'Re-throwing error from scriptGenerationService with message:',
-      finalErrorMessage
-    );
     throw new Error(finalErrorMessage);
   }
 };

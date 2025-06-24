@@ -1,59 +1,61 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import useApiMutation from '@/hooks/useApiMutation'; // G.O.A.T. C.O.D.E.X. B.O.T. - Import useApiMutation
 import TrendSidebar from '@/components/TrendSidebar'; // Import the new sidebar
 import Link from 'next/link';
+import { useSelectedKeywords } from '@/contexts/SelectedKeywordsContext'; // G.O.A.T. C.O.D.E.X. B.O.T. - Import context hook
 
 export default function Home() {
   const [topic, setTopic] = useState(''); // Default topic for initial load
   const [script, setScript] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
+  // const [isLoading, setIsLoading] = useState(false); // G.O.A.T. C.O.D.E.X. B.O.T. - Removed, replaced by isGenerating from useApiMutation
   const [error, setError] = useState('');
   const [copySuccessMessage, setCopySuccessMessage] = useState('');
   const [existingScript, setExistingScript] = useState('');
-  const [selectedKeywords, setSelectedKeywords] = useState<string[]>([]);
-  const [isModifying, setIsModifying] = useState(false);
+  // G.O.A.T. C.O.D.E.X. B.O.T. - selectedKeywords now comes from context, setSelectedKeywords was passed to TrendSidebar but is no longer needed as context handles updates internally.
+  const { selectedKeywords } = useSelectedKeywords(); 
+  // const [isModifying, setIsModifying] = useState(false); // G.O.A.T. C.O.D.E.X. B.O.T. - Removed, replaced by isModifyingScript from useApiMutation
   const [modifyError, setModifyError] = useState('');
   const [scriptDerivedTopic, setScriptDerivedTopic] = useState('');
 
+  // G.O.A.T. C.O.D.E.X. B.O.T. - Setup useApiMutation for script generation
+  const {
+    mutate: generateScriptMutate,
+    isLoading: isGenerating,
+    error: generateError,
+    data: generateData,
+  } = useApiMutation<any, { topic: string; user_provided_trends: string[] }>(
+    '/api/v1/scripts/generate'
+  );
+
+  // G.O.A.T. C.O.D.E.X. B.O.T. - Setup useApiMutation for script modification
+  const {
+    mutate: modifyScriptMutate,
+    isLoading: isModifyingScript,
+    error: modifyScriptErrorHook,
+    data: modifyData,
+  } = useApiMutation<any, { existingScript: string; selectedKeywords: string[] }>(
+    '/api/v1/scripts/modify'
+  );
+
   const handleGenerateScript = async () => {
     if (!topic.trim()) {
-      setError('Please enter a topic.');
+      setError('Please enter a topic.'); // G.O.A.T. C.O.D.E.X. B.O.T. - Keep client-side validation
       return;
     }
-    setIsLoading(true);
-    setError('');
-    setScript('');
+    setError(''); // Clear previous manual error
+    setScript(''); // Clear previous script
 
     try {
-      const response = await fetch('/api/v1/scripts/generate', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ topic, user_provided_trends: [] }), // Sending empty array for user_provided_trends for now
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(
-          errorData.error || `HTTP error! status: ${response.status}`
-        );
-      }
-
-      const data = await response.json();
-      setScript(data.script);
-    } catch (e: unknown) {
-      console.error('Failed to generate script:', e);
-      let errorMessage = 'Failed to generate script. Please try again.';
-      if (e instanceof Error) {
-        errorMessage = e.message;
-      } else if (typeof e === 'string') {
-        errorMessage = e;
-      }
-      setError(errorMessage);
+      // G.O.A.T. C.O.D.E.X. B.O.T. - Call mutate function from useApiMutation
+      await generateScriptMutate({ topic, user_provided_trends: [] });
+      // setScript will be handled by useEffect watching generateData
+    } catch (e) {
+      // Error is already set by the hook (generateError)
+      // console.error is also handled by the hook
+      // setError(e.message) // No longer needed here, hook manages error state
     }
-    setIsLoading(false);
   };
 
   useEffect(() => {
@@ -64,6 +66,39 @@ export default function Home() {
       setScriptDerivedTopic('');
     }
   }, [existingScript]);
+
+  // G.O.A.T. C.O.D.E.X. B.O.T. - Update script state when generateData changes from the hook
+  useEffect(() => {
+    if (generateData?.script) {
+      setScript(generateData.script);
+      setError(''); // Clear error on new successful data
+    }
+  }, [generateData]);
+
+  // G.O.A.T. C.O.D.E.X. B.O.T. - Update main error state when generateError changes from the hook
+  useEffect(() => {
+    if (generateError) {
+      setError(generateError.message);
+      setScript(''); // Clear script on error
+    }
+  }, [generateError]);
+
+  // G.O.A.T. C.O.D.E.X. B.O.T. - Update script state when modifyData changes from the hook
+  useEffect(() => {
+    if (modifyData?.modifiedScript) {
+      setScript(modifyData.modifiedScript);
+      setModifyError(''); // Clear modify error on new successful data
+    }
+  }, [modifyData]);
+
+  // G.O.A.T. C.O.D.E.X. B.O.T. - Update modifyError state when modifyScriptErrorHook changes from the hook
+  useEffect(() => {
+    if (modifyScriptErrorHook) {
+      setModifyError(modifyScriptErrorHook.message);
+      // Optionally clear script display if modification fails
+      // setScript(''); 
+    }
+  }, [modifyScriptErrorHook]);
 
   const handleCopyScript = async () => {
     if (!script) return;
@@ -85,53 +120,17 @@ export default function Home() {
       );
       return;
     }
-    setIsModifying(true);
-    setModifyError('');
+    setModifyError(''); // Clear previous manual error
     // setScript(''); // Optional: Clear main script display or decide how to update
 
     try {
-      const response = await fetch('/api/v1/scripts/modify', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ existingScript, selectedKeywords }),
-      });
-
-      if (!response.ok) {
-        let errorData;
-        try {
-          errorData = await response.json();
-        } catch (parseError) {
-          // If parsing JSON fails, use a generic error based on status
-          console.error('Failed to parse error JSON from server:', parseError);
-          throw new Error(
-            `HTTP error! status: ${response.status}. Unable to parse error details.`
-          );
-        }
-        throw new Error(
-          errorData.error || `HTTP error! status: ${response.status}`
-        );
-      }
-
-      const data = await response.json();
-      setScript(data.modifiedScript); // Update the main script display area
-      // Optionally, you could also clear existingScript or selectedKeywords here if desired
-      // setExistingScript('');
-      // setSelectedKeywords([]);
-    } catch (e: unknown) {
-      console.error('Failed to modify script:', e);
-      let modifyErrorMessage = 'Failed to modify script. Please try again.';
-      if (e instanceof Error) {
-        modifyErrorMessage = e.message;
-      } else if (typeof e === 'string') {
-        modifyErrorMessage = e;
-      }
-      setModifyError(modifyErrorMessage);
-      // Optionally clear the main script display on error, or leave it as is
-      // setScript('');
-    } finally {
-      setIsModifying(false);
+      // G.O.A.T. C.O.D.E.X. B.O.T. - Call mutate function from useApiMutation
+      await modifyScriptMutate({ existingScript, selectedKeywords });
+      // setScript will be handled by useEffect watching modifyData
+    } catch (e) {
+      // Error is already set by the hook (modifyScriptErrorHook)
+      // console.error is also handled by the hook
+      // setModifyError(e.message) // No longer needed here, hook manages error state
     }
   };
 
@@ -139,8 +138,7 @@ export default function Home() {
     <>
       <div className='bg-white dark:bg-slate-800 shadow-xl rounded-lg p-6 sm:p-10 flex flex-col md:flex-row gap-6'>
         <TrendSidebar
-          selectedKeywords={selectedKeywords}
-          onSelectedKeywordsChange={setSelectedKeywords}
+          // G.O.A.T. C.O.D.E.X. B.O.T. - selectedKeywords and onSelectedKeywordsChange removed, TrendSidebar uses context
           topic={scriptDerivedTopic || topic}
         />
         <div className='flex-1 flex flex-col items-center p-4 md:p-8 overflow-y-auto'>
@@ -178,7 +176,7 @@ export default function Home() {
               placeholder="e.g., 'Future of Artificial Intelligence'"
               rows={3}
               className='w-full p-3 border border-slate-300 dark:border-slate-600 rounded-md shadow-sm focus:ring-sky-500 focus:border-sky-500 dark:bg-slate-700 dark:text-slate-50 transition-colors duration-150 resize-y'
-              disabled={isLoading}
+              disabled={isGenerating} // G.O.A.T. C.O.D.E.X. B.O.T. - Use isGenerating from hook
             />
           </section>
 
@@ -193,10 +191,10 @@ export default function Home() {
           <section className='mb-8 text-center'>
             <button
               onClick={handleGenerateScript}
-              disabled={isLoading || !topic.trim()}
+              disabled={isGenerating || !topic.trim()} // G.O.A.T. C.O.D.E.X. B.O.T. - Use isGenerating from hook
               className='px-8 py-3 bg-sky-600 hover:bg-sky-700 dark:bg-sky-500 dark:hover:bg-sky-600 text-white font-semibold rounded-lg shadow-md focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-opacity-75 transition-all duration-150 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-105 active:scale-95 flex items-center justify-center space-x-2'
             >
-              {isLoading ? (
+              {isGenerating ? ( // G.O.A.T. C.O.D.E.X. B.O.T. - Use isGenerating from hook
                 <>
                   <svg
                     className='animate-spin -ml-1 mr-2 h-5 w-5 text-white'
@@ -244,7 +242,7 @@ export default function Home() {
               placeholder='Paste your script here...'
               rows={8}
               className='w-full p-3 border border-slate-300 dark:border-slate-600 rounded-md shadow-sm focus:ring-sky-500 focus:border-sky-500 dark:bg-slate-700 dark:text-slate-50 transition-colors duration-150'
-              disabled={isLoading || isModifying}
+              disabled={isGenerating || isModifyingScript} // G.O.A.T. C.O.D.E.X. B.O.T. - Use hook's loading states
             />
           </section>
 
@@ -253,15 +251,15 @@ export default function Home() {
             <section className='mb-8 text-center'>
               <button
                 onClick={handleModifyScript}
-                disabled={
-                  isModifying ||
-                  isLoading ||
+                disabled={ // G.O.A.T. C.O.D.E.X. B.O.T. - Use hook's loading states
+                  isModifyingScript ||
+                  isGenerating ||
                   !existingScript.trim() ||
                   selectedKeywords.length === 0
                 }
                 className='px-8 py-3 bg-green-600 hover:bg-green-700 dark:bg-green-500 dark:hover:bg-green-600 text-white font-semibold rounded-lg shadow-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-75 transition-all duration-150 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-105 active:scale-95 flex items-center justify-center space-x-2'
               >
-                {isModifying ? (
+                {isModifyingScript ? ( // G.O.A.T. C.O.D.E.X. B.O.T. - Use isModifyingScript from hook
                   <>
                     <svg
                       className='animate-spin -ml-1 mr-2 h-5 w-5 text-white'
@@ -291,7 +289,7 @@ export default function Home() {
               </button>
               {selectedKeywords.length === 0 &&
                 existingScript.trim() &&
-                !isModifying && (
+                !isModifyingScript && ( // G.O.A.T. C.O.D.E.X. B.O.T. - Use isModifyingScript from hook
                   <p className='text-sm text-yellow-600 dark:text-yellow-400 mt-2'>
                     Select keywords from the sidebar to enable modification.
                   </p>
