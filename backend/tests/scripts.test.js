@@ -100,7 +100,9 @@ describe('POST /api/v1/scripts/generate', () => {
   it('should return 500 if GEMINI_API_KEY is not set in service', async () => {
     const error = new Error('GEMINI_API_KEY is not set.');
     error.status = 500; // Service should set status on error
-    scriptOrchestrationService.orchestrateScriptCreation.mockRejectedValue(error);
+    scriptOrchestrationService.orchestrateScriptCreation.mockRejectedValue(
+      error
+    );
 
     const response = await request(app)
       .post('/api/v1/scripts/generate')
@@ -118,7 +120,9 @@ describe('POST /api/v1/scripts/generate', () => {
       'Failed to get valid script content from Gemini API response.'
     );
     error.status = 502; // Service should set status on error
-    scriptOrchestrationService.orchestrateScriptCreation.mockRejectedValue(error);
+    scriptOrchestrationService.orchestrateScriptCreation.mockRejectedValue(
+      error
+    );
 
     const response = await request(app)
       .post('/api/v1/scripts/generate')
@@ -127,15 +131,16 @@ describe('POST /api/v1/scripts/generate', () => {
     expect(response.status).toBe(502);
     expect(response.body).toEqual({
       success: false,
-      message:
-        'Failed to get valid script content from Gemini API response.',
+      message: 'Failed to get valid script content from Gemini API response.',
     });
   });
 
   it('should return 500 for other service errors', async () => {
     const error = new Error('Some other internal service error.');
     error.status = 500; // Service should set status on error
-    scriptOrchestrationService.orchestrateScriptCreation.mockRejectedValue(error);
+    scriptOrchestrationService.orchestrateScriptCreation.mockRejectedValue(
+      error
+    );
 
     const response = await request(app)
       .post('/api/v1/scripts/generate')
