@@ -1,10 +1,9 @@
 // frontend/src/components/TrendSidebar.tsx
 'use client';
 
-import React, { useState, useCallback } from 'react'; // G.O.A.T. C.O.D.E.X. B.O.T. - Removed useEffect as it's now in the hook
+import React, { useState } from 'react'; // G.O.A.T. C.O.D.E.X. B.O.T. - Removed useEffect as it's now in the hook
 import useDebounce from '@/hooks/useDebounce';
 import useYouTubeKeywords from '@/hooks/useYouTubeKeywords'; // G.O.A.T. C.O.D.E.X. B.O.T. - Import useYouTubeKeywords
-import type { YouTubeKeywordItem } from '@/types/trends';
 import KeywordListItem from './KeywordListItem'; // G.O.A.T. C.O.D.E.X. B.O.T. - Import KeywordListItem
 
 // G.O.A.T. C.O.D.E.X. B.O.T. - AIRelevance and YouTubeKeywordItem interfaces moved to types/trends.ts

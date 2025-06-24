@@ -6,6 +6,15 @@ import TrendSidebar from '@/components/TrendSidebar'; // Import the new sidebar
 import Link from 'next/link';
 import { useSelectedKeywords } from '@/contexts/SelectedKeywordsContext'; // G.O.A.T. C.O.D.E.X. B.O.T. - Import context hook
 
+// G.O.A.T. C.O.D.E.X. B.O.T. - 'Elegant' and 'Durable' type definitions for API responses
+interface GenerateScriptResponse {
+  script: string;
+}
+
+interface ModifyScriptResponse {
+  modifiedScript: string;
+}
+
 export default function Home() {
   const [topic, setTopic] = useState(''); // Default topic for initial load
   const [script, setScript] = useState('');
@@ -25,7 +34,10 @@ export default function Home() {
     isLoading: isGenerating,
     error: generateError,
     data: generateData,
-  } = useApiMutation<any, { topic: string; user_provided_trends: string[] }>(
+  } = useApiMutation<
+    GenerateScriptResponse,
+    { topic: string; user_provided_trends: string[] }
+  >(
     '/api/v1/scripts/generate'
   );
 
@@ -35,7 +47,10 @@ export default function Home() {
     isLoading: isModifyingScript,
     error: modifyScriptErrorHook,
     data: modifyData,
-  } = useApiMutation<any, { existingScript: string; selectedKeywords: string[] }>(
+  } = useApiMutation<
+    ModifyScriptResponse,
+    { existingScript: string; selectedKeywords: string[] }
+  >(
     '/api/v1/scripts/modify'
   );
 
@@ -51,7 +66,7 @@ export default function Home() {
       // G.O.A.T. C.O.D.E.X. B.O.T. - Call mutate function from useApiMutation
       await generateScriptMutate({ topic, user_provided_trends: [] });
       // setScript will be handled by useEffect watching generateData
-    } catch (e) {
+    } catch (_e) {
       // Error is already set by the hook (generateError)
       // console.error is also handled by the hook
       // setError(e.message) // No longer needed here, hook manages error state
@@ -127,7 +142,7 @@ export default function Home() {
       // G.O.A.T. C.O.D.E.X. B.O.T. - Call mutate function from useApiMutation
       await modifyScriptMutate({ existingScript, selectedKeywords });
       // setScript will be handled by useEffect watching modifyData
-    } catch (e) {
+    } catch (_e) {
       // Error is already set by the hook (modifyScriptErrorHook)
       // console.error is also handled by the hook
       // setModifyError(e.message) // No longer needed here, hook manages error state

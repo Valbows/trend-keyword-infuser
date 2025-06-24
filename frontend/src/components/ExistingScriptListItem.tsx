@@ -52,8 +52,8 @@ const ExistingScriptListItem: React.FC<ExistingScriptListItemProps> = ({ script,
       // 'Optimized' success path
       setVideoUrl('');
       onEngagementRecorded(result.data); // Trigger data refresh in the parent component
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to record engagement');
     } finally {
       setIsLoading(false);
     }

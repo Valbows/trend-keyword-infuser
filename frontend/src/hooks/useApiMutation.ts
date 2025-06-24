@@ -22,7 +22,7 @@ interface ApiMutationState<TData> {
  * @param options - Optional configuration for the mutation, like the HTTP method.
  * @returns An object containing the mutate function, data, isLoading state, and error state.
  */
-function useApiMutation<TData = any, TVariables = any>(
+function useApiMutation<TData = unknown, TVariables = unknown>(
   url: string,
   options?: UseApiMutationOptions
 ) {
