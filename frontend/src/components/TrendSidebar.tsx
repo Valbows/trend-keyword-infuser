@@ -23,9 +23,7 @@ const timeframes = [
   { value: 'custom', label: 'Custom Range…' },
 ];
 
-const TrendSidebar: React.FC<TrendSidebarProps> = ({
-  topic,
-}) => {
+const TrendSidebar: React.FC<TrendSidebarProps> = ({ topic }) => {
   const debouncedTopic = useDebounce(topic, 750);
   const [selectedTimeframe, setSelectedTimeframe] = useState<string>('24h');
   const [startDate, setStartDate] = useState<string>('');
@@ -33,11 +31,7 @@ const TrendSidebar: React.FC<TrendSidebarProps> = ({
   const [isMobileListVisible, setIsMobileListVisible] = useState(false);
 
   // G.O.A.T. C.O.D.E.X. B.O.T. - Utilize useYouTubeKeywords hook for data fetching and state management
-  const {
-    keywords,
-    isLoading,
-    error,
-  } = useYouTubeKeywords({
+  const { keywords, isLoading, error } = useYouTubeKeywords({
     debouncedTopic,
     selectedTimeframe,
     startDate,

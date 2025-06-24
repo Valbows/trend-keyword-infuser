@@ -51,13 +51,19 @@ function useApiMutation<TData = unknown, TVariables = unknown>(
             errorData = await response.json();
           } catch (parseError) {
             // If parsing JSON fails, use a generic error based on status
-            console.error('Failed to parse error JSON from server:', parseError);
+            console.error(
+              'Failed to parse error JSON from server:',
+              parseError
+            );
             throw new Error(
               `HTTP error! status: ${response.status}. Unable to parse error details.`
             );
           }
           // Prefer error message from backend if available
-          const errorMessage = errorData?.error || errorData?.message || `HTTP error! status: ${response.status}`;
+          const errorMessage =
+            errorData?.error ||
+            errorData?.message ||
+            `HTTP error! status: ${response.status}`;
           throw new Error(errorMessage);
         }
 
@@ -71,9 +77,14 @@ function useApiMutation<TData = unknown, TVariables = unknown>(
         } else if (typeof err === 'string') {
           caughtError = new Error(err);
         } else {
-          caughtError = new Error('An unknown error occurred during API mutation.');
+          caughtError = new Error(
+            'An unknown error occurred during API mutation.'
+          );
         }
-        console.error(`API Mutation Error (${options?.method || 'POST'} ${url}):`, caughtError);
+        console.error(
+          `API Mutation Error (${options?.method || 'POST'} ${url}):`,
+          caughtError
+        );
         setState({ data: null, isLoading: false, error: caughtError });
         throw caughtError; // Re-throw for component-level handling if needed
       }

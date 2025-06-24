@@ -59,14 +59,20 @@ function useYouTubeKeywords({
           const eDate = new Date(endDate);
 
           if (isNaN(sDate.getTime()) || isNaN(eDate.getTime())) {
-            throw new Error('Invalid date(s) provided. Please use the date pickers.');
+            throw new Error(
+              'Invalid date(s) provided. Please use the date pickers.'
+            );
           }
           if (sDate > eDate) {
             throw new Error('Start date cannot be after end date.');
           }
 
-          const publishedAfterISO = new Date(startDate + 'T00:00:00.000Z').toISOString();
-          const publishedBeforeISO = new Date(endDate + 'T23:59:59.999Z').toISOString();
+          const publishedAfterISO = new Date(
+            startDate + 'T00:00:00.000Z'
+          ).toISOString();
+          const publishedBeforeISO = new Date(
+            endDate + 'T23:59:59.999Z'
+          ).toISOString();
           queryParams += `&publishedAfterISO=${publishedAfterISO}&publishedBeforeISO=${publishedBeforeISO}`;
           queryParams += `&timeframe=custom`;
         } catch (e: unknown) {
@@ -84,10 +90,20 @@ function useYouTubeKeywords({
       }
 
       try {
-        const response = await fetch(`/api/v1/trends/youtube-keywords?${queryParams}`);
+        const response = await fetch(
+          `/api/v1/trends/youtube-keywords?${queryParams}`
+        );
         if (!response.ok) {
-          const errorData = await response.json().catch(() => ({ message: `HTTP error! status: ${response.status}` }));
-          throw new Error(errorData.error || errorData.message || `HTTP error! status: ${response.status}`);
+          const errorData = await response
+            .json()
+            .catch(() => ({
+              message: `HTTP error! status: ${response.status}`,
+            }));
+          throw new Error(
+            errorData.error ||
+              errorData.message ||
+              `HTTP error! status: ${response.status}`
+          );
         }
         const data = await response.json();
         setKeywords((data.keywords || []).slice(0, 10)); // Keep the top 10 logic

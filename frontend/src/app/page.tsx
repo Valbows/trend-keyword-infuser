@@ -23,7 +23,7 @@ export default function Home() {
   const [copySuccessMessage, setCopySuccessMessage] = useState('');
   const [existingScript, setExistingScript] = useState('');
   // G.O.A.T. C.O.D.E.X. B.O.T. - selectedKeywords now comes from context, setSelectedKeywords was passed to TrendSidebar but is no longer needed as context handles updates internally.
-  const { selectedKeywords } = useSelectedKeywords(); 
+  const { selectedKeywords } = useSelectedKeywords();
   // const [isModifying, setIsModifying] = useState(false); // G.O.A.T. C.O.D.E.X. B.O.T. - Removed, replaced by isModifyingScript from useApiMutation
   const [modifyError, setModifyError] = useState('');
   const [scriptDerivedTopic, setScriptDerivedTopic] = useState('');
@@ -37,9 +37,7 @@ export default function Home() {
   } = useApiMutation<
     GenerateScriptResponse,
     { topic: string; user_provided_trends: string[] }
-  >(
-    '/api/v1/scripts/generate'
-  );
+  >('/api/v1/scripts/generate');
 
   // G.O.A.T. C.O.D.E.X. B.O.T. - Setup useApiMutation for script modification
   const {
@@ -50,9 +48,7 @@ export default function Home() {
   } = useApiMutation<
     ModifyScriptResponse,
     { existingScript: string; selectedKeywords: string[] }
-  >(
-    '/api/v1/scripts/modify'
-  );
+  >('/api/v1/scripts/modify');
 
   const handleGenerateScript = async () => {
     if (!topic.trim()) {
@@ -111,7 +107,7 @@ export default function Home() {
     if (modifyScriptErrorHook) {
       setModifyError(modifyScriptErrorHook.message);
       // Optionally clear script display if modification fails
-      // setScript(''); 
+      // setScript('');
     }
   }, [modifyScriptErrorHook]);
 
@@ -266,7 +262,8 @@ export default function Home() {
             <section className='mb-8 text-center'>
               <button
                 onClick={handleModifyScript}
-                disabled={ // G.O.A.T. C.O.D.E.X. B.O.T. - Use hook's loading states
+                disabled={
+                  // G.O.A.T. C.O.D.E.X. B.O.T. - Use hook's loading states
                   isModifyingScript ||
                   isGenerating ||
                   !existingScript.trim() ||

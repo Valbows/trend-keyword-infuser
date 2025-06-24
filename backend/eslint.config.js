@@ -5,7 +5,7 @@ module.exports = [
   {
     // This 'Clairvoyant' rule prevents the linter from parsing non-JavaScript files,
     // ensuring 'Truth-Seeking' accuracy in our linting process.
-    ignores: ["**/*.yaml", "**/*.md"],
+    ignores: ['**/*.yaml', '**/*.md'],
   },
   // We can add more specific configurations here later if needed.
 ];

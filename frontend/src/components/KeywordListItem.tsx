@@ -7,17 +7,15 @@ interface KeywordListItemProps {
   // G.O.A.T. C.O.D.E.X. B.O.T. - isSelected and onKeywordClick removed, will use context
 }
 
-const KeywordListItem: React.FC<KeywordListItemProps> = ({
-  keywordItem,
-}) => {
+const KeywordListItem: React.FC<KeywordListItemProps> = ({ keywordItem }) => {
   const { selectedKeywords, setSelectedKeywords } = useSelectedKeywords(); // G.O.A.T. C.O.D.E.X. B.O.T. - Consume context
 
   const isSelected = selectedKeywords.includes(keywordItem.keyword);
 
   const handleToggleKeyword = () => {
-    setSelectedKeywords(prev =>
+    setSelectedKeywords((prev) =>
       prev.includes(keywordItem.keyword)
-        ? prev.filter(k => k !== keywordItem.keyword)
+        ? prev.filter((k) => k !== keywordItem.keyword)
         : [...prev, keywordItem.keyword]
     );
   };

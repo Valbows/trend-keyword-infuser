@@ -224,22 +224,25 @@ const ScriptWorkflowOrchestrator: React.FC = () => {
     ]
   );
 
-  const handleEngagementRecorded = useCallback((updatedScript: ScriptSummary) => {
-    // This 'Clairvoyant' check ensures we don't crash if a child component provides invalid data.
-    if (!updatedScript || !updatedScript.id) {
-      console.error(
-        '[ScriptWorkflowOrchestrator] handleEngagementRecorded received an invalid script object:',
-        updatedScript
-      );
-      return; // Exit gracefully
-    }
+  const handleEngagementRecorded = useCallback(
+    (updatedScript: ScriptSummary) => {
+      // This 'Clairvoyant' check ensures we don't crash if a child component provides invalid data.
+      if (!updatedScript || !updatedScript.id) {
+        console.error(
+          '[ScriptWorkflowOrchestrator] handleEngagementRecorded received an invalid script object:',
+          updatedScript
+        );
+        return; // Exit gracefully
+      }
 
-    setExistingScripts(prevScripts =>
-      prevScripts.map(script =>
-        script.id === updatedScript.id ? updatedScript : script
-      )
-    );
-  }, []);
+      setExistingScripts((prevScripts) =>
+        prevScripts.map((script) =>
+          script.id === updatedScript.id ? updatedScript : script
+        )
+      );
+    },
+    []
+  );
 
   console.log(
     '[ScriptWorkflowOrchestrator] DEBUG: ScriptEditor render conditions:',

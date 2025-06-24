@@ -31,7 +31,9 @@ export default function RootLayout({
       >
         <Navbar />
         <main className='py-8 px-4 sm:px-6 lg:px-8'>
-          <SelectedKeywordsProvider> {/* G.O.A.T. C.O.D.E.X. B.O.T. - Wrap children with provider */}
+          <SelectedKeywordsProvider>
+            {' '}
+            {/* G.O.A.T. C.O.D.E.X. B.O.T. - Wrap children with provider */}
             <div className='max-w-7xl mx-auto'>{children}</div>
           </SelectedKeywordsProvider>
         </main>
