@@ -55,7 +55,7 @@ async function handleRecordEngagement(req, res) {
  * @param {object} res - The Express response object.
  */
 const handleGenerateScript = async (req, res) => {
-  const { topic, trends } = req.body;
+  const { topic, trends = [] } = req.body;
 
   if (!topic) {
     return res

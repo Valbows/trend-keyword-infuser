@@ -35,10 +35,9 @@ describe('POST /api/v1/scripts/generate', () => {
   });
 
   it('should generate a script successfully with topic and trends', async () => {
-    // Mock what scriptOrchestrationService returns
     const orchestratedScriptData = {
-      script: mockGeneratedScript, // The actual script text
-      scriptId: 'orchestration-mock-id-1', // An ID that might come from orchestration if it saved it first
+      script: mockGeneratedScript,
+      scriptId: 'orchestration-mock-id-1',
       topic: mockTopic,
     };
     scriptOrchestrationService.orchestrateScriptCreation.mockResolvedValue(
@@ -50,11 +49,9 @@ describe('POST /api/v1/scripts/generate', () => {
       .send({ topic: mockTopic, trends: mockTrends });
 
     expect(response.status).toBe(200);
-    // Assert the final response structure from the controller
     expect(response.body).toEqual({
-      scriptId: expect.any(String), // This is the ID from the controller's Supabase save
-      script: orchestratedScriptData, // The controller nests the orchestration result here
-      topic: mockTopic,
+      success: true,
+      data: orchestratedScriptData,
     });
     expect(
       scriptOrchestrationService.orchestrateScriptCreation
@@ -62,7 +59,6 @@ describe('POST /api/v1/scripts/generate', () => {
   });
 
   it('should generate a script successfully with only a topic (empty trends)', async () => {
-    // Mock what scriptOrchestrationService returns
     const orchestratedScriptData = {
       script: mockGeneratedScript,
       scriptId: 'orchestration-mock-id-2',
@@ -77,14 +73,10 @@ describe('POST /api/v1/scripts/generate', () => {
       .send({ topic: mockTopic }); // No trends array sent
 
     expect(response.status).toBe(200);
-    // Assert the final response structure from the controller
     expect(response.body).toEqual({
-      scriptId: expect.any(String), // This is the ID from the controller's Supabase save
-      script: orchestratedScriptData, // The controller nests the orchestration result here
-      topic: mockTopic,
+      success: true,
+      data: orchestratedScriptData,
     });
-    // The controller defaults trends to [] if not provided or not an array
-    // and passes this to the orchestration service
     expect(
       scriptOrchestrationService.orchestrateScriptCreation
     ).toHaveBeenCalledWith(mockTopic, []);
@@ -96,16 +88,19 @@ describe('POST /api/v1/scripts/generate', () => {
       .send({ trends: mockTrends }); // Missing topic
 
     expect(response.status).toBe(400);
-    expect(response.body).toEqual({ error: 'Missing required field: topic' });
+    expect(response.body).toEqual({
+      success: false,
+      message: 'Missing required field: topic',
+    });
     expect(
       scriptOrchestrationService.orchestrateScriptCreation
     ).not.toHaveBeenCalled();
   });
 
   it('should return 500 if GEMINI_API_KEY is not set in service', async () => {
-    scriptOrchestrationService.orchestrateScriptCreation.mockRejectedValue(
-      new Error('GEMINI_API_KEY is not set.') // This specific error message is checked by controller
-    );
+    const error = new Error('GEMINI_API_KEY is not set.');
+    error.status = 500; // Service should set status on error
+    scriptOrchestrationService.orchestrateScriptCreation.mockRejectedValue(error);
 
     const response = await request(app)
       .post('/api/v1/scripts/generate')
@@ -113,14 +108,17 @@ describe('POST /api/v1/scripts/generate', () => {
 
     expect(response.status).toBe(500);
     expect(response.body).toEqual({
-      error: 'Script generation service is not configured.',
+      success: false,
+      message: 'GEMINI_API_KEY is not set.',
     });
   });
 
   it('should return 502 if Gemini API returns an invalid response', async () => {
-    scriptOrchestrationService.orchestrateScriptCreation.mockRejectedValue(
-      new Error('Failed to get valid script content from Gemini API response.') // This specific error message is checked by controller
+    const error = new Error(
+      'Failed to get valid script content from Gemini API response.'
     );
+    error.status = 502; // Service should set status on error
+    scriptOrchestrationService.orchestrateScriptCreation.mockRejectedValue(error);
 
     const response = await request(app)
       .post('/api/v1/scripts/generate')
@@ -128,15 +126,16 @@ describe('POST /api/v1/scripts/generate', () => {
 
     expect(response.status).toBe(502);
     expect(response.body).toEqual({
-      error:
-        'Failed to generate script due to an issue with the AI service response.',
+      success: false,
+      message:
+        'Failed to get valid script content from Gemini API response.',
     });
   });
 
   it('should return 500 for other service errors', async () => {
-    scriptOrchestrationService.orchestrateScriptCreation.mockRejectedValue(
-      new Error('Some other internal service error.') // Generic error
-    );
+    const error = new Error('Some other internal service error.');
+    error.status = 500; // Service should set status on error
+    scriptOrchestrationService.orchestrateScriptCreation.mockRejectedValue(error);
 
     const response = await request(app)
       .post('/api/v1/scripts/generate')
@@ -144,7 +143,8 @@ describe('POST /api/v1/scripts/generate', () => {
 
     expect(response.status).toBe(500);
     expect(response.body).toEqual({
-      error: 'Failed to generate script due to an internal server error.',
+      success: false,
+      message: 'Some other internal service error.',
     });
   });
 });
