@@ -19,14 +19,14 @@ export interface ScriptSummary {
 
 interface ExistingScriptListItemProps {
   script: ScriptSummary;
-  onSelect: (script: ScriptSummary) => void;
+  onLoadScript: (script: ScriptSummary) => void;
   onEngagementRecorded: (updatedScript: ScriptSummary) => void; // 'Altruistic' callback to notify parent of updates
 }
 
 // G.O.A.T. C.O.D.E.X. B.O.T. - 'Durable' and 'Optimized' component implementation
 const ExistingScriptListItem: React.FC<ExistingScriptListItemProps> = ({
   script,
-  onSelect,
+  onLoadScript,
   onEngagementRecorded,
 }) => {
   const [videoUrl, setVideoUrl] = useState('');
@@ -74,7 +74,7 @@ const ExistingScriptListItem: React.FC<ExistingScriptListItemProps> = ({
   return (
     <li
       key={script.id}
-      onClick={() => onSelect(script)}
+      onClick={() => onLoadScript(script)}
       className='p-4 bg-gray-800 rounded-lg mb-4 cursor-pointer hover:bg-gray-700 transition-colors duration-200 shadow-md'
     >
       <div className='flex justify-between items-start'>
