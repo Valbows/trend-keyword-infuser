@@ -24,14 +24,18 @@ class ScriptPersistenceService {
       }
 
       if (!data || data.length === 0) {
-        logger.error('Failed to retrieve script ID from Supabase after insert.');
+        logger.error(
+          'Failed to retrieve script ID from Supabase after insert.'
+        );
         throw new Error('Failed to confirm script creation in the database.');
       }
 
       return data[0];
     } catch (e) {
       logger.error('Unexpected error in createScript:', e);
-      throw new Error('An unexpected error occurred while creating the script.');
+      throw new Error(
+        'An unexpected error occurred while creating the script.'
+      );
     }
   }
 

@@ -2,7 +2,6 @@ const trendService = require('../services/trendService'); // This seems to be fo
 const trendDiscoveryService = require('../services/trendDiscoveryService'); // Our service for YouTube specific trends/keywords
 const logger = require('../utils/logger');
 
-
 const getTrends = async (req, res) => {
   const { topic } = req.query;
 
@@ -53,13 +52,12 @@ const getYouTubeKeywords = async (req, res) => {
   if (
     !(publishedAfterISO && publishedBeforeISO) &&
     !validTimeframes.includes(timeframe)
-  )
-  {
+  ) {
     logger.warn(
       `[trendController.getYouTubeKeywords] Invalid timeframe: ${timeframe}`
     );
     return res.status(400).json({
-      error: `Invalid timeframe. Valid values are: ${validTimeframes.join(', ')}.`, 
+      error: `Invalid timeframe. Valid values are: ${validTimeframes.join(', ')}.`,
     });
   }
 

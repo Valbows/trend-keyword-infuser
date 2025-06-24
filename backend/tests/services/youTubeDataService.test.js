@@ -6,10 +6,10 @@ jest.mock('googleapis', () => ({
   google: {
     youtube: jest.fn(() => ({
       videos: {
-        list: jest.fn()
-      }
-    }))
-  }
+        list: jest.fn(),
+      },
+    })),
+  },
 }));
 
 // Mock logger to prevent console output during tests
@@ -17,7 +17,7 @@ jest.mock('../../src/utils/logger', () => ({
   info: jest.fn(),
   debug: jest.fn(),
   warn: jest.fn(),
-  error: jest.fn()
+  error: jest.fn(),
 }));
 
 const YouTubeDataService = require('../../src/services/youTubeDataService');
@@ -37,7 +37,8 @@ describe('YouTubeDataService', () => {
     });
 
     test('should extract video ID from YouTube URL with additional parameters', () => {
-      const url = 'https://www.youtube.com/watch?v=dQw4w9WgXcQ&t=42s&list=PLxyz';
+      const url =
+        'https://www.youtube.com/watch?v=dQw4w9WgXcQ&t=42s&list=PLxyz';
       const videoId = YouTubeDataService.extractYouTubeVideoId(url);
       expect(videoId).toBe('dQw4w9WgXcQ');
     });
@@ -91,17 +92,21 @@ describe('YouTubeDataService', () => {
       const mockStats = {
         views: 1000000,
         likes: 50000,
-        comments: 2500
+        comments: 2500,
       };
 
       // Mock the internal API call
       const originalGetVideoStatistics = YouTubeDataService.getVideoStatistics;
-      YouTubeDataService.getVideoStatistics = jest.fn().mockResolvedValue(mockStats);
+      YouTubeDataService.getVideoStatistics = jest
+        .fn()
+        .mockResolvedValue(mockStats);
 
       const result = await YouTubeDataService.getVideoStatistics('dQw4w9WgXcQ');
-      
+
       expect(result).toEqual(mockStats);
-      expect(YouTubeDataService.getVideoStatistics).toHaveBeenCalledWith('dQw4w9WgXcQ');
+      expect(YouTubeDataService.getVideoStatistics).toHaveBeenCalledWith(
+        'dQw4w9WgXcQ'
+      );
 
       // Restore original method
       YouTubeDataService.getVideoStatistics = originalGetVideoStatistics;
@@ -110,9 +115,13 @@ describe('YouTubeDataService', () => {
     test('should handle API errors gracefully', async () => {
       // Mock API error
       const originalGetVideoStatistics = YouTubeDataService.getVideoStatistics;
-      YouTubeDataService.getVideoStatistics = jest.fn().mockRejectedValue(new Error('API Error'));
+      YouTubeDataService.getVideoStatistics = jest
+        .fn()
+        .mockRejectedValue(new Error('API Error'));
 
-      await expect(YouTubeDataService.getVideoStatistics('invalid-id')).rejects.toThrow('API Error');
+      await expect(
+        YouTubeDataService.getVideoStatistics('invalid-id')
+      ).rejects.toThrow('API Error');
 
       // Restore original method
       YouTubeDataService.getVideoStatistics = originalGetVideoStatistics;

@@ -106,11 +106,10 @@ Example of desired output format:
         } else if (error && error.details) {
           try {
             tempDetail = JSON.stringify(error.details);
-          } catch (stringifyDetailsError) {
+          } catch (_stringifyDetailsError) {
             // This internal log could be reinstated if deep debugging of error structures is needed.
             // console.error('Failed to stringify error.details:', stringifyDetailsError);
-            tempDetail =
-              'Could not stringify error.details.';
+            tempDetail = 'Could not stringify error.details.';
           }
         } else {
           try {
@@ -127,14 +126,13 @@ Example of desired output format:
               tempDetail =
                 'Complex error object received (non-informative when stringified).';
             }
-          } catch (stringifyError) {
+          } catch (_stringifyError) {
             // This internal log could be reinstated if deep debugging of error structures is needed.
             // console.error('Failed to stringify the entire error object:', stringifyError);
-            tempDetail =
-              'The entire error object could not be stringified.';
+            tempDetail = 'The entire error object could not be stringified.';
           }
         }
-      } catch (accessError) {
+      } catch (_accessError) {
         // This catches errors if accessing error.cause, error.statusMessage, etc., itself fails
         // console.error('Error while accessing properties of the original error object:', accessError);
         tempDetail =

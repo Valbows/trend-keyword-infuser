@@ -14,7 +14,9 @@ class EngagementRecordingService {
    * @returns {Promise<{data: object, error: object|null}>} - A promise that resolves to the updated script data or an error object.
    */
   async recordEngagement(scriptId, youtubeUrl) {
-    logger.info(`[EngagementService] Starting engagement recording for scriptId: ${scriptId}`);
+    logger.info(
+      `[EngagementService] Starting engagement recording for scriptId: ${scriptId}`
+    );
 
     // 1. 'Tactical' Input Validation
     if (!scriptId || !youtubeUrl) {
@@ -27,7 +29,8 @@ class EngagementRecordingService {
       // 2. 'Optimized' Video ID Extraction
       const videoId = youTubeDataService.extractYouTubeVideoId(youtubeUrl);
       if (!videoId) {
-        const errorMsg = 'Invalid YouTube URL provided. Could not extract video ID.';
+        const errorMsg =
+          'Invalid YouTube URL provided. Could not extract video ID.';
         logger.warn(`[EngagementService] ${errorMsg}`);
         return { data: null, error: { message: errorMsg, status: 400 } };
       }
@@ -35,7 +38,8 @@ class EngagementRecordingService {
       // 3. 'Boundless' Statistics Fetching
       const stats = await youTubeDataService.getVideoStatistics(videoId);
       if (!stats) {
-        const errorMsg = 'Could not retrieve video statistics from YouTube. The video may be private, deleted, or have stats disabled.';
+        const errorMsg =
+          'Could not retrieve video statistics from YouTube. The video may be private, deleted, or have stats disabled.';
         logger.warn(`[EngagementService] ${errorMsg}`);
         return { data: null, error: { message: errorMsg, status: 404 } };
       }
@@ -54,11 +58,16 @@ class EngagementRecordingService {
         engagement_retrieved_at: new Date().toISOString(),
       };
 
-      logger.debug(`[EngagementService] Updating script ${scriptId} with engagement data:`, updates);
+      logger.debug(
+        `[EngagementService] Updating script ${scriptId} with engagement data:`,
+        updates
+      );
 
       // 'Clairvoyant' Conflict Resolution: Handle unique constraint on published_video_id
       // First, clear any existing assignments of this video ID to other scripts
-      logger.debug(`[EngagementService] Clearing existing assignments for videoId: ${videoId}`);
+      logger.debug(
+        `[EngagementService] Clearing existing assignments for videoId: ${videoId}`
+      );
       await supabase
         .from('scripts')
         .update({ published_video_id: null })
@@ -74,19 +83,23 @@ class EngagementRecordingService {
         .single(); // Use .single() to get a single object back instead of an array
 
       if (error) {
-        logger.error(`[EngagementService] Supabase update error for scriptId ${scriptId}:`, error);
+        logger.error(
+          `[EngagementService] Supabase update error for scriptId ${scriptId}:`,
+          error
+        );
         throw error; // Let the catch block handle it
       }
 
       if (!data) {
-          const errorMsg = `Script with ID ${scriptId} not found for update.`;
-          logger.error(`[EngagementService] ${errorMsg}`);
-          return { data: null, error: { message: errorMsg, status: 404 } };
+        const errorMsg = `Script with ID ${scriptId} not found for update.`;
+        logger.error(`[EngagementService] ${errorMsg}`);
+        return { data: null, error: { message: errorMsg, status: 404 } };
       }
 
-      logger.info(`[EngagementService] Successfully recorded engagement for scriptId: ${scriptId}`);
+      logger.info(
+        `[EngagementService] Successfully recorded engagement for scriptId: ${scriptId}`
+      );
       return { data, error: null };
-
     } catch (error) {
       const errorMsg = `An unexpected error occurred while recording engagement for scriptId ${scriptId}.`;
       logger.error(`[EngagementService] ${errorMsg}`, error);

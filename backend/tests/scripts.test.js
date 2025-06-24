@@ -41,7 +41,9 @@ describe('POST /api/v1/scripts/generate', () => {
       scriptId: 'orchestration-mock-id-1', // An ID that might come from orchestration if it saved it first
       topic: mockTopic,
     };
-    scriptOrchestrationService.orchestrateScriptCreation.mockResolvedValue(orchestratedScriptData);
+    scriptOrchestrationService.orchestrateScriptCreation.mockResolvedValue(
+      orchestratedScriptData
+    );
 
     const response = await request(app)
       .post('/api/v1/scripts/generate')
@@ -66,7 +68,9 @@ describe('POST /api/v1/scripts/generate', () => {
       scriptId: 'orchestration-mock-id-2',
       topic: mockTopic,
     };
-    scriptOrchestrationService.orchestrateScriptCreation.mockResolvedValue(orchestratedScriptData);
+    scriptOrchestrationService.orchestrateScriptCreation.mockResolvedValue(
+      orchestratedScriptData
+    );
 
     const response = await request(app)
       .post('/api/v1/scripts/generate')

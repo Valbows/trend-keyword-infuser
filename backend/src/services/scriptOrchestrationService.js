@@ -1,7 +1,6 @@
 // backend/src/services/scriptOrchestrationService.js
 
 const llmService = require('./scriptGenerationService');
-const trendDiscoveryService = require('./trendDiscoveryService');
 const scriptPersistenceService = require('./scriptPersistenceService');
 const cache = require('./cacheService');
 const logger = require('../utils/logger');
@@ -20,11 +19,15 @@ class ScriptOrchestrationService {
     const cachedData = cache.get(cacheKey);
 
     if (cachedData) {
-      logger.info(`[OrchestrationService] Serving generated script from cache for key: ${cacheKey}`);
+      logger.info(
+        `[OrchestrationService] Serving generated script from cache for key: ${cacheKey}`
+      );
       return cachedData;
     }
 
-    logger.info(`[OrchestrationService] Starting fresh script creation for topic: "${topic}"`);
+    logger.info(
+      `[OrchestrationService] Starting fresh script creation for topic: "${topic}"`
+    );
 
     // Step 1: LLM Script Generation
     const scriptText = await llmService.generateScript(topic, validatedTrends);
@@ -44,7 +47,9 @@ class ScriptOrchestrationService {
 
     // Step 3: Cache the 'Truth-Seeking' result
     cache.set(cacheKey, responseData, 3600000); // Cache for 1 hour
-    logger.info(`[OrchestrationService] Caching new script data for key: ${cacheKey}`);
+    logger.info(
+      `[OrchestrationService] Caching new script data for key: ${cacheKey}`
+    );
 
     return responseData;
   }
@@ -62,7 +67,9 @@ class ScriptOrchestrationService {
     selectedKeywords,
     userId = null
   ) {
-    logger.info(`[OrchestrationService] Starting script modification with ${selectedKeywords.length} keywords.`);
+    logger.info(
+      `[OrchestrationService] Starting script modification with ${selectedKeywords.length} keywords.`
+    );
 
     const instructionalTopic = `Please modify the following script by naturally and coherently infusing the provided keywords. 
 Maintain the original tone and intent of the script as much as possible. Focus on enhancing the script with these keywords, not rewriting it entirely.
@@ -76,12 +83,16 @@ ${existingScript}
 
 Return only the modified script content.`;
 
-    logger.info('[OrchestrationService] Invoking LLM service for script modification...');
+    logger.info(
+      '[OrchestrationService] Invoking LLM service for script modification...'
+    );
     const modifiedScriptText = await llmService.generateScript(
       instructionalTopic,
       selectedKeywords.map((kw) => ({ keyword: kw, source: 'user-selected' }))
     );
-    logger.info('[OrchestrationService] Script successfully modified by LLM service.');
+    logger.info(
+      '[OrchestrationService] Script successfully modified by LLM service.'
+    );
 
     // Save the modified script using the 'Durable' persistence service
     const scriptDataToSave = {
@@ -94,10 +105,13 @@ Return only the modified script content.`;
       user_id: userId,
     };
 
-    const savedScript = await scriptPersistenceService.createScript(scriptDataToSave);
+    const savedScript =
+      await scriptPersistenceService.createScript(scriptDataToSave);
 
-    logger.info(`[OrchestrationService] Modified script saved with ID: ${savedScript.id}`);
-    
+    logger.info(
+      `[OrchestrationService] Modified script saved with ID: ${savedScript.id}`
+    );
+
     return { modifiedScriptText, savedScriptId: savedScript.id };
   }
 }

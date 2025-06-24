@@ -8,7 +8,7 @@ jest.mock('../../src/utils/logger', () => ({
   info: jest.fn(),
   debug: jest.fn(),
   warn: jest.fn(),
-  error: jest.fn()
+  error: jest.fn(),
 }));
 
 describe('Script Controller - Engagement Recording', () => {
@@ -29,12 +29,14 @@ describe('Script Controller - Engagement Recording', () => {
           likes: 50000,
           comments: 2500,
           engagement_rate: 5.25,
-          engagement_retrieved_at: '2025-06-24T04:00:00.000Z'
+          engagement_retrieved_at: '2025-06-24T04:00:00.000Z',
         },
-        error: null
+        error: null,
       };
 
-      engagementRecordingService.recordEngagement.mockResolvedValue(mockResponse);
+      engagementRecordingService.recordEngagement.mockResolvedValue(
+        mockResponse
+      );
 
       const response = await request(app)
         .post(`/api/v1/scripts/${mockScriptId}/record-engagement`)
@@ -43,7 +45,7 @@ describe('Script Controller - Engagement Recording', () => {
 
       expect(response.body).toEqual({
         success: true,
-        data: mockResponse.data
+        data: mockResponse.data,
       });
       expect(engagementRecordingService.recordEngagement).toHaveBeenCalledWith(
         mockScriptId,
@@ -59,9 +61,11 @@ describe('Script Controller - Engagement Recording', () => {
 
       expect(response.body).toEqual({
         success: false,
-        message: 'The videoUrl field is required.'
+        message: 'The videoUrl field is required.',
       });
-      expect(engagementRecordingService.recordEngagement).not.toHaveBeenCalled();
+      expect(
+        engagementRecordingService.recordEngagement
+      ).not.toHaveBeenCalled();
     });
 
     test('should return 400 for empty videoUrl', async () => {
@@ -72,9 +76,11 @@ describe('Script Controller - Engagement Recording', () => {
 
       expect(response.body).toEqual({
         success: false,
-        message: 'The videoUrl field is required.'
+        message: 'The videoUrl field is required.',
       });
-      expect(engagementRecordingService.recordEngagement).not.toHaveBeenCalled();
+      expect(
+        engagementRecordingService.recordEngagement
+      ).not.toHaveBeenCalled();
     });
 
     test('should return 400 for invalid YouTube URL', async () => {
@@ -82,11 +88,13 @@ describe('Script Controller - Engagement Recording', () => {
         data: null,
         error: {
           message: 'Invalid YouTube URL provided. Could not extract video ID.',
-          status: 400
-        }
+          status: 400,
+        },
       };
 
-      engagementRecordingService.recordEngagement.mockResolvedValue(mockErrorResponse);
+      engagementRecordingService.recordEngagement.mockResolvedValue(
+        mockErrorResponse
+      );
 
       const response = await request(app)
         .post(`/api/v1/scripts/${mockScriptId}/record-engagement`)
@@ -95,7 +103,7 @@ describe('Script Controller - Engagement Recording', () => {
 
       expect(response.body).toEqual({
         success: false,
-        message: mockErrorResponse.error.message
+        message: mockErrorResponse.error.message,
       });
     });
 
@@ -103,12 +111,15 @@ describe('Script Controller - Engagement Recording', () => {
       const mockErrorResponse = {
         data: null,
         error: {
-          message: 'Could not retrieve video statistics from YouTube. The video may be private, deleted, or have stats disabled.',
-          status: 404
-        }
+          message:
+            'Could not retrieve video statistics from YouTube. The video may be private, deleted, or have stats disabled.',
+          status: 404,
+        },
       };
 
-      engagementRecordingService.recordEngagement.mockResolvedValue(mockErrorResponse);
+      engagementRecordingService.recordEngagement.mockResolvedValue(
+        mockErrorResponse
+      );
 
       const response = await request(app)
         .post(`/api/v1/scripts/${mockScriptId}/record-engagement`)
@@ -117,7 +128,7 @@ describe('Script Controller - Engagement Recording', () => {
 
       expect(response.body).toEqual({
         success: false,
-        message: mockErrorResponse.error.message
+        message: mockErrorResponse.error.message,
       });
     });
 
@@ -125,12 +136,15 @@ describe('Script Controller - Engagement Recording', () => {
       const mockErrorResponse = {
         data: null,
         error: {
-          message: 'Script with ID 123e4567-e89b-12d3-a456-426614174000 not found for update.',
-          status: 404
-        }
+          message:
+            'Script with ID 123e4567-e89b-12d3-a456-426614174000 not found for update.',
+          status: 404,
+        },
       };
 
-      engagementRecordingService.recordEngagement.mockResolvedValue(mockErrorResponse);
+      engagementRecordingService.recordEngagement.mockResolvedValue(
+        mockErrorResponse
+      );
 
       const response = await request(app)
         .post(`/api/v1/scripts/${mockScriptId}/record-engagement`)
@@ -139,7 +153,7 @@ describe('Script Controller - Engagement Recording', () => {
 
       expect(response.body).toEqual({
         success: false,
-        message: mockErrorResponse.error.message
+        message: mockErrorResponse.error.message,
       });
     });
 
@@ -147,12 +161,15 @@ describe('Script Controller - Engagement Recording', () => {
       const mockErrorResponse = {
         data: null,
         error: {
-          message: 'An unexpected error occurred while recording engagement for scriptId 123e4567-e89b-12d3-a456-426614174000.',
-          status: 500
-        }
+          message:
+            'An unexpected error occurred while recording engagement for scriptId 123e4567-e89b-12d3-a456-426614174000.',
+          status: 500,
+        },
       };
 
-      engagementRecordingService.recordEngagement.mockResolvedValue(mockErrorResponse);
+      engagementRecordingService.recordEngagement.mockResolvedValue(
+        mockErrorResponse
+      );
 
       const response = await request(app)
         .post(`/api/v1/scripts/${mockScriptId}/record-engagement`)
@@ -161,22 +178,24 @@ describe('Script Controller - Engagement Recording', () => {
 
       expect(response.body).toEqual({
         success: false,
-        message: mockErrorResponse.error.message
+        message: mockErrorResponse.error.message,
       });
     });
 
     test('should handle malformed script ID', async () => {
       const invalidScriptId = 'invalid-uuid';
-      
+
       const mockErrorResponse = {
         data: null,
         error: {
           message: 'Script ID and YouTube URL are required.',
-          status: 400
-        }
+          status: 400,
+        },
       };
 
-      engagementRecordingService.recordEngagement.mockResolvedValue(mockErrorResponse);
+      engagementRecordingService.recordEngagement.mockResolvedValue(
+        mockErrorResponse
+      );
 
       const response = await request(app)
         .post(`/api/v1/scripts/${invalidScriptId}/record-engagement`)
@@ -185,7 +204,7 @@ describe('Script Controller - Engagement Recording', () => {
 
       expect(response.body).toEqual({
         success: false,
-        message: mockErrorResponse.error.message
+        message: mockErrorResponse.error.message,
       });
     });
 
@@ -201,7 +220,8 @@ describe('Script Controller - Engagement Recording', () => {
 
       expect(response.body).toEqual({
         success: false,
-        message: 'An unexpected server error occurred in handleRecordEngagement for scriptId: 123e4567-e89b-12d3-a456-426614174000'
+        message:
+          'An unexpected server error occurred in handleRecordEngagement for scriptId: 123e4567-e89b-12d3-a456-426614174000',
       });
     });
 
@@ -210,19 +230,21 @@ describe('Script Controller - Engagement Recording', () => {
         'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
         'https://youtu.be/dQw4w9WgXcQ',
         'https://www.youtube.com/embed/dQw4w9WgXcQ',
-        'https://m.youtube.com/watch?v=dQw4w9WgXcQ'
+        'https://m.youtube.com/watch?v=dQw4w9WgXcQ',
       ];
 
       const mockResponse = {
         data: {
           id: mockScriptId,
           published_video_id: 'dQw4w9WgXcQ',
-          engagement_rate: 5.25
+          engagement_rate: 5.25,
         },
-        error: null
+        error: null,
       };
 
-      engagementRecordingService.recordEngagement.mockResolvedValue(mockResponse);
+      engagementRecordingService.recordEngagement.mockResolvedValue(
+        mockResponse
+      );
 
       for (const url of urlFormats) {
         const response = await request(app)
@@ -232,11 +254,13 @@ describe('Script Controller - Engagement Recording', () => {
 
         expect(response.body).toEqual({
           success: true,
-          data: mockResponse.data
+          data: mockResponse.data,
         });
       }
 
-      expect(engagementRecordingService.recordEngagement).toHaveBeenCalledTimes(urlFormats.length);
+      expect(engagementRecordingService.recordEngagement).toHaveBeenCalledTimes(
+        urlFormats.length
+      );
     });
   });
 });

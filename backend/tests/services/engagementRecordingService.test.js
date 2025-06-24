@@ -9,7 +9,7 @@ jest.mock('../../src/utils/logger', () => ({
   info: jest.fn(),
   debug: jest.fn(),
   warn: jest.fn(),
-  error: jest.fn()
+  error: jest.fn(),
 }));
 
 describe('EngagementRecordingService', () => {
@@ -28,16 +28,16 @@ describe('EngagementRecordingService', () => {
       youTubeDataService.getVideoStatistics.mockResolvedValue({
         views: 1000000,
         likes: 50000,
-        comments: 2500
+        comments: 2500,
       });
 
       // Mock Supabase responses
       supabase.from.mockReturnValue({
         update: jest.fn().mockReturnValue({
           eq: jest.fn().mockReturnValue({
-            neq: jest.fn().mockResolvedValue({ data: null, error: null })
-          })
-        })
+            neq: jest.fn().mockResolvedValue({ data: null, error: null }),
+          }),
+        }),
       });
 
       const mockUpdateResponse = {
@@ -52,32 +52,41 @@ describe('EngagementRecordingService', () => {
                     views: 1000000,
                     likes: 50000,
                     comments: 2500,
-                    engagement_rate: 5.25
+                    engagement_rate: 5.25,
                   },
-                  error: null
-                })
-              })
-            })
-          })
-        })
+                  error: null,
+                }),
+              }),
+            }),
+          }),
+        }),
       };
 
       // Override the second supabase call for the actual update
-      supabase.from.mockReturnValueOnce({
-        update: jest.fn().mockReturnValue({
-          eq: jest.fn().mockReturnValue({
-            neq: jest.fn().mockResolvedValue({ data: null, error: null })
-          })
+      supabase.from
+        .mockReturnValueOnce({
+          update: jest.fn().mockReturnValue({
+            eq: jest.fn().mockReturnValue({
+              neq: jest.fn().mockResolvedValue({ data: null, error: null }),
+            }),
+          }),
         })
-      }).mockReturnValueOnce(mockUpdateResponse.from());
+        .mockReturnValueOnce(mockUpdateResponse.from());
 
-      const result = await engagementRecordingService.recordEngagement(mockScriptId, mockYouTubeUrl);
+      const result = await engagementRecordingService.recordEngagement(
+        mockScriptId,
+        mockYouTubeUrl
+      );
 
       expect(result.error).toBeNull();
       expect(result.data).toBeDefined();
       expect(result.data.engagement_rate).toBe(5.25);
-      expect(youTubeDataService.extractYouTubeVideoId).toHaveBeenCalledWith(mockYouTubeUrl);
-      expect(youTubeDataService.getVideoStatistics).toHaveBeenCalledWith(mockVideoId);
+      expect(youTubeDataService.extractYouTubeVideoId).toHaveBeenCalledWith(
+        mockYouTubeUrl
+      );
+      expect(youTubeDataService.getVideoStatistics).toHaveBeenCalledWith(
+        mockVideoId
+      );
     });
 
     test('should calculate engagement rate correctly', async () => {
@@ -90,16 +99,16 @@ describe('EngagementRecordingService', () => {
       youTubeDataService.getVideoStatistics.mockResolvedValue({
         views,
         likes,
-        comments
+        comments,
       });
 
       // Mock Supabase clearing existing assignments
       supabase.from.mockReturnValue({
         update: jest.fn().mockReturnValue({
           eq: jest.fn().mockReturnValue({
-            neq: jest.fn().mockResolvedValue({ data: null, error: null })
-          })
-        })
+            neq: jest.fn().mockResolvedValue({ data: null, error: null }),
+          }),
+        }),
       });
 
       // Mock Supabase update response
@@ -111,25 +120,32 @@ describe('EngagementRecordingService', () => {
                 single: jest.fn().mockResolvedValue({
                   data: {
                     id: mockScriptId,
-                    engagement_rate: parseFloat(expectedEngagementRate.toFixed(2))
+                    engagement_rate: parseFloat(
+                      expectedEngagementRate.toFixed(2)
+                    ),
                   },
-                  error: null
-                })
-              })
-            })
-          })
-        })
+                  error: null,
+                }),
+              }),
+            }),
+          }),
+        }),
       };
 
-      supabase.from.mockReturnValueOnce({
-        update: jest.fn().mockReturnValue({
-          eq: jest.fn().mockReturnValue({
-            neq: jest.fn().mockResolvedValue({ data: null, error: null })
-          })
+      supabase.from
+        .mockReturnValueOnce({
+          update: jest.fn().mockReturnValue({
+            eq: jest.fn().mockReturnValue({
+              neq: jest.fn().mockResolvedValue({ data: null, error: null }),
+            }),
+          }),
         })
-      }).mockReturnValueOnce(mockUpdateResponse.from());
+        .mockReturnValueOnce(mockUpdateResponse.from());
 
-      const result = await engagementRecordingService.recordEngagement(mockScriptId, mockYouTubeUrl);
+      const result = await engagementRecordingService.recordEngagement(
+        mockScriptId,
+        mockYouTubeUrl
+      );
 
       expect(result.data.engagement_rate).toBe(7.5);
     });
@@ -139,16 +155,16 @@ describe('EngagementRecordingService', () => {
       youTubeDataService.getVideoStatistics.mockResolvedValue({
         views: 0,
         likes: 50,
-        comments: 25
+        comments: 25,
       });
 
       // Mock Supabase responses
       supabase.from.mockReturnValue({
         update: jest.fn().mockReturnValue({
           eq: jest.fn().mockReturnValue({
-            neq: jest.fn().mockResolvedValue({ data: null, error: null })
-          })
-        })
+            neq: jest.fn().mockResolvedValue({ data: null, error: null }),
+          }),
+        }),
       });
 
       const mockUpdateResponse = {
@@ -159,51 +175,69 @@ describe('EngagementRecordingService', () => {
                 single: jest.fn().mockResolvedValue({
                   data: {
                     id: mockScriptId,
-                    engagement_rate: 0
+                    engagement_rate: 0,
                   },
-                  error: null
-                })
-              })
-            })
-          })
-        })
+                  error: null,
+                }),
+              }),
+            }),
+          }),
+        }),
       };
 
-      supabase.from.mockReturnValueOnce({
-        update: jest.fn().mockReturnValue({
-          eq: jest.fn().mockReturnValue({
-            neq: jest.fn().mockResolvedValue({ data: null, error: null })
-          })
+      supabase.from
+        .mockReturnValueOnce({
+          update: jest.fn().mockReturnValue({
+            eq: jest.fn().mockReturnValue({
+              neq: jest.fn().mockResolvedValue({ data: null, error: null }),
+            }),
+          }),
         })
-      }).mockReturnValueOnce(mockUpdateResponse.from());
+        .mockReturnValueOnce(mockUpdateResponse.from());
 
-      const result = await engagementRecordingService.recordEngagement(mockScriptId, mockYouTubeUrl);
+      const result = await engagementRecordingService.recordEngagement(
+        mockScriptId,
+        mockYouTubeUrl
+      );
 
       expect(result.data.engagement_rate).toBe(0);
     });
 
     test('should return error for missing scriptId', async () => {
-      const result = await engagementRecordingService.recordEngagement(null, mockYouTubeUrl);
+      const result = await engagementRecordingService.recordEngagement(
+        null,
+        mockYouTubeUrl
+      );
 
       expect(result.error).toBeDefined();
       expect(result.error.status).toBe(400);
-      expect(result.error.message).toContain('Script ID and YouTube URL are required');
+      expect(result.error.message).toContain(
+        'Script ID and YouTube URL are required'
+      );
       expect(result.data).toBeNull();
     });
 
     test('should return error for missing youtubeUrl', async () => {
-      const result = await engagementRecordingService.recordEngagement(mockScriptId, null);
+      const result = await engagementRecordingService.recordEngagement(
+        mockScriptId,
+        null
+      );
 
       expect(result.error).toBeDefined();
       expect(result.error.status).toBe(400);
-      expect(result.error.message).toContain('Script ID and YouTube URL are required');
+      expect(result.error.message).toContain(
+        'Script ID and YouTube URL are required'
+      );
       expect(result.data).toBeNull();
     });
 
     test('should return error for invalid YouTube URL', async () => {
       youTubeDataService.extractYouTubeVideoId.mockReturnValue(null);
 
-      const result = await engagementRecordingService.recordEngagement(mockScriptId, 'https://example.com/invalid');
+      const result = await engagementRecordingService.recordEngagement(
+        mockScriptId,
+        'https://example.com/invalid'
+      );
 
       expect(result.error).toBeDefined();
       expect(result.error.status).toBe(400);
@@ -215,11 +249,16 @@ describe('EngagementRecordingService', () => {
       youTubeDataService.extractYouTubeVideoId.mockReturnValue(mockVideoId);
       youTubeDataService.getVideoStatistics.mockResolvedValue(null);
 
-      const result = await engagementRecordingService.recordEngagement(mockScriptId, mockYouTubeUrl);
+      const result = await engagementRecordingService.recordEngagement(
+        mockScriptId,
+        mockYouTubeUrl
+      );
 
       expect(result.error).toBeDefined();
       expect(result.error.status).toBe(404);
-      expect(result.error.message).toContain('Could not retrieve video statistics');
+      expect(result.error.message).toContain(
+        'Could not retrieve video statistics'
+      );
       expect(result.data).toBeNull();
     });
 
@@ -228,19 +267,24 @@ describe('EngagementRecordingService', () => {
       youTubeDataService.getVideoStatistics.mockResolvedValue({
         views: 1000,
         likes: 50,
-        comments: 25
+        comments: 25,
       });
 
       // Mock database error
       supabase.from.mockReturnValue({
         update: jest.fn().mockReturnValue({
           eq: jest.fn().mockReturnValue({
-            neq: jest.fn().mockRejectedValue(new Error('Database connection failed'))
-          })
-        })
+            neq: jest
+              .fn()
+              .mockRejectedValue(new Error('Database connection failed')),
+          }),
+        }),
       });
 
-      const result = await engagementRecordingService.recordEngagement(mockScriptId, mockYouTubeUrl);
+      const result = await engagementRecordingService.recordEngagement(
+        mockScriptId,
+        mockYouTubeUrl
+      );
 
       expect(result.error).toBeDefined();
       expect(result.error.status).toBe(500);

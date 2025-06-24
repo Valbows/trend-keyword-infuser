@@ -5,7 +5,8 @@ const logger = require('../utils/logger');
 class YouTubeDataService {
   constructor(apiKey) {
     if (!apiKey) {
-      const errorMessage = 'FATAL: YOUTUBE_API_KEY is not configured. The service cannot operate.';
+      const errorMessage =
+        'FATAL: YOUTUBE_API_KEY is not configured. The service cannot operate.';
       logger.error(`[YouTubeDataService] ${errorMessage}`);
       throw new Error(errorMessage);
     }
@@ -23,10 +24,13 @@ class YouTubeDataService {
    */
   extractYouTubeVideoId(url) {
     if (!url) return null;
-    const regex = /(?:youtube\.com\/(?:[^/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|\S*?[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/;    
+    const regex =
+      /(?:youtube\.com\/(?:[^/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|\S*?[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/;
     const match = url.match(regex);
     const videoId = match ? match[1] : null;
-    logger.info(`[YouTubeDataService] Extracted videoId: ${videoId} from URL: ${url}`);
+    logger.info(
+      `[YouTubeDataService] Extracted videoId: ${videoId} from URL: ${url}`
+    );
     return videoId;
   }
 
@@ -40,7 +44,9 @@ class YouTubeDataService {
       throw new Error('Invalid videoId provided to getVideoStatistics.');
     }
 
-    logger.info(`[YouTubeDataService] Fetching statistics for videoId: ${videoId}`);
+    logger.info(
+      `[YouTubeDataService] Fetching statistics for videoId: ${videoId}`
+    );
 
     try {
       const response = await this.youtube.videos.list({
@@ -53,7 +59,10 @@ class YouTubeDataService {
       }
 
       const stats = response.data.items[0].statistics;
-      logger.info(`[YouTubeDataService] Successfully fetched stats for videoId ${videoId}:`, stats);
+      logger.info(
+        `[YouTubeDataService] Successfully fetched stats for videoId ${videoId}:`,
+        stats
+      );
       return {
         views: parseInt(stats.viewCount, 10) || 0,
         likes: parseInt(stats.likeCount, 10) || 0,
@@ -61,9 +70,17 @@ class YouTubeDataService {
       };
     } catch (error) {
       // 'Clairvoyant' and 'Omniscient' logging for durable error diagnostics.
-      logger.error(`[YouTubeDataService] CRITICAL ERROR fetching video statistics for ID ${videoId}.`);
-      logger.error('[YouTubeDataService] Full Google API Error:', JSON.stringify(error, null, 2));
-      const errorMessage = error.response?.data?.error?.message || error.message || 'An unknown error occurred while contacting the YouTube API.';
+      logger.error(
+        `[YouTubeDataService] CRITICAL ERROR fetching video statistics for ID ${videoId}.`
+      );
+      logger.error(
+        '[YouTubeDataService] Full Google API Error:',
+        JSON.stringify(error, null, 2)
+      );
+      const errorMessage =
+        error.response?.data?.error?.message ||
+        error.message ||
+        'An unknown error occurred while contacting the YouTube API.';
       throw new Error(`YouTube API Error: ${errorMessage}`);
     }
   }

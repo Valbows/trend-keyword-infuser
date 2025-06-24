@@ -487,11 +487,15 @@ class TrendDiscoveryService {
     const cachedData = cache.get(cacheKey);
 
     if (cachedData) {
-      logger.info(`[TrendDiscoveryService] Serving from cache for key: ${cacheKey}`);
+      logger.info(
+        `[TrendDiscoveryService] Serving from cache for key: ${cacheKey}`
+      );
       return cachedData;
     }
 
-    logger.info(`[TrendDiscoveryService] Fetching fresh YouTube keywords for topic: "${topic}"`);
+    logger.info(
+      `[TrendDiscoveryService] Fetching fresh YouTube keywords for topic: "${topic}"`
+    );
 
     const apiKey = process.env.YOUTUBE_API_KEY;
     if (!apiKey) {
@@ -594,7 +598,9 @@ class TrendDiscoveryService {
         topic
       );
 
-      const sortedKeywords = finalKeywords.sort((a, b) => b.engagement_score - a.engagement_score);
+      const sortedKeywords = finalKeywords.sort(
+        (a, b) => b.engagement_score - a.engagement_score
+      );
 
       const responseData = {
         topic,

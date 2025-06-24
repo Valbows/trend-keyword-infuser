@@ -25,7 +25,7 @@ const getYoutubeClient = () => {
  * @param {string} topic - The topic to search trends for (currently used for logging, can be used for filtering later).
  * @returns {Promise<Array<Object>>} A promise that resolves to an array of trend objects from Google Trends.
  */
-const fetchGoogleTrends = async (topic) => {
+const fetchGoogleTrends = async (_topic) => {
   try {
     const feed = await parser.parseURL(GOOGLE_TRENDS_RSS_URL_US);
     if (!feed.items) {
@@ -39,8 +39,8 @@ const fetchGoogleTrends = async (topic) => {
       pubDate: item.pubDate,
       snippet: item.contentSnippet || item.content, // Some feeds use contentSnippet, others content
     }));
-  } catch (error) {
-    // Consider logger.error('Error fetching or parsing Google Trends RSS:', error.message);
+  } catch (_error) {
+    // Consider logger.error('Error fetching or parsing Google Trends RSS:', _error.message);
     // It's important not to let one source failure bring down the whole service if possible
     return []; // Return empty array on error for this source
   }
@@ -110,8 +110,8 @@ const fetchTrendsFromSources = async (topic) => {
     ]);
 
     return [...googleTrends, ...youtubeTrends];
-  } catch (error) {
-    // Consider logger.error('Error in trendService fetching trends from sources:', error.message);
+  } catch (_error) {
+    // Consider logger.error('Error in trendService fetching trends from sources:', _error.message);
     throw new Error('Failed to fetch trends from aggregated sources');
   }
 };
