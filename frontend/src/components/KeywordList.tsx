@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { YouTubeKeywordItem } from './TrendSidebar'; // Assuming types are here or a shared file
+import { YouTubeKeywordItem } from '@/types/trends';
 import KeywordListItem from './KeywordListItem';
 
 interface KeywordListProps {
