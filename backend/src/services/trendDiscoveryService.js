@@ -1,5 +1,6 @@
 // backend/src/services/trendDiscoveryService.js
 const axios = require('axios');
+const cache = require('../services/cacheService');
 const { getRelevanceForKeywords } = require('./KeywordAnalysisService');
 const logger = require('../utils/logger');
 
@@ -478,13 +479,19 @@ class TrendDiscoveryService {
 
   async getYouTubeKeywordsByTopicAndTimeframe(
     topic,
-    timeframe = 'any',
-    publishedAfterISO = null,
-    publishedBeforeISO = null
+    timeframe,
+    publishedAfterISO,
+    publishedBeforeISO
   ) {
-    logger.info(
-      `[TrendDiscoveryService] Getting YouTube keywords for topic: "${topic}", timeframe: "${timeframe}"`
-    );
+    const cacheKey = `youtube-keywords:${topic}:${timeframe}:${publishedAfterISO || ''}:${publishedBeforeISO || ''}`;
+    const cachedData = cache.get(cacheKey);
+
+    if (cachedData) {
+      logger.info(`[TrendDiscoveryService] Serving from cache for key: ${cacheKey}`);
+      return cachedData;
+    }
+
+    logger.info(`[TrendDiscoveryService] Fetching fresh YouTube keywords for topic: "${topic}"`);
 
     const apiKey = process.env.YOUTUBE_API_KEY;
     if (!apiKey) {
@@ -587,7 +594,23 @@ class TrendDiscoveryService {
         topic
       );
 
-      return finalKeywords;
+      const sortedKeywords = finalKeywords.sort((a, b) => b.engagement_score - a.engagement_score);
+
+      const responseData = {
+        topic,
+        timeframe,
+        keywords: sortedKeywords,
+        ...(publishedAfterISO && { publishedAfterISO }),
+        ...(publishedBeforeISO && { publishedBeforeISO }),
+      };
+
+      // Cache for 1 hour (3600 * 1000 ms)
+      cache.set(cacheKey, responseData, 3600000);
+      logger.info(
+        `[TrendDiscoveryService] Caching new data for key: ${cacheKey}`
+      );
+
+      return responseData;
     } catch (error) {
       logger.error(
         '[TrendDiscoveryService] Error fetching videos from YouTube API for keyword extraction:',

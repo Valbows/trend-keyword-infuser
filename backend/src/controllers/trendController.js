@@ -1,7 +1,7 @@
 const trendService = require('../services/trendService'); // This seems to be for a general trend service
 const trendDiscoveryService = require('../services/trendDiscoveryService'); // Our service for YouTube specific trends/keywords
 const logger = require('../utils/logger');
-const cache = require('../services/cacheService');
+
 
 const getTrends = async (req, res) => {
   const { topic } = req.query;
@@ -53,50 +53,24 @@ const getYouTubeKeywords = async (req, res) => {
   if (
     !(publishedAfterISO && publishedBeforeISO) &&
     !validTimeframes.includes(timeframe)
-  ) {
+  )
+  {
     logger.warn(
       `[trendController.getYouTubeKeywords] Invalid timeframe: ${timeframe}`
     );
     return res.status(400).json({
-      error: `Invalid timeframe. Valid values are: ${validTimeframes.join(', ')}.`,
+      error: `Invalid timeframe. Valid values are: ${validTimeframes.join(', ')}.`, 
     });
   }
 
-  const cacheKey = `youtube-keywords:${topic}:${timeframe}:${publishedAfterISO || ''}:${publishedBeforeISO || ''}`;
-  const cachedData = cache.get(cacheKey);
-
-  if (cachedData) {
-    logger.info(
-      `[trendController.getYouTubeKeywords] Serving from cache for key: ${cacheKey}`
-    );
-    return res.status(200).json(cachedData);
-  }
-
   try {
-    logger.info(
-      `[trendController.getYouTubeKeywords] Fetching fresh YouTube keywords for topic: "${topic}"`
-    );
-    const keywords =
+    const responseData =
       await trendDiscoveryService.getYouTubeKeywordsByTopicAndTimeframe(
         topic,
         timeframe,
         publishedAfterISO,
         publishedBeforeISO
       );
-
-    const responseData = {
-      topic,
-      timeframe,
-      keywords,
-      ...(publishedAfterISO && { publishedAfterISO }),
-      ...(publishedBeforeISO && { publishedBeforeISO }),
-    };
-
-    // Cache for 1 hour (3600 * 1000 ms)
-    cache.set(cacheKey, responseData, 3600000);
-    logger.info(
-      `[trendController.getYouTubeKeywords] Caching new data for key: ${cacheKey}`
-    );
 
     res.status(200).json(responseData);
   } catch (error) {
