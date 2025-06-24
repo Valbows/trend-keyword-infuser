@@ -11,6 +11,20 @@ const compat = new FlatCompat({
 
 const eslintConfig = [
   ...compat.extends('next/core-web-vitals', 'next/typescript', 'prettier'),
+  {
+    // G.O.A.T. C.O.D.E.X. B.O.T. - 'Elegant' and 'Durable' rule to allow underscore-prefixed unused variables.
+    // This 'Clairvoyant' configuration ensures consistency between local and CI environments.
+    rules: {
+      '@typescript-eslint/no-unused-vars': [
+        'error',
+        {
+          argsIgnorePattern: '^_',
+          varsIgnorePattern: '^_',
+          caughtErrorsIgnorePattern: '^_',
+        },
+      ],
+    },
+  },
 ];
 
 export default eslintConfig;
