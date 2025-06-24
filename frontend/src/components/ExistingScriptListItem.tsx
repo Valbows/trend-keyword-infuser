@@ -8,11 +8,11 @@ export interface ScriptSummary {
   created_at: string;
   // 'Clairvoyant' inclusion of optional engagement metrics
   published_video_id?: string | null;
-  engagement_rate?: number;
-  views?: number;
-  likes?: number;
-  comments?: number;
-  engagement_retrieved_at?: string;
+  engagement_rate?: number | null;
+  views?: number | null;
+  likes?: number | null;
+  comments?: number | null;
+  engagement_retrieved_at?: string | null;
 }
 
 interface ExistingScriptListItemProps {
