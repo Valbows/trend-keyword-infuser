@@ -93,7 +93,6 @@ class ScriptPersistenceService {
       .from('scripts')
       .update({
         generated_script: content,
-        updated_at: new Date().toISOString(),
       })
       .eq('id', id)
       .select();
