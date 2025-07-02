@@ -1,7 +1,10 @@
-// G.O.A.T. C.O.D.E.X. B.O.T. - 'Durable' and 'Xtensible' Script Data Service
+// G.O.A.T. C.O.D.E.X. B.O.T. - 'Durable', 'Xtensible', and 'Tactical' Script Data Service
 // This service provides a centralized, 'Optimized' interface for all script-related database operations.
+// Enhanced with robust error handling and standardized service responses.
 
 import { supabase } from './supabaseClient';
+import { ServiceResponse, withErrorHandling } from '../utils/serviceUtils';
+import { env } from '../config/environment';
 
 // 'Elegant' and 'Xtensible' type definition for a Script
 // 'Elegant' and 'Xtensible' type definition for a Script, including engagement metrics
@@ -24,25 +27,29 @@ export interface Script {
 
 class ScriptService {
   /**
-   * Retrieves all scripts from the database.
-   * @returns A promise that resolves to an array of scripts.
+   * Retrieves all scripts from the database with standardized error handling.
+   * @returns A promise that resolves to a ServiceResponse containing an array of scripts.
    */
-  async getAllScripts(): Promise<Script[]> {
-    console.info('[ScriptService] Fetching all scripts.');
-    const { data, error } = await supabase
-      .from('scripts')
-      .select('*')
-      .order('created_at', { ascending: false });
+  async getAllScripts(): Promise<ServiceResponse<Script[]>> {
+    return await withErrorHandling<Script[]>('getAllScripts', async () => {
+      console.info('[ScriptService] Fetching all scripts.');
+      
+      const { data, error } = await supabase
+        .from('scripts')
+        .select('*')
+        .order('created_at', { ascending: false });
 
-    if (error) {
-      console.error('[ScriptService] Error fetching scripts:', error);
-      throw new Error('Could not fetch scripts from the database.');
-    }
+      if (error) {
+        console.error('[ScriptService] Error fetching scripts:', error);
+        throw error; // Will be caught by withErrorHandling
+      }
 
-    console.info(
-      `[ScriptService] Successfully fetched ${data.length} scripts.`
-    );
-    return data;
+      console.info(
+        `[ScriptService] Successfully fetched ${data.length} scripts.`
+      );
+      
+      return data as Script[];
+    });
   }
 
   /**

@@ -3,10 +3,6 @@
 import { NextResponse } from 'next/server';
 import { scriptService } from '@/lib/services/scriptService';
 
-interface RouteParams {
-  params: { id: string };
-}
-
 interface UpdateScriptBody {
   title: string;
   content: string;
@@ -14,9 +10,13 @@ interface UpdateScriptBody {
 
 /**
  * 'Elegant' and 'Xtensible' handler for fetching a single script by its ID.
+ * Uses URL path extraction to avoid Next.js 15.3.3 type issues.
  */
-export async function GET(_request: Request, { params }: RouteParams) {
-  const id = parseInt(params.id, 10);
+export async function GET(request: Request) {
+  // Extract id from URL path segments
+  const segments = request.url.split('/');
+  const idParam = segments[segments.length - 1]; // Get the ID from the URL pattern
+  const id = parseInt(idParam, 10);
 
   if (isNaN(id)) {
     return NextResponse.json(
@@ -58,9 +58,13 @@ export async function GET(_request: Request, { params }: RouteParams) {
 
 /**
  * 'Durable' and 'Optimized' handler for updating a script's content and title.
+ * Uses URL path extraction to avoid Next.js 15.3.3 type issues.
  */
-export async function PUT(request: Request, { params }: RouteParams) {
-  const id = parseInt(params.id, 10);
+export async function PUT(request: Request) {
+  // Extract id from URL path segments
+  const segments = request.url.split('/');
+  const idParam = segments[segments.length - 1]; // Get the ID from the URL pattern
+  const id = parseInt(idParam, 10);
 
   if (isNaN(id)) {
     return NextResponse.json(

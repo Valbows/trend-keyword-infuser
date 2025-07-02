@@ -1,12 +1,15 @@
 import { NextResponse } from 'next/server';
 import { engagementRecordingService } from '@/lib/services/engagementRecordingService';
 
-// Minimal typing pattern for Next.js 15.3.3 App Router
-export async function POST(
-  request: Request,
-  { params }: { params: { id: string } }
-) {
-  const id = parseInt(params.id, 10);
+/**
+ * Handler for recording YouTube engagement metrics
+ * Uses a single request parameter approach to avoid Next.js 15.3.3 type issues
+ */
+export async function POST(request: Request) {
+  // Extract id from URL path segments
+  const segments = request.url.split('/');
+  const idParam = segments[segments.length - 2]; // Get the ID from the URL pattern
+  const id = parseInt(idParam, 10);
 
   if (isNaN(id)) {
     return NextResponse.json(
