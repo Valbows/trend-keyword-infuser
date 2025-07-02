@@ -91,7 +91,7 @@ function useYouTubeKeywords({
 
       try {
         const response = await fetch(
-          `/api/v1/trends/youtube-keywords?${queryParams}`
+          `/api/trends/youtube-keywords?${queryParams}`
         );
         if (!response.ok) {
           const errorData = await response.json().catch(() => ({

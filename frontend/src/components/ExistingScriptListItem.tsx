@@ -42,7 +42,7 @@ const ExistingScriptListItem: React.FC<ExistingScriptListItemProps> = ({
     // 'Tactical' API call to the backend
     try {
       const response = await fetch(
-        `/api/v1/scripts/${script.id}/record-engagement`,
+        `/api/scripts/${script.id}/record-engagement`,
         {
           method: 'POST',
           headers: {

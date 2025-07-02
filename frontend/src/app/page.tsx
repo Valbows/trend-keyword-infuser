@@ -37,7 +37,7 @@ export default function Home() {
   } = useApiMutation<
     GenerateScriptResponse,
     { topic: string; user_provided_trends: string[] }
-  >('/api/v1/scripts/generate');
+  >('/api/scripts/generate');
 
   // G.O.A.T. C.O.D.E.X. B.O.T. - Setup useApiMutation for script modification
   const {
@@ -48,7 +48,7 @@ export default function Home() {
   } = useApiMutation<
     ModifyScriptResponse,
     { existingScript: string; selectedKeywords: string[] }
-  >('/api/v1/scripts/modify');
+  >('/api/scripts/modify');
 
   const handleGenerateScript = async () => {
     if (!topic.trim()) {

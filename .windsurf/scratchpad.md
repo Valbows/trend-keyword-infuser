@@ -389,7 +389,44 @@ The system consists of:
         - [x] Task: Conduct a review of Tailwind CSS usage for consistency and efficiency across all components. (Completed: `page.tsx`, `TrendSidebar.tsx` and its children, and all main content components - `AppHeader.tsx`, `TopicInputSection.tsx`, `ErrorDisplay.tsx`, `GenerateScriptButton.tsx`, `ModifyScriptButton.tsx`, `CopyScriptButton.tsx`, `ExistingScriptInputSection.tsx`, `GeneratedScriptDisplay.tsx` - reviewed. All found to be consistent and efficient. Minor refinements made to `LoadingSpinner.tsx`, `CopyScriptButton.tsx`, and `ExistingScriptInputSection.tsx`.)
         - [x] Task: Identify and refactor overly complex or duplicated class strings. Consider creating reusable component-level styles or utility functions if appropriate, promoting 'Elegant' and maintainable styles. (Completed: Button components - `GenerateScriptButton`, `ModifyScriptButton`, `CopyScriptButton` - refactored to use common utility classes `.btn-action` and `.btn-copy` defined in `globals.css`.)
         - [x] Task: Verify responsiveness and accessibility (A11Y) of all styled components. (Completed: Main content components previously verified. `TrendSidebar.tsx` and its children - `TimeframeSelector.tsx`, `CustomDateRangePicker.tsx`, `LoadingSpinner.tsx`, `SidebarErrorMessage.tsx`, `KeywordList.tsx`, and `KeywordListItem.tsx` - verified and enhanced for responsiveness and accessibility. Semantic HTML, ARIA roles (alert, button, pressed, expanded, controls), and responsive/sticky styling for the sidebar were refined. G.O.A.T. C.O.D.E.X. B.O.T. - Session `{{SESSION_ID}}`)
-        - [ ] *Success Criteria:* Consistent and 'Elegant' UI, maintainable and performant styling, improved accessibility.
+        - [ ] *Success Criteria:* Consi
+
+# Project Plan: Deploying the Trend Keyword Infuser MVP to Vercel
+
+## 1.0 Goal
+
+Successfully deploy the full-stack application (frontend and backend) to Vercel by migrating the existing Express.js backend logic into Next.js API routes. This will create a unified, serverless application that aligns with Vercel's architecture, ensuring a 'Durable' and 'Xtensible' deployment.
+
+## 2.0 Backend Migration to Next.js API Routes
+
+This is the core of the deployment effort. We will move all logic from the `backend` directory into the `frontend/src/app/api` directory, adapting it to the Next.js serverless environment.
+
+-   **Task 2.1: Set up API Route Structure.**
+    -   **Action:** Create the necessary directory and file structure inside `frontend/src/app/api` to mirror the existing backend routes.
+
+- [x] **Task 2.3: Migrate Services and Logic.**
+  - [x] **Action:** Port the business logic from the Express services (`trendDiscoveryService.js`, `scriptGenerationService.js`, etc.) into new TypeScript service modules within the `frontend` project (e.g., under `frontend/src/lib/services/`). This involves converting CommonJS (`require`) to ES Modules (`import`) and ensuring the logic is platform-agnostic.
+  - [x] **Success Criteria:** All backend business logic is ported to TypeScript/ESM within the `frontend` project structure.
+
+## 4.0 Vercel Configuration and Deployment
+
+-   **Task 4.1: Configure Vercel Project Settings.**
+    -   **Action:** In the Vercel project dashboard:
+        1.  Set the **Framework Preset** to `Next.js`.
+        2.  Set the **Root Directory** to `frontend`.
+    -   **Success Criteria:** Vercel's settings are correctly configured to identify and build the Next.js application.
+
+-   **Task 4.2: Configure Environment Variables.**
+    -   **Action:** In the Vercel project settings, under **Environment Variables**, securely add all required keys:
+        -   `GEMINI_API_KEY`
+        -   `SUPABASE_URL`
+        -   `SUPABASE_KEY`
+        -   `YOUTUBE_API_KEY`
+    -   **Success Criteria:** All required secrets are securely stored and available to the build and runtime environments.
+
+-   **Task 4.3: Deploy and Test.**
+    -   **Action:** Trigger a new deployment and conduct thorough end-to-end testing on the Vercel-provided URL.
+    -   **Success Criteria:** The application is fully functional in the production environment, validating the successful completion of the migration and deployment process.stent and 'Elegant' UI, maintainable and performant styling, improved accessibility.
         - [ ] Task: Review all component props, state variables, and function signatures for accurate, comprehensive, and strict TypeScript typings.
         - [ ] Task: Ensure all interfaces (e.g., `YouTubeKeywordItem`) are well-defined and consistently applied for 'Durable' code.
         - [ ] *Success Criteria:* Enhanced type safety, improved developer experience, reduced runtime errors.

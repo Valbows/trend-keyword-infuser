@@ -52,15 +52,28 @@ const ScriptWorkflowOrchestrator: React.FC = () => {
       setIsLoadingExistingScripts(true);
       setLoadExistingScriptsError(null);
       try {
-        const response = await fetch('/api/v1/scripts');
+        const response = await fetch('/api/scripts');
         if (!response.ok) {
           const errorData = await response.json().catch(() => ({})); // Try to parse error, default to empty obj
           throw new Error(
             errorData.error || `HTTP error! status: ${response.status}`
           );
         }
-        const data: ScriptSummary[] = await response.json();
-        setExistingScripts(data);
+        const responseData = await response.json();
+        
+        // Handle API response structure { success: true, data: scripts[] }
+        console.log('[ScriptWorkflowOrchestrator] Scripts response:', responseData);
+        
+        if (responseData && responseData.data && Array.isArray(responseData.data)) {
+          // Standard API response with { success: true, data: [...] } format
+          setExistingScripts(responseData.data);
+        } else if (Array.isArray(responseData)) {
+          // Direct array response
+          setExistingScripts(responseData);
+        } else {
+          console.error('[ScriptWorkflowOrchestrator] Unexpected scripts response format:', responseData);
+          setExistingScripts([]);
+        }
       } catch (error: unknown) {
         console.error('Failed to fetch existing scripts:', error);
         let errorMessage = 'An unknown error occurred while fetching scripts.';
@@ -117,7 +130,7 @@ const ScriptWorkflowOrchestrator: React.FC = () => {
     setSaveError(null);
 
     try {
-      const response = await fetch('/api/v1/scripts/generate', {
+      const response = await fetch('/api/scripts/generate', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -174,7 +187,7 @@ const ScriptWorkflowOrchestrator: React.FC = () => {
       setSaveSuccessMessage(null);
 
       try {
-        const response = await fetch(`/api/v1/scripts/${currentScriptId}`, {
+        const response = await fetch(`/api/scripts/${currentScriptId}`, {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
