@@ -15,12 +15,12 @@ import { env } from '../config/environment';
 const supabaseOptions = {
   auth: {
     autoRefreshToken: true,
-    persistSession: true
+    persistSession: true,
   },
   global: {
     // Add custom headers if needed
-    headers: { 'x-application-name': 'trend-keyword-infuser' }
-  }
+    headers: { 'x-application-name': 'trend-keyword-infuser' },
+  },
 };
 
 // Create and export the Supabase client instance

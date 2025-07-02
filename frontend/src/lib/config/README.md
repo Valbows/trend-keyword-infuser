@@ -5,10 +5,12 @@
 This project implements a robust, 'Durable', and 'Tactical' approach to environment variable management across multiple deployment contexts:
 
 1. **Development Environment**
+
    - Uses `.env.development` for mock values during local development
    - Developers should copy `.env.local.example` to `.env.local` with actual values
 
 2. **CI/CD Environment (GitHub Actions)**
+
    - Uses GitHub Secrets with proper variable mapping in workflow file
    - Both `SUPABASE_SERVICE_KEY` and `SUPABASE_KEY` naming conventions supported
 
@@ -18,24 +20,26 @@ This project implements a robust, 'Durable', and 'Tactical' approach to environm
 
 ## Required Environment Variables
 
-| Variable | Purpose | Required In |
-|----------|---------|------------|
-| `SUPABASE_URL` | Supabase project URL | All environments |
+| Variable                                 | Purpose                     | Required In      |
+| ---------------------------------------- | --------------------------- | ---------------- |
+| `SUPABASE_URL`                           | Supabase project URL        | All environments |
 | `SUPABASE_KEY` or `SUPABASE_SERVICE_KEY` | API key for Supabase access | All environments |
-| `GEMINI_API_KEY` | Google Gemini API access | Optional |
-| `YOUTUBE_API_KEY` | YouTube Data API access | Optional |
+| `GEMINI_API_KEY`                         | Google Gemini API access    | Optional         |
+| `YOUTUBE_API_KEY`                        | YouTube Data API access     | Optional         |
 
 ## Implementation Details
 
 1. **Centralized Configuration**: All environment variables are accessed through the `environment.ts` module, which provides:
+
    - Type safety with the `EnvironmentVariables` interface
    - Validation with meaningful error messages
    - Fallback mechanisms for different naming conventions
 
 2. **Service Layer Integration**: Services use the centralized configuration for consistent access:
+
    ```typescript
    import { env } from '../config/environment';
-   
+
    // Use environment variables
    const url = env.SUPABASE_URL;
    ```

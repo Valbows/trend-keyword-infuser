@@ -33,7 +33,7 @@ class ScriptService {
   async getAllScripts(): Promise<ServiceResponse<Script[]>> {
     return await withErrorHandling<Script[]>('getAllScripts', async () => {
       console.info('[ScriptService] Fetching all scripts.');
-      
+
       const { data, error } = await supabase
         .from('scripts')
         .select('*')
@@ -47,7 +47,7 @@ class ScriptService {
       console.info(
         `[ScriptService] Successfully fetched ${data.length} scripts.`
       );
-      
+
       return data as Script[];
     });
   }

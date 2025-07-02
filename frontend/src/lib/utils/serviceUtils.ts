@@ -1,6 +1,6 @@
 /**
  * G.O.A.T. C.O.D.E.X. B.O.T. - 'Durable' and 'Tactical' Service Utilities
- * 
+ *
  * Provides robust error handling and logging patterns for service layer operations.
  * Helps standardize error responses and ensure proper debugging information.
  */
@@ -19,14 +19,14 @@ export interface ServiceResponse<T> {
  * Creates a standardized error response
  */
 export function createErrorResponse<T>(
-  message: string, 
+  message: string,
   status: number = 500
 ): ServiceResponse<T> {
   return {
     data: null,
     error: message,
     status,
-    success: false
+    success: false,
   };
 }
 
@@ -34,14 +34,14 @@ export function createErrorResponse<T>(
  * Creates a standardized success response
  */
 export function createSuccessResponse<T>(
-  data: T, 
+  data: T,
   status: number = 200
 ): ServiceResponse<T> {
   return {
     data,
     error: null,
     status,
-    success: true
+    success: true,
   };
 }
 
@@ -49,24 +49,24 @@ export function createSuccessResponse<T>(
  * Handles Supabase PostgrestError objects and converts them to standard error responses
  */
 export function handleSupabaseError<T>(
-  error: PostgrestError | Error | unknown, 
+  error: PostgrestError | Error | unknown,
   operation: string
 ): ServiceResponse<T> {
   console.error(`[Supabase Error] ${operation}:`, error);
-  
+
   let message = 'An unexpected error occurred';
   let status = 500;
-  
+
   if (error instanceof Error) {
     message = error.message;
   }
-  
+
   // Define a type for PostgreSQL-like errors to avoid using 'any'
   interface PostgresErrorLike {
     code: string;
     message: string;
   }
-  
+
   // Type guard function to check if the error is PostgreSQL-like
   function isPostgresError(err: unknown): err is PostgresErrorLike {
     return (
@@ -78,24 +78,27 @@ export function handleSupabaseError<T>(
       typeof (err as PostgresErrorLike).message === 'string'
     );
   }
-  
+
   if (isPostgresError(error)) {
     const pgError = error as PostgrestError;
     message = pgError.message;
-    
+
     // Map common PostgreSQL error codes to appropriate HTTP status codes
-    if (pgError.code === '23505') { // Unique violation
+    if (pgError.code === '23505') {
+      // Unique violation
       status = 409;
       message = 'This resource already exists';
-    } else if (pgError.code === '42P01') { // Undefined table
+    } else if (pgError.code === '42P01') {
+      // Undefined table
       status = 500;
       message = 'Database configuration error';
-    } else if (pgError.code === '42501') { // Permission denied
+    } else if (pgError.code === '42501') {
+      // Permission denied
       status = 403;
       message = 'Permission denied to access this resource';
     }
   }
-  
+
   return createErrorResponse(message, status);
 }
 
