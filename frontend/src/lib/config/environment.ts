@@ -18,9 +18,11 @@ export interface EnvironmentVariables {
 export function getEnvironmentVariables(): EnvironmentVariables {
   // Required variables
   const supabaseUrl = process.env.SUPABASE_URL;
-  // Support both naming conventions used in different environments
+  // Support multiple naming conventions used in different environments
   const supabaseKey =
-    process.env.SUPABASE_SERVICE_KEY || process.env.SUPABASE_KEY;
+    process.env.SUPABASE_SERVICE_KEY || 
+    process.env.SUPABASE_KEY || 
+    process.env.SUPABASE_ANON_KEY;
 
   // Optional variables
   const geminiApiKey = process.env.GEMINI_API_KEY;
@@ -34,7 +36,7 @@ export function getEnvironmentVariables(): EnvironmentVariables {
 
   if (!supabaseKey) {
     throw new Error(
-      'Neither SUPABASE_KEY nor SUPABASE_SERVICE_KEY environment variable is defined'
+      'None of the expected Supabase key environment variables are defined: SUPABASE_SERVICE_KEY, SUPABASE_KEY, or SUPABASE_ANON_KEY'
     );
   }
 

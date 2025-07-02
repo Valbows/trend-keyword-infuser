@@ -14,6 +14,7 @@ jobs:
       # Map the GitHub secrets to the environment variable names expected by the application
       SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
       SUPABASE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}  # Map service key to SUPABASE_KEY for compatibility
+      SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}  # Also support SUPABASE_ANON_KEY naming
       SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
       GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
       YOUTUBE_API_KEY: ${{ secrets.YOUTUBE_API_KEY }}
@@ -51,6 +52,7 @@ jobs:
           cd frontend
           echo "SUPABASE_URL=$SUPABASE_URL" >> .env.production
           echo "SUPABASE_KEY=$SUPABASE_KEY" >> .env.production
+          echo "SUPABASE_ANON_KEY=$SUPABASE_ANON_KEY" >> .env.production
           npm run build
         
       - name: Validate Environment Variables
