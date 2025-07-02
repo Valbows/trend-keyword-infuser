@@ -1,20 +1,9 @@
-// G.O.A.T. C.O.D.E.X. B.O.T. - 'Durable' and 'Optimized' API Route for Recording YouTube Engagement
-
 import { NextResponse } from 'next/server';
 import { engagementRecordingService } from '@/lib/services/engagementRecordingService';
 
-interface RecordEngagementBody {
-  videoUrl: string;
-}
-
-/**
- * 'Elegant' and 'Xtensible' handler for recording YouTube engagement for a script.
- */
-export async function POST(
-  request: Request,
-  context: { params: { id: string } }
-) {
-  const id = parseInt(context.params.id, 10);
+// Minimal typing pattern for Next.js 15.3.3 App Router
+export async function POST(request: Request, { params }: { params: { id: string } }) {
+  const id = parseInt(params.id, 10);
 
   if (isNaN(id)) {
     return NextResponse.json(
@@ -24,7 +13,7 @@ export async function POST(
   }
 
   try {
-    const body: RecordEngagementBody = await request.json();
+    const body: { videoUrl: string } = await request.json();
     const { videoUrl } = body;
 
     if (!videoUrl) {
