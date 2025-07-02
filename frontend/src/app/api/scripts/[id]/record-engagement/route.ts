@@ -3,6 +3,10 @@
 import { NextResponse } from 'next/server';
 import { engagementRecordingService } from '@/lib/services/engagementRecordingService';
 
+interface RecordEngagementBody {
+  videoUrl: string;
+}
+
 interface RouteParams {
   params: { id: string };
 }
@@ -18,7 +22,7 @@ export async function POST(request: Request, { params }: RouteParams) {
   }
 
   try {
-    const body = await request.json();
+    const body: RecordEngagementBody = await request.json();
     const { videoUrl } = body;
 
     if (!videoUrl) {
@@ -31,10 +35,10 @@ export async function POST(request: Request, { params }: RouteParams) {
 
     return NextResponse.json({ success: true, data: updatedScript });
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error(`[API /record-engagement] Error recording engagement for script ${id}:`, error);
     return NextResponse.json(
-      { success: false, message: error.message || 'An internal server error occurred.' },
+      { success: false, message: error instanceof Error ? error.message : 'An internal server error occurred.' },
       { status: 500 }
     );
   }

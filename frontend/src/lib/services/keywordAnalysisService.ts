@@ -3,6 +3,17 @@
 
 import { GoogleGenerativeAI, HarmCategory, HarmBlockThreshold, GenerationConfig, SafetySetting } from '@google/generative-ai';
 
+// 'Durable' and 'Elegant' type definitions for AI service responses
+interface AIKeywordRelevance {
+  keyword: string;
+  reason: string;
+  score: number; // Expecting a numerical score, e.g., 1-10
+}
+
+interface AIResponse {
+  relevant_keywords: AIKeywordRelevance[];
+}
+
 // 'Elegant' and 'Xtensible' type definitions
 export interface AIRelevance {
   score: number;
@@ -13,7 +24,7 @@ export interface AIRelevance {
 // Base type for keyword objects
 export interface KeywordInput {
   keyword: string;
-  [key: string]: any; // Allow other properties
+  [key: string]: unknown; // Allow other properties
 }
 
 // 'Durable' generic type for keyword objects after AI analysis, using a type intersection.
@@ -85,27 +96,28 @@ export async function getRelevanceForKeywords<T extends KeywordInput>(
     const result = await model.generateContent({ contents: [{ role: 'user', parts: [{ text: prompt }] }], generationConfig, safetySettings });
 
     const responseText = result.response.text();
-    const aiResults: { keyword: string; relevance_score: number; justification: string }[] = JSON.parse(responseText);
+    const aiResponse: AIResponse = JSON.parse(responseText);
 
-    const aiResultsMap = new Map<string, Omit<AIRelevance, 'error'>>();
-    aiResults.forEach((res) => {
-      if (res && res.keyword && typeof res.relevance_score === 'number') {
-        aiResultsMap.set(res.keyword, { score: res.relevance_score, justification: res.justification });
-      }
+    // 'Optimized' - Use a Map for O(1) average time complexity lookups
+    const relevanceMap = new Map<string, Omit<AIKeywordRelevance, 'keyword'>>();
+    aiResponse.relevant_keywords.forEach((item) => {
+      relevanceMap.set(item.keyword, { reason: item.reason, score: item.score });
     });
 
     const augmentedKeywords: KeywordWithRelevance<T>[] = keywordsArray.map((originalKeywordObj) => {
-      const aiData = aiResultsMap.get(originalKeywordObj.keyword);
+      const relevance = relevanceMap.get(originalKeywordObj.keyword);
       return {
         ...originalKeywordObj,
-        aiRelevance: aiData ? { ...aiData } : { score: 0, justification: 'Keyword not found in AI results.', error: 'Analysis failed for this keyword.' },
+        aiRelevance: relevance
+          ? { score: relevance.score, justification: relevance.reason }
+          : { score: 0, justification: 'Keyword not found in AI results.', error: 'Analysis failed for this keyword.' },
       };
     });
 
     console.info(`KeywordAnalysisService: Successfully processed AI relevance for ${keywordsArray.length} keywords.`);
     return augmentedKeywords;
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('KeywordAnalysisService: Error calling Gemini API:', error);
     const errorMessage = error instanceof Error ? error.message : String(error);
     return keywordsArray.map((kw) => ({ ...kw, aiRelevance: { score: 0, justification: '', error: `AI API call failed: ${errorMessage}` } }));

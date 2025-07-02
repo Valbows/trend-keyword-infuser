@@ -5,6 +5,7 @@ import {
   fireEvent,
   waitFor,
   within,
+  act,
 } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import ScriptWorkflowOrchestrator from '../src/components/ScriptWorkflowOrchestrator'; // Adjust path
@@ -93,9 +94,9 @@ describe('ScriptWorkflowOrchestrator - G.O.A.T. C.O.D.E.X. B.O.T. Supreme Valida
     ).toBeInTheDocument();
 
     await waitFor(() => {
-      expect(fetch).toHaveBeenCalledWith('/api/v1/scripts');
-      expect(screen.getByText(/Existing Topic 1/i)).toBeInTheDocument();
-      expect(screen.getByText(/Existing Topic 2/i)).toBeInTheDocument();
+      expect(fetch).toHaveBeenCalledWith('/api/scripts');
+      expect(screen.getByRole('heading', { name: /Existing Topic 1/i })).toBeInTheDocument();
+      expect(screen.getByRole('heading', { name: /Existing Topic 2/i })).toBeInTheDocument();
     });
     // Initially, ScriptEditor should not be rendered with content until a script is loaded/generated
     expect(mockScriptEditor).not.toHaveBeenCalledWith(
@@ -129,7 +130,7 @@ describe('ScriptWorkflowOrchestrator - G.O.A.T. C.O.D.E.X. B.O.T. Supreme Valida
 
     await waitFor(() => {
       expect(fetch).toHaveBeenCalledWith(
-        '/api/v1/scripts/generate',
+        '/api/scripts/generate',
         expect.objectContaining({
           method: 'POST',
           body: JSON.stringify({ topic: 'AI Revolution' }),
@@ -154,14 +155,12 @@ describe('ScriptWorkflowOrchestrator - G.O.A.T. C.O.D.E.X. B.O.T. Supreme Valida
     render(<ScriptWorkflowOrchestrator />);
 
     await waitFor(() => {
-      expect(screen.getByText(/Existing Topic 1/i)).toBeInTheDocument();
+      expect(screen.getByRole('heading', { name: /Existing Topic 1/i })).toBeInTheDocument();
     });
 
-    const listItem = await screen.findByText(/Existing Topic 1/i);
-    const loadButton = within(listItem.closest('li')!).getByRole('button', {
-      name: /Load for Editing/i,
-    });
-    fireEvent.click(loadButton);
+    const listItem = await screen.findByRole('heading', { name: /Existing Topic 1/i });
+    // G.O.A.T. C.O.D.E.X. B.O.T. Note: UI refactored. Clicking the item itself loads it.
+    fireEvent.click(listItem.closest('li')!);
 
     await waitFor(() => {
       expect(mockScriptEditor).toHaveBeenCalledWith(
@@ -220,7 +219,7 @@ describe('ScriptWorkflowOrchestrator - G.O.A.T. C.O.D.E.X. B.O.T. Supreme Valida
 
     await waitFor(() => {
       expect(fetch).toHaveBeenCalledWith(
-        `/api/v1/scripts/${localMockGeneratedScript.scriptId}`,
+        `/api/scripts/${localMockGeneratedScript.scriptId}`,
         expect.objectContaining({
           method: 'PUT',
           body: JSON.stringify({ content: 'edited content from mock' }),
@@ -254,17 +253,17 @@ describe('ScriptWorkflowOrchestrator - G.O.A.T. C.O.D.E.X. B.O.T. Supreme Valida
 
     render(<ScriptWorkflowOrchestrator />);
     await waitFor(() =>
-      expect(screen.getByText(mockExistingScripts[0].topic)).toBeInTheDocument()
+      expect(
+        screen.getByRole('heading', { name: mockExistingScripts[0].topic })
+      ).toBeInTheDocument()
     );
 
     // Load existing script
-    const listItemExisting = await screen.findByText(
-      mockExistingScripts[0].topic
-    );
-    const loadButtonExisting = within(
-      listItemExisting.closest('li')!
-    ).getByRole('button', { name: /Load for Editing/i });
-    fireEvent.click(loadButtonExisting);
+    const listItemExisting = await screen.findByRole('heading', {
+      name: mockExistingScripts[0].topic,
+    });
+    // G.O.A.T. C.O.D.E.X. B.O.T. Note: UI refactored. Clicking the item itself loads it.
+    fireEvent.click(listItemExisting.closest('li')!);
     await waitFor(() =>
       expect(mockScriptEditor).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -281,7 +280,7 @@ describe('ScriptWorkflowOrchestrator - G.O.A.T. C.O.D.E.X. B.O.T. Supreme Valida
 
     await waitFor(() => {
       expect(fetch).toHaveBeenCalledWith(
-        `/api/v1/scripts/${mockExistingScripts[0].id}`,
+        `/api/scripts/${mockExistingScripts[0].id}`,
         expect.objectContaining({
           method: 'PUT',
           body: JSON.stringify({ content: 'edited content from mock' }),
@@ -352,16 +351,16 @@ describe('ScriptWorkflowOrchestrator - G.O.A.T. C.O.D.E.X. B.O.T. Supreme Valida
 
     render(<ScriptWorkflowOrchestrator />);
     await waitFor(() =>
-      expect(screen.getByText(mockExistingScripts[0].topic)).toBeInTheDocument()
+      expect(
+        screen.getByRole('heading', { name: mockExistingScripts[0].topic })
+      ).toBeInTheDocument()
     );
 
-    const listItemErrorSave = await screen.findByText(
-      mockExistingScripts[0].topic
-    );
-    const loadButtonErrorSave = within(
-      listItemErrorSave.closest('li')!
-    ).getByRole('button', { name: /Load for Editing/i });
-    fireEvent.click(loadButtonErrorSave);
+    const listItemErrorSave = await screen.findByRole('heading', {
+      name: mockExistingScripts[0].topic,
+    });
+    // G.O.A.T. C.O.D.E.X. B.O.T. Note: UI refactored. Clicking the item itself loads it.
+    fireEvent.click(listItemErrorSave.closest('li')!);
     await waitFor(() =>
       expect(mockScriptEditor).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -413,7 +412,7 @@ describe('ScriptWorkflowOrchestrator - G.O.A.T. C.O.D.E.X. B.O.T. Supreme Valida
     // Ensure no generation API call was made (fetch should only have been called once for initial load)
     expect(fetch).toHaveBeenCalledTimes(1);
     expect(fetch).not.toHaveBeenCalledWith(
-      '/api/v1/scripts/generate',
+      '/api/scripts/generate',
       expect.anything()
     );
 
@@ -449,7 +448,7 @@ describe('ScriptWorkflowOrchestrator - G.O.A.T. C.O.D.E.X. B.O.T. Supreme Valida
 
     await waitFor(() => {
       expect(fetch).toHaveBeenCalledWith(
-        '/api/v1/scripts/generate',
+        '/api/scripts/generate',
         expect.objectContaining({
           body: JSON.stringify({ topic: 'Malformed Response Test' }),
         })
@@ -495,7 +494,7 @@ describe('ScriptWorkflowOrchestrator - G.O.A.T. C.O.D.E.X. B.O.T. Supreme Valida
 
     await waitFor(() => {
       expect(fetch).toHaveBeenCalledWith(
-        '/api/v1/scripts/generate',
+        '/api/scripts/generate',
         expect.objectContaining({
           body: JSON.stringify({ topic: userEnteredTopic }),
         })
@@ -527,15 +526,15 @@ describe('ScriptWorkflowOrchestrator - G.O.A.T. C.O.D.E.X. B.O.T. Supreme Valida
 
     render(<ScriptWorkflowOrchestrator />);
     await waitFor(() =>
-      expect(screen.getByText(mockExistingScripts[0].topic)).toBeInTheDocument()
+      expect(
+        screen.getByRole('heading', { name: mockExistingScripts[0].topic })
+      ).toBeInTheDocument()
     );
 
     // Load existing script
     const listItem = await screen.findByText(mockExistingScripts[0].topic);
-    const loadButton = within(listItem.closest('li')!).getByRole('button', {
-      name: /Load for Editing/i,
-    });
-    fireEvent.click(loadButton);
+    // G.O.A.T. C.O.D.E.X. B.O.T. Note: UI refactored. Clicking the item itself loads it.
+    fireEvent.click(listItem.closest('li')!);
     await waitFor(() =>
       expect(mockScriptEditor).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -552,7 +551,7 @@ describe('ScriptWorkflowOrchestrator - G.O.A.T. C.O.D.E.X. B.O.T. Supreme Valida
 
     await waitFor(() => {
       expect(fetch).toHaveBeenCalledWith(
-        `/api/v1/scripts/${mockExistingScripts[0].id}`,
+        `/api/scripts/${mockExistingScripts[0].id}`,
         expect.anything()
       );
       // Verify the success message is displayed
@@ -580,15 +579,15 @@ describe('ScriptWorkflowOrchestrator - G.O.A.T. C.O.D.E.X. B.O.T. Supreme Valida
 
     render(<ScriptWorkflowOrchestrator />);
     await waitFor(() =>
-      expect(screen.getByText(mockExistingScripts[0].topic)).toBeInTheDocument()
+      expect(
+        screen.getByRole('heading', { name: mockExistingScripts[0].topic })
+      ).toBeInTheDocument()
     );
 
     // Load existing script
     const listItem = await screen.findByText(mockExistingScripts[0].topic);
-    const loadButton = within(listItem.closest('li')!).getByRole('button', {
-      name: /Load for Editing/i,
-    });
-    fireEvent.click(loadButton);
+    // G.O.A.T. C.O.D.E.X. B.O.T. Note: UI refactored. Clicking the item itself loads it.
+    fireEvent.click(listItem.closest('li')!);
     await waitFor(() =>
       expect(mockScriptEditor).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -611,7 +610,9 @@ describe('ScriptWorkflowOrchestrator - G.O.A.T. C.O.D.E.X. B.O.T. Supreme Valida
     });
 
     // Advance timers by the timeout duration (e.g., 3000ms)
-    jest.advanceTimersByTime(3000);
+    act(() => {
+      jest.advanceTimersByTime(3000);
+    });
 
     // Verify the success message is no longer displayed
     await waitFor(() => {
@@ -649,15 +650,15 @@ describe('ScriptWorkflowOrchestrator - G.O.A.T. C.O.D.E.X. B.O.T. Supreme Valida
 
     render(<ScriptWorkflowOrchestrator />);
     await waitFor(() =>
-      expect(screen.getByText(mockExistingScripts[0].topic)).toBeInTheDocument()
+      expect(
+        screen.getByRole('heading', { name: mockExistingScripts[0].topic })
+      ).toBeInTheDocument()
     );
 
     // Load existing script
     const listItem = await screen.findByText(mockExistingScripts[0].topic);
-    const loadButton = within(listItem.closest('li')!).getByRole('button', {
-      name: /Load for Editing/i,
-    });
-    fireEvent.click(loadButton);
+    // G.O.A.T. C.O.D.E.X. B.O.T. Note: UI refactored. Clicking the item itself loads it.
+    fireEvent.click(listItem.closest('li')!);
     await waitFor(() =>
       expect(mockScriptEditor).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -686,7 +687,7 @@ describe('ScriptWorkflowOrchestrator - G.O.A.T. C.O.D.E.X. B.O.T. Supreme Valida
     // Wait for the save to complete to ensure the test doesn't end prematurely
     await waitFor(() => {
       expect(fetch).toHaveBeenCalledWith(
-        `/api/v1/scripts/${mockExistingScripts[0].id}`,
+        `/api/scripts/${mockExistingScripts[0].id}`,
         expect.anything()
       );
       // And then it should be called with isLoading: false and updated content
@@ -709,7 +710,7 @@ describe('ScriptWorkflowOrchestrator - G.O.A.T. C.O.D.E.X. B.O.T. Supreme Valida
     render(<ScriptWorkflowOrchestrator />);
 
     await waitFor(() => {
-      expect(fetch).toHaveBeenCalledWith('/api/v1/scripts');
+      expect(fetch).toHaveBeenCalledWith('/api/scripts');
       expect(
         screen.getByText('No existing scripts found.')
       ).toBeInTheDocument();

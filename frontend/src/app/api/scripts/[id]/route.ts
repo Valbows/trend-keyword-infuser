@@ -7,10 +7,15 @@ interface RouteParams {
   params: { id: string };
 }
 
+interface UpdateScriptBody {
+  title: string;
+  content: string;
+}
+
 /**
  * 'Elegant' and 'Xtensible' handler for fetching a single script by its ID.
  */
-export async function GET(request: Request, { params }: RouteParams) {
+export async function GET(_request: Request, { params }: RouteParams) {
   const id = parseInt(params.id, 10);
 
   if (isNaN(id)) {
@@ -29,10 +34,10 @@ export async function GET(request: Request, { params }: RouteParams) {
     console.info(`[API /scripts/{id}] Successfully fetched script with ID: ${id}`);
     return NextResponse.json({ success: true, data: script });
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error(`[API /scripts/{id}] Error fetching script ${id}:`, error);
     return NextResponse.json(
-      { success: false, message: error.message || 'An internal server error occurred.' },
+      { success: false, message: error instanceof Error ? error.message : 'An internal server error occurred.' },
       { status: 500 }
     );
   }
@@ -49,7 +54,7 @@ export async function PUT(request: Request, { params }: RouteParams) {
   }
 
   try {
-    const body = await request.json();
+    const body: UpdateScriptBody = await request.json();
     const { title, content } = body;
 
     if (!title && !content) {
@@ -62,10 +67,10 @@ export async function PUT(request: Request, { params }: RouteParams) {
 
     return NextResponse.json({ success: true, data: updatedScript });
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error(`[API /scripts/{id}] Error updating script ${id}:`, error);
     return NextResponse.json(
-      { success: false, message: error.message || 'An internal server error occurred.' },
+      { success: false, message: error instanceof Error ? error.message : 'An internal server error occurred.' },
       { status: 500 }
     );
   }

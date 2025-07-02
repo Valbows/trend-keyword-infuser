@@ -4,10 +4,15 @@ import { NextResponse } from 'next/server';
 import { scriptOrchestrationService } from '@/lib/services/scriptOrchestrationService';
 import { YouTubeKeywordItem } from '@/lib/services/trendDiscoveryService';
 
+interface GenerateScriptBody {
+  topic: string;
+  trends: YouTubeKeywordItem[];
+}
+
 // 'Elegant' and 'Xtensible' handler for POST requests
 export async function POST(request: Request) {
   try {
-    const body = await request.json();
+    const body: GenerateScriptBody = await request.json();
     const { topic, trends = [] }: { topic: string; trends: YouTubeKeywordItem[] } = body;
 
     if (!topic) {
@@ -23,9 +28,9 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ success: true, data: newScript });
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('[API /scripts/generate] Error generating script:', error);
-    const errorMessage = error.message || 'An internal server error occurred during script generation.';
+    const errorMessage = error instanceof Error ? error.message : 'An internal server error occurred during script generation.';
     // 'Clairvoyant' error handling to provide specific feedback
     if (errorMessage.includes('GEMINI_API_KEY')) {
         return NextResponse.json(

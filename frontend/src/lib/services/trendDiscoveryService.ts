@@ -1,9 +1,9 @@
 // G.O.A.T. C.O.D.E.X. B.O.T. - Migrated and Enhanced TrendDiscoveryService
 // 'Durable', 'Optimized', and 'Xtensible' TypeScript implementation.
 
+import { youtube_v3 } from 'googleapis';
 import { youTubeDataService } from './youTubeDataService';
 import { getRelevanceForKeywords, KeywordInput, AIRelevance } from './keywordAnalysisService';
-import { youtube_v3 } from 'googleapis';
 
 // 'Optimized' list of stop words to filter out common noise from video titles and descriptions.
 const STOP_WORDS = new Set([
@@ -23,7 +23,7 @@ export interface YouTubeKeywordItem extends ExtractedKeyword {
 }
 
 class TrendDiscoveryService {
-    private async _extractKeywordsFromVideos(videos: youtube_v3.Schema$SearchResult[], topic: string): Promise<ExtractedKeyword[]> {
+    private async _extractKeywordsFromVideos(videos: youtube_v3.Schema$SearchResult[]): Promise<ExtractedKeyword[]> {
         const keywordMap = new Map<string, { count: number; weighted_recency_score_sum: number; source_videos: Set<string> }>();
         const MIN_KEYWORD_LENGTH = 3;
 
@@ -42,7 +42,7 @@ class TrendDiscoveryService {
             const combinedText = `${title} ${description}`.toLowerCase();
             const tokens = combinedText.split(/[^a-z0-9'-]+/).filter(t => t && t.length > 0 && t !== "'" && t !== '-');
 
-            const videoKeywords = new Set<string>();
+            
 
             for (const token of tokens) {
                 if (token.length >= MIN_KEYWORD_LENGTH && !STOP_WORDS.has(token)) {
@@ -55,9 +55,8 @@ class TrendDiscoveryService {
 
                     keywordData.count++;
                     keywordData.weighted_recency_score_sum += recencyScore;
-                    if (!videoKeywords.has(token)) {
+                    if (!keywordData.source_videos.has(video.id.videoId)) {
                         keywordData.source_videos.add(video.id.videoId);
-                        videoKeywords.add(token);
                     }
                 }
             }
@@ -82,13 +81,13 @@ class TrendDiscoveryService {
         }
 
         const query = `${topic} tutorial "how to" update news`;
-        const videos = await youTubeDataService.searchVideos(query, 25, publishedAfter, publishedBefore);
+        const videos = await youTubeDataService.searchVideos(query, 50, publishedAfter, publishedBefore);
 
         if (videos.length === 0) {
             return [];
         }
 
-        const extractedKeywords = await this._extractKeywordsFromVideos(videos, topic);
+        const extractedKeywords = await this._extractKeywordsFromVideos(videos);
         const keywordsWithRelevance = await getRelevanceForKeywords(extractedKeywords, topic);
 
         const finalResult: YouTubeKeywordItem[] = keywordsWithRelevance.map(kw => ({

@@ -35,7 +35,7 @@ const safetySettings: SafetySetting[] = [
  * @param trends An array of trend objects, containing keywords and other metrics.
  * @returns A promise that resolves to the generated script text.
  */
-export async function generateScript(topic: string, trends: YouTubeKeywordItem[]): Promise<string> {
+export const generateScript = async (topic: string, trends: YouTubeKeywordItem[]): Promise<string> => {
   if (!model) {
     throw new Error('ScriptGenerationService: Gemini model not initialized. Check GEMINI_API_KEY.');
   }
@@ -58,7 +58,7 @@ Provide only the script content itself, without any surrounding text, titles, or
 Do not use markdown formatting in the script output (e.g., no ### or **).
 Ensure the script flows naturally and is ready for text-to-speech conversion.
 Example of desired output format for a script with keywords:
-"Welcome back to our channel! Today, we're diving deep into ${topic}. Did you know that ${trends && trends.length > 0 ? trends[0].keyword : 'a recent development'} is making waves? Let's explore..."
+"Welcome back to our channel! Today, we're diving deep into ${topic}. Did you know that ${trends && trends.length > 0 ? `the keyword '${trends[0].keyword}'` : 'a recent development'} is making waves? Let's explore..."
 `;
 
   try {
@@ -77,7 +77,7 @@ Example of desired output format for a script with keywords:
     
     console.info(`[ScriptGenerationService] Successfully generated script for topic: "${topic}"`);
     return responseText.trim();
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error(`[ScriptGenerationService] Error generating script for topic "${topic}":`, error);
     const errorMessage = error instanceof Error ? error.message : String(error);
     throw new Error(`Gemini API Error: ${errorMessage}`);

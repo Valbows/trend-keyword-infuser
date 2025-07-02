@@ -62,8 +62,6 @@ const ScriptWorkflowOrchestrator: React.FC = () => {
         const responseData = await response.json();
         
         // Handle API response structure { success: true, data: scripts[] }
-        console.log('[ScriptWorkflowOrchestrator] Scripts response:', responseData);
-        
         if (responseData && responseData.data && Array.isArray(responseData.data)) {
           // Standard API response with { success: true, data: [...] } format
           setExistingScripts(responseData.data);
@@ -71,11 +69,9 @@ const ScriptWorkflowOrchestrator: React.FC = () => {
           // Direct array response
           setExistingScripts(responseData);
         } else {
-          console.error('[ScriptWorkflowOrchestrator] Unexpected scripts response format:', responseData);
           setExistingScripts([]);
         }
       } catch (error: unknown) {
-        console.error('Failed to fetch existing scripts:', error);
         let errorMessage = 'An unknown error occurred while fetching scripts.';
         if (error instanceof Error) {
           errorMessage = error.message;
@@ -104,7 +100,6 @@ const ScriptWorkflowOrchestrator: React.FC = () => {
       // For instance, by focusing the textarea or scrolling the view.
       // const editorElement = document.getElementById('scriptEditorTextArea'); // Assuming ScriptEditor's textarea has such an ID
       // if (editorElement) editorElement.focus();
-      console.log(`Loading script ID: ${script.id} for editing.`);
     },
     [
       setCurrentScriptId,
@@ -154,7 +149,6 @@ const ScriptWorkflowOrchestrator: React.FC = () => {
         );
       }
     } catch (error: unknown) {
-      console.error('Failed to generate script:', error);
       let errorMessage = 'An unknown error occurred during script generation.';
       if (error instanceof Error) {
         errorMessage = error.message;
@@ -217,7 +211,6 @@ const ScriptWorkflowOrchestrator: React.FC = () => {
         // Auto-clear success message after a few seconds
         setTimeout(() => setSaveSuccessMessage(null), 3000);
       } catch (error: unknown) {
-        console.error('Failed to save script:', error);
         let errorMessage = 'An unknown error occurred while saving the script.';
         if (error instanceof Error) {
           errorMessage = error.message;
@@ -242,10 +235,6 @@ const ScriptWorkflowOrchestrator: React.FC = () => {
     (updatedScript: ScriptSummary) => {
       // This 'Clairvoyant' check ensures we don't crash if a child component provides invalid data.
       if (!updatedScript || !updatedScript.id) {
-        console.error(
-          '[ScriptWorkflowOrchestrator] handleEngagementRecorded received an invalid script object:',
-          updatedScript
-        );
         return; // Exit gracefully
       }
 
@@ -258,17 +247,7 @@ const ScriptWorkflowOrchestrator: React.FC = () => {
     []
   );
 
-  console.log(
-    '[ScriptWorkflowOrchestrator] DEBUG: ScriptEditor render conditions:',
-    {
-      hasContent: !!currentScriptContent,
-      hasId: !!currentScriptId,
-      shouldRenderEditor: !!(currentScriptContent || currentScriptId),
-      currentScriptIdForTitle: currentScriptId,
-      isLoadingSaveProp: isLoadingSave, // This is passed to ScriptEditor's isLoading prop
-      saveErrorProp: saveError,
-    }
-  );
+
 
   return (
     <div className='space-y-8 p-4 md:p-8 max-w-4xl mx-auto bg-slate-900 text-slate-100 rounded-xl shadow-2xl'>

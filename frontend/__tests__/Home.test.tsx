@@ -1,6 +1,17 @@
 import '@testing-library/jest-dom';
 import { render, screen, fireEvent } from '@testing-library/react';
 import Home from '../src/app/page';
+import { SelectedKeywordsProvider } from '../src/contexts/SelectedKeywordsContext';
+
+// G.O.A.T. C.O.D.E.X. B.O.T. Note: A custom render function is 'Elegant' and 'Durable'.
+// It ensures the component is always wrapped in the necessary context provider.
+const renderHome = () => {
+  return render(
+    <SelectedKeywordsProvider>
+      <Home />
+    </SelectedKeywordsProvider>
+  );
+};
 
 // Mock the TrendSidebar component to isolate the Home component for testing
 jest.mock('../src/components/TrendSidebar', () => {
@@ -28,7 +39,7 @@ describe('Home Page', () => {
   });
 
   it('renders the main heading', () => {
-    render(<Home />);
+    renderHome();
 
     const heading = screen.getByRole('heading', {
       name: /Trend Keyword Infuser/i,
@@ -38,7 +49,7 @@ describe('Home Page', () => {
   });
 
   it('updates the topic in TrendSidebar when user types in the topic input', () => {
-    render(<Home />);
+    renderHome();
 
     const topicInput = screen.getByPlaceholderText(
       "e.g., 'Future of Artificial Intelligence'"
@@ -52,7 +63,7 @@ describe('Home Page', () => {
   });
 
   it('derives a topic from a pasted script and passes it to TrendSidebar', () => {
-    render(<Home />);
+    renderHome();
 
     const scriptInput = screen.getByPlaceholderText(
       'Paste your script here...'
@@ -69,7 +80,7 @@ describe('Home Page', () => {
   });
 
   it('enables the Generate Script button only when a topic is provided', () => {
-    render(<Home />);
+    renderHome();
 
     const generateButton = screen.getByRole('button', {
       name: /Generate Script/i,

@@ -4,7 +4,7 @@ import { NextResponse } from 'next/server';
 import { scriptService } from '@/lib/services/scriptService';
 
 // 'Elegant' and 'Xtensible' handler for GET requests
-export async function GET(request: Request) {
+export async function GET(_request: Request) {
   try {
     console.info('[API /scripts] Fetching all scripts.');
     const scripts = await scriptService.getAllScripts();
@@ -12,10 +12,10 @@ export async function GET(request: Request) {
 
     return NextResponse.json({ success: true, data: scripts });
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('[API /scripts] Error fetching all scripts:', error);
     return NextResponse.json(
-      { success: false, message: error.message || 'An internal server error occurred.' },
+      { success: false, message: error instanceof Error ? error.message : 'An internal server error occurred.' },
       { status: 500 }
     );
   }

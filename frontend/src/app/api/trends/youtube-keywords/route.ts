@@ -30,10 +30,10 @@ export async function GET(request: Request) {
     console.info(`[API /trends/youtube-keywords] Found ${trends.length} trends.`);
     return NextResponse.json({ success: true, data: trends });
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error(`[API /trends/youtube-keywords] Error fetching trends for topic "${topic}":`, error);
     return NextResponse.json(
-      { success: false, message: error.message || 'An internal server error occurred.' },
+      { success: false, message: error instanceof Error ? error.message : 'An internal server error occurred.' },
       { status: 500 }
     );
   }

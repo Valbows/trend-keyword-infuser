@@ -82,13 +82,33 @@ class YouTubeDataService {
 
       console.info(`[YouTubeDataService] Found ${items.length} videos for query: "${query}"`);
       return items;
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error(`[YouTubeDataService] CRITICAL ERROR searching for videos with query "${query}".`);
       console.error('[YouTubeDataService] Full Google API Error:', JSON.stringify(error, null, 2));
-      const errorMessage =
-        error.response?.data?.error?.message ||
-        error.message ||
-        'An unknown error occurred while contacting the YouTube API.';
+      let errorMessage;
+      if (error instanceof Error) {
+        // The googleapis library can throw errors with a 'response' property.
+        // This is a 'Durable' way to check for a more specific error message.
+        const response = (error as { response?: unknown }).response;
+        if (
+          response &&
+          typeof response === 'object' &&
+          'data' in response &&
+          response.data &&
+          typeof response.data === 'object' &&
+          'error' in response.data &&
+          response.data.error &&
+          typeof response.data.error === 'object' &&
+          'message' in response.data.error &&
+          typeof (response.data.error as { message: unknown }).message === 'string'
+        ) {
+          errorMessage = (response.data.error as { message: string }).message;
+        } else {
+          errorMessage = error.message;
+        }
+      } else {
+        errorMessage = 'An unknown error occurred while contacting the YouTube API.';
+      }
       throw new Error(`YouTube API Error: ${errorMessage}`);
     }
   }
@@ -122,14 +142,34 @@ class YouTubeDataService {
         likes: parseInt(stats.likeCount || '0', 10),
         comments: parseInt(stats.commentCount || '0', 10),
       };
-    } catch (error: any) {
+    } catch (error: unknown) {
       // 'Clairvoyant' and 'Omniscient' logging for durable error diagnostics.
       console.error(`[YouTubeDataService] CRITICAL ERROR fetching video statistics for ID ${videoId}.`);
       console.error('[YouTubeDataService] Full Google API Error:', JSON.stringify(error, null, 2));
-      const errorMessage =
-        error.response?.data?.error?.message ||
-        error.message ||
-        'An unknown error occurred while contacting the YouTube API.';
+      let errorMessage;
+      if (error instanceof Error) {
+        // The googleapis library can throw errors with a 'response' property.
+        // This is a 'Durable' way to check for a more specific error message.
+        const response = (error as { response?: unknown }).response;
+        if (
+          response &&
+          typeof response === 'object' &&
+          'data' in response &&
+          response.data &&
+          typeof response.data === 'object' &&
+          'error' in response.data &&
+          response.data.error &&
+          typeof response.data.error === 'object' &&
+          'message' in response.data.error &&
+          typeof (response.data.error as { message: unknown }).message === 'string'
+        ) {
+          errorMessage = (response.data.error as { message: string }).message;
+        } else {
+          errorMessage = error.message;
+        }
+      } else {
+        errorMessage = 'An unknown error occurred while contacting the YouTube API.';
+      }
       throw new Error(`YouTube API Error: ${errorMessage}`);
     }
   }
