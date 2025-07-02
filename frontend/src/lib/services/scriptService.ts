@@ -4,7 +4,7 @@
 
 import { supabase } from './supabaseClient';
 import { ServiceResponse, withErrorHandling } from '../utils/serviceUtils';
-import { env } from '../config/environment';
+import { env as _env } from '../config/environment';
 
 // 'Elegant' and 'Xtensible' type definition for a Script
 // 'Elegant' and 'Xtensible' type definition for a Script, including engagement metrics

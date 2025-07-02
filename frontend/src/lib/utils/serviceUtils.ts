@@ -61,7 +61,25 @@ export function handleSupabaseError<T>(
     message = error.message;
   }
   
-  if ('code' in (error as any) && 'message' in (error as any)) {
+  // Define a type for PostgreSQL-like errors to avoid using 'any'
+  interface PostgresErrorLike {
+    code: string;
+    message: string;
+  }
+  
+  // Type guard function to check if the error is PostgreSQL-like
+  function isPostgresError(err: unknown): err is PostgresErrorLike {
+    return (
+      typeof err === 'object' &&
+      err !== null &&
+      'code' in err &&
+      'message' in err &&
+      typeof (err as PostgresErrorLike).code === 'string' &&
+      typeof (err as PostgresErrorLike).message === 'string'
+    );
+  }
+  
+  if (isPostgresError(error)) {
     const pgError = error as PostgrestError;
     message = pgError.message;
     
