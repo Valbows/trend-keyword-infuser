@@ -7,15 +7,14 @@ interface RecordEngagementBody {
   videoUrl: string;
 }
 
-interface RouteParams {
-  params: { id: string };
-}
-
 /**
  * 'Elegant' and 'Xtensible' handler for recording YouTube engagement for a script.
  */
-export async function POST(request: Request, { params }: RouteParams) {
-  const id = parseInt(params.id, 10);
+export async function POST(
+  request: Request,
+  context: { params: { id: string } }
+) {
+  const id = parseInt(context.params.id, 10);
 
   if (isNaN(id)) {
     return NextResponse.json({ success: false, message: 'Invalid script ID.' }, { status: 400 });
