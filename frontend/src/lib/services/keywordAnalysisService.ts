@@ -1,7 +1,13 @@
 // G.O.A.T. C.O.D.E.X. B.O.T. - Migrated and Enhanced KeywordAnalysisService
 // 'Durable', 'Optimized', and 'Xtensible' TypeScript implementation.
 
-import { GoogleGenerativeAI, HarmCategory, HarmBlockThreshold, GenerationConfig, SafetySetting } from '@google/generative-ai';
+import {
+  GoogleGenerativeAI,
+  HarmCategory,
+  HarmBlockThreshold,
+  GenerationConfig,
+  SafetySetting,
+} from '@google/generative-ai';
 
 // 'Durable' and 'Elegant' type definitions for AI service responses
 interface AIKeywordRelevance {
@@ -38,10 +44,14 @@ let genAI: GoogleGenerativeAI | undefined;
 if (GEMINI_API_KEY) {
   genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
 } else {
-  console.error('KeywordAnalysisService: GEMINI_API_KEY is not set. AI relevance features will be disabled.');
+  console.error(
+    'KeywordAnalysisService: GEMINI_API_KEY is not set. AI relevance features will be disabled.'
+  );
 }
 
-const model = genAI ? genAI.getGenerativeModel({ model: 'gemini-1.5-flash-latest' }) : null;
+const model = genAI
+  ? genAI.getGenerativeModel({ model: 'gemini-1.5-flash-latest' })
+  : null;
 
 const generationConfig: GenerationConfig = {
   temperature: 0.3,
@@ -52,10 +62,22 @@ const generationConfig: GenerationConfig = {
 };
 
 const safetySettings: SafetySetting[] = [
-  { category: HarmCategory.HARM_CATEGORY_HARASSMENT, threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE },
-  { category: HarmCategory.HARM_CATEGORY_HATE_SPEECH, threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE },
-  { category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT, threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE },
-  { category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT, threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE },
+  {
+    category: HarmCategory.HARM_CATEGORY_HARASSMENT,
+    threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
+  },
+  {
+    category: HarmCategory.HARM_CATEGORY_HATE_SPEECH,
+    threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
+  },
+  {
+    category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT,
+    threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
+  },
+  {
+    category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT,
+    threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
+  },
 ];
 
 /**
@@ -69,14 +91,22 @@ export async function getRelevanceForKeywords<T extends KeywordInput>(
   contextTopic: string
 ): Promise<KeywordWithRelevance<T>[]> {
   if (!model) {
-    console.warn('KeywordAnalysisService: Gemini model not initialized. Skipping AI relevance.');
+    console.warn(
+      'KeywordAnalysisService: Gemini model not initialized. Skipping AI relevance.'
+    );
     return keywordsArray.map((kw) => ({ ...kw, aiRelevance: null }));
   }
   if (!keywordsArray || keywordsArray.length === 0) {
     return [];
   }
-  if (!contextTopic || typeof contextTopic !== 'string' || contextTopic.trim() === '') {
-    console.warn('KeywordAnalysisService: Context topic is invalid. Skipping AI relevance.');
+  if (
+    !contextTopic ||
+    typeof contextTopic !== 'string' ||
+    contextTopic.trim() === ''
+  ) {
+    console.warn(
+      'KeywordAnalysisService: Context topic is invalid. Skipping AI relevance.'
+    );
     return keywordsArray.map((kw) => ({ ...kw, aiRelevance: null }));
   }
 
@@ -92,8 +122,14 @@ export async function getRelevanceForKeywords<T extends KeywordInput>(
   `;
 
   try {
-    console.debug(`KeywordAnalysisService: Sending prompt to Gemini for topic "${contextTopic}".`);
-    const result = await model.generateContent({ contents: [{ role: 'user', parts: [{ text: prompt }] }], generationConfig, safetySettings });
+    console.debug(
+      `KeywordAnalysisService: Sending prompt to Gemini for topic "${contextTopic}".`
+    );
+    const result = await model.generateContent({
+      contents: [{ role: 'user', parts: [{ text: prompt }] }],
+      generationConfig,
+      safetySettings,
+    });
 
     const responseText = result.response.text();
     const aiResponse: AIResponse = JSON.parse(responseText);
@@ -101,25 +137,42 @@ export async function getRelevanceForKeywords<T extends KeywordInput>(
     // 'Optimized' - Use a Map for O(1) average time complexity lookups
     const relevanceMap = new Map<string, Omit<AIKeywordRelevance, 'keyword'>>();
     aiResponse.relevant_keywords.forEach((item) => {
-      relevanceMap.set(item.keyword, { reason: item.reason, score: item.score });
+      relevanceMap.set(item.keyword, {
+        reason: item.reason,
+        score: item.score,
+      });
     });
 
-    const augmentedKeywords: KeywordWithRelevance<T>[] = keywordsArray.map((originalKeywordObj) => {
-      const relevance = relevanceMap.get(originalKeywordObj.keyword);
-      return {
-        ...originalKeywordObj,
-        aiRelevance: relevance
-          ? { score: relevance.score, justification: relevance.reason }
-          : { score: 0, justification: 'Keyword not found in AI results.', error: 'Analysis failed for this keyword.' },
-      };
-    });
+    const augmentedKeywords: KeywordWithRelevance<T>[] = keywordsArray.map(
+      (originalKeywordObj) => {
+        const relevance = relevanceMap.get(originalKeywordObj.keyword);
+        return {
+          ...originalKeywordObj,
+          aiRelevance: relevance
+            ? { score: relevance.score, justification: relevance.reason }
+            : {
+                score: 0,
+                justification: 'Keyword not found in AI results.',
+                error: 'Analysis failed for this keyword.',
+              },
+        };
+      }
+    );
 
-    console.info(`KeywordAnalysisService: Successfully processed AI relevance for ${keywordsArray.length} keywords.`);
+    console.info(
+      `KeywordAnalysisService: Successfully processed AI relevance for ${keywordsArray.length} keywords.`
+    );
     return augmentedKeywords;
-
   } catch (error: unknown) {
     console.error('KeywordAnalysisService: Error calling Gemini API:', error);
     const errorMessage = error instanceof Error ? error.message : String(error);
-    return keywordsArray.map((kw) => ({ ...kw, aiRelevance: { score: 0, justification: '', error: `AI API call failed: ${errorMessage}` } }));
+    return keywordsArray.map((kw) => ({
+      ...kw,
+      aiRelevance: {
+        score: 0,
+        justification: '',
+        error: `AI API call failed: ${errorMessage}`,
+      },
+    }));
   }
 }

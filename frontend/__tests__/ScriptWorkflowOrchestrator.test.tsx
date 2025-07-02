@@ -95,8 +95,12 @@ describe('ScriptWorkflowOrchestrator - G.O.A.T. C.O.D.E.X. B.O.T. Supreme Valida
 
     await waitFor(() => {
       expect(fetch).toHaveBeenCalledWith('/api/scripts');
-      expect(screen.getByRole('heading', { name: /Existing Topic 1/i })).toBeInTheDocument();
-      expect(screen.getByRole('heading', { name: /Existing Topic 2/i })).toBeInTheDocument();
+      expect(
+        screen.getByRole('heading', { name: /Existing Topic 1/i })
+      ).toBeInTheDocument();
+      expect(
+        screen.getByRole('heading', { name: /Existing Topic 2/i })
+      ).toBeInTheDocument();
     });
     // Initially, ScriptEditor should not be rendered with content until a script is loaded/generated
     expect(mockScriptEditor).not.toHaveBeenCalledWith(
@@ -155,10 +159,14 @@ describe('ScriptWorkflowOrchestrator - G.O.A.T. C.O.D.E.X. B.O.T. Supreme Valida
     render(<ScriptWorkflowOrchestrator />);
 
     await waitFor(() => {
-      expect(screen.getByRole('heading', { name: /Existing Topic 1/i })).toBeInTheDocument();
+      expect(
+        screen.getByRole('heading', { name: /Existing Topic 1/i })
+      ).toBeInTheDocument();
     });
 
-    const listItem = await screen.findByRole('heading', { name: /Existing Topic 1/i });
+    const listItem = await screen.findByRole('heading', {
+      name: /Existing Topic 1/i,
+    });
     // G.O.A.T. C.O.D.E.X. B.O.T. Note: UI refactored. Clicking the item itself loads it.
     fireEvent.click(listItem.closest('li')!);
 

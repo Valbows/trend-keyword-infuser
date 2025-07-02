@@ -15,7 +15,8 @@ class YouTubeDataService {
 
   constructor(apiKey: string) {
     if (!apiKey) {
-      const errorMessage = 'FATAL: YOUTUBE_API_KEY is not configured. The service cannot operate.';
+      const errorMessage =
+        'FATAL: YOUTUBE_API_KEY is not configured. The service cannot operate.';
       console.error(`[YouTubeDataService] ${errorMessage}`);
       throw new Error(errorMessage);
     }
@@ -37,7 +38,9 @@ class YouTubeDataService {
       /(?:youtube\.com\/(?:[^/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|\S*?[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/;
     const match = url.match(regex);
     const videoId = match ? match[1] : null;
-    console.info(`[YouTubeDataService] Extracted videoId: ${videoId} from URL: ${url}`);
+    console.info(
+      `[YouTubeDataService] Extracted videoId: ${videoId} from URL: ${url}`
+    );
     return videoId;
   }
 
@@ -60,7 +63,9 @@ class YouTubeDataService {
     publishedAfter?: string,
     publishedBefore?: string
   ): Promise<youtube_v3.Schema$SearchResult[]> {
-    console.info(`[YouTubeDataService] Searching for videos with query: "${query}"`);
+    console.info(
+      `[YouTubeDataService] Searching for videos with query: "${query}"`
+    );
     try {
       const params: youtube_v3.Params$Resource$Search$List = {
         part: ['snippet'],
@@ -76,15 +81,24 @@ class YouTubeDataService {
 
       const items = response.data.items;
       if (!items) {
-        console.warn(`[YouTubeDataService] No videos found for query: "${query}"`);
+        console.warn(
+          `[YouTubeDataService] No videos found for query: "${query}"`
+        );
         return [];
       }
 
-      console.info(`[YouTubeDataService] Found ${items.length} videos for query: "${query}"`);
+      console.info(
+        `[YouTubeDataService] Found ${items.length} videos for query: "${query}"`
+      );
       return items;
     } catch (error: unknown) {
-      console.error(`[YouTubeDataService] CRITICAL ERROR searching for videos with query "${query}".`);
-      console.error('[YouTubeDataService] Full Google API Error:', JSON.stringify(error, null, 2));
+      console.error(
+        `[YouTubeDataService] CRITICAL ERROR searching for videos with query "${query}".`
+      );
+      console.error(
+        '[YouTubeDataService] Full Google API Error:',
+        JSON.stringify(error, null, 2)
+      );
       let errorMessage;
       if (error instanceof Error) {
         // The googleapis library can throw errors with a 'response' property.
@@ -100,14 +114,16 @@ class YouTubeDataService {
           response.data.error &&
           typeof response.data.error === 'object' &&
           'message' in response.data.error &&
-          typeof (response.data.error as { message: unknown }).message === 'string'
+          typeof (response.data.error as { message: unknown }).message ===
+            'string'
         ) {
           errorMessage = (response.data.error as { message: string }).message;
         } else {
           errorMessage = error.message;
         }
       } else {
-        errorMessage = 'An unknown error occurred while contacting the YouTube API.';
+        errorMessage =
+          'An unknown error occurred while contacting the YouTube API.';
       }
       throw new Error(`YouTube API Error: ${errorMessage}`);
     }
@@ -118,7 +134,9 @@ class YouTubeDataService {
       throw new Error('Invalid videoId provided to getVideoStatistics.');
     }
 
-    console.info(`[YouTubeDataService] Fetching statistics for videoId: ${videoId}`);
+    console.info(
+      `[YouTubeDataService] Fetching statistics for videoId: ${videoId}`
+    );
 
     try {
       const response = await this.youtube.videos.list({
@@ -135,8 +153,11 @@ class YouTubeDataService {
       if (!stats) {
         throw new Error(`Statistics not found for video ID: ${videoId}`);
       }
-      
-      console.info(`[YouTubeDataService] Successfully fetched stats for videoId ${videoId}:`, stats);
+
+      console.info(
+        `[YouTubeDataService] Successfully fetched stats for videoId ${videoId}:`,
+        stats
+      );
       return {
         views: parseInt(stats.viewCount || '0', 10),
         likes: parseInt(stats.likeCount || '0', 10),
@@ -144,8 +165,13 @@ class YouTubeDataService {
       };
     } catch (error: unknown) {
       // 'Clairvoyant' and 'Omniscient' logging for durable error diagnostics.
-      console.error(`[YouTubeDataService] CRITICAL ERROR fetching video statistics for ID ${videoId}.`);
-      console.error('[YouTubeDataService] Full Google API Error:', JSON.stringify(error, null, 2));
+      console.error(
+        `[YouTubeDataService] CRITICAL ERROR fetching video statistics for ID ${videoId}.`
+      );
+      console.error(
+        '[YouTubeDataService] Full Google API Error:',
+        JSON.stringify(error, null, 2)
+      );
       let errorMessage;
       if (error instanceof Error) {
         // The googleapis library can throw errors with a 'response' property.
@@ -161,14 +187,16 @@ class YouTubeDataService {
           response.data.error &&
           typeof response.data.error === 'object' &&
           'message' in response.data.error &&
-          typeof (response.data.error as { message: unknown }).message === 'string'
+          typeof (response.data.error as { message: unknown }).message ===
+            'string'
         ) {
           errorMessage = (response.data.error as { message: string }).message;
         } else {
           errorMessage = error.message;
         }
       } else {
-        errorMessage = 'An unknown error occurred while contacting the YouTube API.';
+        errorMessage =
+          'An unknown error occurred while contacting the YouTube API.';
       }
       throw new Error(`YouTube API Error: ${errorMessage}`);
     }
@@ -178,8 +206,12 @@ class YouTubeDataService {
 // 'Altruistic' Singleton Pattern: Ensures a single, configured instance throughout the application.
 const apiKey = process.env.YOUTUBE_API_KEY;
 if (!apiKey) {
-  console.warn('[YouTubeDataService] YOUTUBE_API_KEY is not set. Service will not be available.');
+  console.warn(
+    '[YouTubeDataService] YOUTUBE_API_KEY is not set. Service will not be available.'
+  );
 }
 
 // Export the instance, which may be null if the API key is not provided.
-export const youTubeDataService = apiKey ? new YouTubeDataService(apiKey) : null;
+export const youTubeDataService = apiKey
+  ? new YouTubeDataService(apiKey)
+  : null;

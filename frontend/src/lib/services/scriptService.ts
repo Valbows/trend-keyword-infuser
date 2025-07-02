@@ -29,14 +29,19 @@ class ScriptService {
    */
   async getAllScripts(): Promise<Script[]> {
     console.info('[ScriptService] Fetching all scripts.');
-    const { data, error } = await supabase.from('scripts').select('*').order('created_at', { ascending: false });
+    const { data, error } = await supabase
+      .from('scripts')
+      .select('*')
+      .order('created_at', { ascending: false });
 
     if (error) {
       console.error('[ScriptService] Error fetching scripts:', error);
       throw new Error('Could not fetch scripts from the database.');
     }
 
-    console.info(`[ScriptService] Successfully fetched ${data.length} scripts.`);
+    console.info(
+      `[ScriptService] Successfully fetched ${data.length} scripts.`
+    );
     return data;
   }
 
@@ -47,13 +52,18 @@ class ScriptService {
    */
   async getScriptById(id: number): Promise<Script | null> {
     console.info(`[ScriptService] Fetching script with ID: ${id}.`);
-    const { data, error } = await supabase.from('scripts').select('*').eq('id', id).single();
+    const { data, error } = await supabase
+      .from('scripts')
+      .select('*')
+      .eq('id', id)
+      .single();
 
     if (error) {
-        if (error.code === 'PGRST116') { // PostgREST error for "exact one row not found"
-            console.warn(`[ScriptService] Script with ID ${id} not found.`);
-            return null;
-        }
+      if (error.code === 'PGRST116') {
+        // PostgREST error for "exact one row not found"
+        console.warn(`[ScriptService] Script with ID ${id} not found.`);
+        return null;
+      }
       console.error(`[ScriptService] Error fetching script ${id}:`, error);
       throw new Error(`Could not fetch script with ID ${id}.`);
     }
@@ -67,16 +77,26 @@ class ScriptService {
    * @param scriptData The data for the new script.
    * @returns A promise that resolves to the newly created script.
    */
-  async createScript(scriptData: Omit<Script, 'id' | 'created_at' | 'updated_at'>): Promise<Script> {
-    console.info(`[ScriptService] Creating new script with title: "${scriptData.title}".`);
-    const { data, error } = await supabase.from('scripts').insert([scriptData]).select().single();
+  async createScript(
+    scriptData: Omit<Script, 'id' | 'created_at' | 'updated_at'>
+  ): Promise<Script> {
+    console.info(
+      `[ScriptService] Creating new script with title: "${scriptData.title}".`
+    );
+    const { data, error } = await supabase
+      .from('scripts')
+      .insert([scriptData])
+      .select()
+      .single();
 
     if (error) {
       console.error('[ScriptService] Error creating script:', error);
       throw new Error('Could not create the new script.');
     }
 
-    console.info(`[ScriptService] Successfully created script with ID: ${data.id}.`);
+    console.info(
+      `[ScriptService] Successfully created script with ID: ${data.id}.`
+    );
     return data;
   }
 
@@ -86,9 +106,17 @@ class ScriptService {
    * @param updates The partial data to update the script with.
    * @returns A promise that resolves to the updated script.
    */
-  async updateScript(id: number, updates: Partial<Omit<Script, 'id' | 'created_at'>>): Promise<Script> {
+  async updateScript(
+    id: number,
+    updates: Partial<Omit<Script, 'id' | 'created_at'>>
+  ): Promise<Script> {
     console.info(`[ScriptService] Updating script with ID: ${id}.`);
-    const { data, error } = await supabase.from('scripts').update(updates).eq('id', id).select().single();
+    const { data, error } = await supabase
+      .from('scripts')
+      .update(updates)
+      .eq('id', id)
+      .select()
+      .single();
 
     if (error) {
       console.error(`[ScriptService] Error updating script ${id}:`, error);

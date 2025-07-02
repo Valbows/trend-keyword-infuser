@@ -13,16 +13,21 @@ class EngagementRecordingService {
    */
   async recordEngagement(scriptId: number, videoUrl: string) {
     if (!youTubeDataService) {
-      const errorMessage = 'YouTube Data Service is not available. Please check API key configuration.';
+      const errorMessage =
+        'YouTube Data Service is not available. Please check API key configuration.';
       console.error(`[EngagementService] ${errorMessage}`);
       throw new Error(errorMessage);
     }
-    console.info(`[EngagementService] Starting engagement recording for script ID: ${scriptId}`);
+    console.info(
+      `[EngagementService] Starting engagement recording for script ID: ${scriptId}`
+    );
 
     // Step 1: Extract Video ID
     const videoId = youTubeDataService.extractYouTubeVideoId(videoUrl);
     if (!videoId) {
-      console.error(`[EngagementService] Invalid or unsupported YouTube URL: ${videoUrl}`);
+      console.error(
+        `[EngagementService] Invalid or unsupported YouTube URL: ${videoUrl}`
+      );
       throw new Error('Invalid YouTube URL provided.');
     }
 
@@ -42,8 +47,13 @@ class EngagementRecordingService {
       engagement_retrieved_at: new Date().toISOString(),
     };
 
-    const updatedScript = await scriptService.updateScript(scriptId, updatePayload);
-    console.info(`[EngagementService] Successfully recorded engagement for script ID: ${scriptId}`);
+    const updatedScript = await scriptService.updateScript(
+      scriptId,
+      updatePayload
+    );
+    console.info(
+      `[EngagementService] Successfully recorded engagement for script ID: ${scriptId}`
+    );
 
     return updatedScript;
   }

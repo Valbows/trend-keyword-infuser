@@ -1,19 +1,28 @@
 import '@testing-library/jest-dom';
 import React, { ReactElement } from 'react';
-import { render, screen, fireEvent, waitFor, RenderOptions } from '@testing-library/react';
+import {
+  render,
+  screen,
+  fireEvent,
+  waitFor,
+  RenderOptions,
+} from '@testing-library/react';
 import TrendSidebar from '../src/components/TrendSidebar';
 import { YouTubeKeywordItem } from '../src/types/trends';
 import { SelectedKeywordsProvider } from '../src/contexts/SelectedKeywordsContext';
 
 // G.O.A.T. C.O.D.E.X. B.O.T. Note: A custom render function is 'Elegant' and 'Durable'.
 // It wraps the component in necessary providers, ensuring a 'Truth-Seeking' test environment.
-const AllTheProviders: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+const AllTheProviders: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
   return <SelectedKeywordsProvider>{children}</SelectedKeywordsProvider>;
 };
 
-const renderWithProvider = (ui: ReactElement, options?: Omit<RenderOptions, 'wrapper'>) =>
-  render(ui, { wrapper: AllTheProviders, ...options });
-
+const renderWithProvider = (
+  ui: ReactElement,
+  options?: Omit<RenderOptions, 'wrapper'>
+) => render(ui, { wrapper: AllTheProviders, ...options });
 
 // Mock the global fetch function
 global.fetch = jest.fn();

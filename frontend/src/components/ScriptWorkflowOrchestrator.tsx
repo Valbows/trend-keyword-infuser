@@ -60,9 +60,13 @@ const ScriptWorkflowOrchestrator: React.FC = () => {
           );
         }
         const responseData = await response.json();
-        
+
         // Handle API response structure { success: true, data: scripts[] }
-        if (responseData && responseData.data && Array.isArray(responseData.data)) {
+        if (
+          responseData &&
+          responseData.data &&
+          Array.isArray(responseData.data)
+        ) {
           // Standard API response with { success: true, data: [...] } format
           setExistingScripts(responseData.data);
         } else if (Array.isArray(responseData)) {
@@ -246,8 +250,6 @@ const ScriptWorkflowOrchestrator: React.FC = () => {
     },
     []
   );
-
-
 
   return (
     <div className='space-y-8 p-4 md:p-8 max-w-4xl mx-auto bg-slate-900 text-slate-100 rounded-xl shadow-2xl'>

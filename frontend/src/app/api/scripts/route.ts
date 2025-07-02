@@ -8,14 +8,21 @@ export async function GET(_request: Request) {
   try {
     console.info('[API /scripts] Fetching all scripts.');
     const scripts = await scriptService.getAllScripts();
-    console.info(`[API /scripts] Successfully fetched ${scripts.length} scripts.`);
+    console.info(
+      `[API /scripts] Successfully fetched ${scripts.length} scripts.`
+    );
 
     return NextResponse.json({ success: true, data: scripts });
-
   } catch (error: unknown) {
     console.error('[API /scripts] Error fetching all scripts:', error);
     return NextResponse.json(
-      { success: false, message: error instanceof Error ? error.message : 'An internal server error occurred.' },
+      {
+        success: false,
+        message:
+          error instanceof Error
+            ? error.message
+            : 'An internal server error occurred.',
+      },
       { status: 500 }
     );
   }

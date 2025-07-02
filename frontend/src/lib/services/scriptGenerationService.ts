@@ -1,7 +1,13 @@
 // G.O.A.T. C.O.D.E.X. B.O.T. - Migrated and Enhanced ScriptGenerationService
 // 'Durable', 'Optimized', and 'Xtensible' TypeScript implementation.
 
-import { GoogleGenerativeAI, HarmCategory, HarmBlockThreshold, GenerationConfig, SafetySetting } from '@google/generative-ai';
+import {
+  GoogleGenerativeAI,
+  HarmCategory,
+  HarmBlockThreshold,
+  GenerationConfig,
+  SafetySetting,
+} from '@google/generative-ai';
 import { YouTubeKeywordItem } from './trendDiscoveryService';
 
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
@@ -10,10 +16,14 @@ let genAI: GoogleGenerativeAI | undefined;
 if (GEMINI_API_KEY) {
   genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
 } else {
-  console.error('ScriptGenerationService: GEMINI_API_KEY is not set. Script generation will be disabled.');
+  console.error(
+    'ScriptGenerationService: GEMINI_API_KEY is not set. Script generation will be disabled.'
+  );
 }
 
-const model = genAI ? genAI.getGenerativeModel({ model: 'gemini-1.5-flash-latest' }) : null;
+const model = genAI
+  ? genAI.getGenerativeModel({ model: 'gemini-1.5-flash-latest' })
+  : null;
 
 const generationConfig: GenerationConfig = {
   temperature: 0.5, // Slightly more creative for script writing
@@ -23,10 +33,22 @@ const generationConfig: GenerationConfig = {
 };
 
 const safetySettings: SafetySetting[] = [
-  { category: HarmCategory.HARM_CATEGORY_HARASSMENT, threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE },
-  { category: HarmCategory.HARM_CATEGORY_HATE_SPEECH, threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE },
-  { category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT, threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE },
-  { category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT, threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE },
+  {
+    category: HarmCategory.HARM_CATEGORY_HARASSMENT,
+    threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
+  },
+  {
+    category: HarmCategory.HARM_CATEGORY_HATE_SPEECH,
+    threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
+  },
+  {
+    category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT,
+    threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
+  },
+  {
+    category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT,
+    threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
+  },
 ];
 
 /**
@@ -35,17 +57,23 @@ const safetySettings: SafetySetting[] = [
  * @param trends An array of trend objects, containing keywords and other metrics.
  * @returns A promise that resolves to the generated script text.
  */
-export const generateScript = async (topic: string, trends: YouTubeKeywordItem[]): Promise<string> => {
+export const generateScript = async (
+  topic: string,
+  trends: YouTubeKeywordItem[]
+): Promise<string> => {
   if (!model) {
-    throw new Error('ScriptGenerationService: Gemini model not initialized. Check GEMINI_API_KEY.');
+    throw new Error(
+      'ScriptGenerationService: Gemini model not initialized. Check GEMINI_API_KEY.'
+    );
   }
 
   let keywordDetails: string;
   if (trends && trends.length > 0) {
-    const keywordList = trends.map(trend => `"${trend.keyword}"`).join(', ');
+    const keywordList = trends.map((trend) => `"${trend.keyword}"`).join(', ');
     keywordDetails = `Incorporate the following current trending keywords seamlessly and naturally into the script:\n${keywordList}`;
   } else {
-    keywordDetails = 'No specific trending keywords were provided. Generate a general, engaging script about the topic based on your own knowledge.';
+    keywordDetails =
+      'No specific trending keywords were provided. Generate a general, engaging script about the topic based on your own knowledge.';
   }
 
   const prompt = `
@@ -62,7 +90,9 @@ Example of desired output format for a script with keywords:
 `;
 
   try {
-    console.info(`[ScriptGenerationService] Generating script for topic: "${topic}"`);
+    console.info(
+      `[ScriptGenerationService] Generating script for topic: "${topic}"`
+    );
     const result = await model.generateContent({
       contents: [{ role: 'user', parts: [{ text: prompt }] }],
       generationConfig,
@@ -72,14 +102,21 @@ Example of desired output format for a script with keywords:
     const responseText = result.response.text();
 
     if (typeof responseText !== 'string' || responseText.trim() === '') {
-      throw new Error('Failed to get valid script content from Gemini API response (empty or invalid).');
+      throw new Error(
+        'Failed to get valid script content from Gemini API response (empty or invalid).'
+      );
     }
-    
-    console.info(`[ScriptGenerationService] Successfully generated script for topic: "${topic}"`);
+
+    console.info(
+      `[ScriptGenerationService] Successfully generated script for topic: "${topic}"`
+    );
     return responseText.trim();
   } catch (error: unknown) {
-    console.error(`[ScriptGenerationService] Error generating script for topic "${topic}":`, error);
+    console.error(
+      `[ScriptGenerationService] Error generating script for topic "${topic}":`,
+      error
+    );
     const errorMessage = error instanceof Error ? error.message : String(error);
     throw new Error(`Gemini API Error: ${errorMessage}`);
   }
-}
+};

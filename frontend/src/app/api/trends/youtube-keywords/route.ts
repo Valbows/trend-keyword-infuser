@@ -19,21 +19,33 @@ export async function GET(request: Request) {
   }
 
   try {
-    console.info(`[API /trends/youtube-keywords] Fetching trends for topic: "${topic}"`);
+    console.info(
+      `[API /trends/youtube-keywords] Fetching trends for topic: "${topic}"`
+    );
     const trends = await trendDiscoveryService.findYouTubeKeywordTrends(
       topic,
       timeframe,
       publishedAfter,
       publishedBefore
     );
-    
-    console.info(`[API /trends/youtube-keywords] Found ${trends.length} trends.`);
-    return NextResponse.json({ success: true, data: trends });
 
+    console.info(
+      `[API /trends/youtube-keywords] Found ${trends.length} trends.`
+    );
+    return NextResponse.json({ success: true, data: trends });
   } catch (error: unknown) {
-    console.error(`[API /trends/youtube-keywords] Error fetching trends for topic "${topic}":`, error);
+    console.error(
+      `[API /trends/youtube-keywords] Error fetching trends for topic "${topic}":`,
+      error
+    );
     return NextResponse.json(
-      { success: false, message: error instanceof Error ? error.message : 'An internal server error occurred.' },
+      {
+        success: false,
+        message:
+          error instanceof Error
+            ? error.message
+            : 'An internal server error occurred.',
+      },
       { status: 500 }
     );
   }

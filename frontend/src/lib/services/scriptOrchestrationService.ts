@@ -12,8 +12,13 @@ class ScriptOrchestrationService {
    * @param trends An array of trend objects.
    * @returns A promise that resolves to the newly created script object.
    */
-  async orchestrateScriptCreation(topic: string, trends: YouTubeKeywordItem[]): Promise<Script> {
-    console.info(`[OrchestrationService] Starting script creation for topic: "${topic}"`);
+  async orchestrateScriptCreation(
+    topic: string,
+    trends: YouTubeKeywordItem[]
+  ): Promise<Script> {
+    console.info(
+      `[OrchestrationService] Starting script creation for topic: "${topic}"`
+    );
 
     // Step 1: LLM Script Generation
     let scriptText: string;
@@ -28,16 +33,21 @@ class ScriptOrchestrationService {
     // Step 2: Persist the script using our 'Durable' script service
     let savedScript: Script;
     try {
-      const keywords = trends.map(t => t.keyword);
+      const keywords = trends.map((t) => t.keyword);
       savedScript = await scriptService.createScript({
         title: topic, // Using topic as the default title
         topic: topic,
         keywords: keywords,
         content: scriptText,
       });
-      console.info(`[OrchestrationService] Script saved to database with ID: ${savedScript.id}`);
+      console.info(
+        `[OrchestrationService] Script saved to database with ID: ${savedScript.id}`
+      );
     } catch (error) {
-      console.error(`[OrchestrationService] Failed to save script to database:`, error);
+      console.error(
+        `[OrchestrationService] Failed to save script to database:`,
+        error
+      );
       throw error; // Re-throw to be caught by the API route handler
     }
 
