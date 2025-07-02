@@ -22,7 +22,7 @@ export async function GET(_request: Request) {
         success: false,
         data: null,
         error: `Failed to fetch scripts: ${error instanceof Error ? error.message : 'Unknown error'}`,
-        status: 500
+        status: 500,
       },
       { status: 500 }
     );
