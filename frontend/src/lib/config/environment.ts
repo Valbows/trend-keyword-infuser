@@ -50,5 +50,29 @@ export function getEnvironmentVariables(): EnvironmentVariables {
   };
 }
 
-// Export singleton instance for use across the application
-export const env = getEnvironmentVariables();
+// Lazy-loaded environment variables to avoid issues during build time
+let _env: EnvironmentVariables | null = null;
+
+// Export getter function for lazy initialization
+export const env = {
+  get SUPABASE_URL() {
+    if (!_env) _env = getEnvironmentVariables();
+    return _env.SUPABASE_URL;
+  },
+  get SUPABASE_KEY() {
+    if (!_env) _env = getEnvironmentVariables();
+    return _env.SUPABASE_KEY;
+  },
+  get GEMINI_API_KEY() {
+    if (!_env) _env = getEnvironmentVariables();
+    return _env.GEMINI_API_KEY;
+  },
+  get YOUTUBE_API_KEY() {
+    if (!_env) _env = getEnvironmentVariables();
+    return _env.YOUTUBE_API_KEY;
+  },
+  get NODE_ENV() {
+    if (!_env) _env = getEnvironmentVariables();
+    return _env.NODE_ENV;
+  },
+};
