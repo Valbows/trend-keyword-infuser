@@ -17,12 +17,14 @@ export interface EnvironmentVariables {
 // Get environment variables with validation and intelligent fallbacks
 export function getEnvironmentVariables(): EnvironmentVariables {
   // Required variables
-  const supabaseUrl = process.env.SUPABASE_URL;
+  const supabaseUrl =
+    process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL;
   // Support multiple naming conventions used in different environments
   const supabaseKey =
     process.env.SUPABASE_SERVICE_KEY ||
     process.env.SUPABASE_KEY ||
-    process.env.SUPABASE_ANON_KEY;
+    process.env.SUPABASE_ANON_KEY ||
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
   // Optional variables
   const geminiApiKey = process.env.GEMINI_API_KEY;
