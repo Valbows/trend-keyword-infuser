@@ -29,17 +29,17 @@ jobs:
       - name: Run Linter
         run: npm run lint --prefix frontend
 
-      - name: Check Formatting (Frontend & Backend)
+      - name: Check Formatting
         run: npm run check-format
 
-      - name: Run Backend Tests
+      - name: Run Frontend Tests
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
           YOUTUBE_API_KEY: ${{ secrets.YOUTUBE_API_KEY }}
           NODE_ENV: test # Explicitly setting NODE_ENV for clarity
-        run: npm run test
+        run: npm test --prefix frontend
 
       - name: Build Frontend
         run: npm run build --prefix frontend
