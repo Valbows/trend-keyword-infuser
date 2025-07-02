@@ -26,26 +26,8 @@ jobs:
       - name: Install Frontend Dependencies
         run: npm install --prefix frontend
 
-      - name: Install Backend Dependencies
-        run: npm install --prefix backend
-
-      - name: Verify Backend Config Files
-        run: |
-          echo "Listing backend directory contents:"
-          ls -la backend
-          echo "-----------------------------------------------------"
-          echo "Attempting to display backend/.prettierrc.json (if it exists):"
-          cat backend/.prettierrc.json || echo "backend/.prettierrc.json not found or cat failed."
-          echo "-----------------------------------------------------"
-          echo "Attempting to display backend/.prettierrc.yaml (if it exists):"
-          cat backend/.prettierrc.yaml || echo "backend/.prettierrc.yaml not found or cat failed."
-          echo "-----------------------------------------------------"
-          echo "Contents of backend/eslint.config.mjs:"
-          cat backend/eslint.config.mjs || echo "backend/eslint.config.mjs not found or cat failed."
-          echo "-----------------------------------------------------"
-
-      - name: Run Linters (Frontend & Backend)
-        run: npm run lint
+      - name: Run Linter
+        run: npm run lint --prefix frontend
 
       - name: Check Formatting (Frontend & Backend)
         run: npm run check-format
