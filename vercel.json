@@ -1,20 +1,12 @@
 {
-  "buildCommand": "npm run build --prefix frontend",
-  "outputDirectory": "frontend/.next",
-  "installCommand": "npm install && npm install --prefix frontend",
+
   "framework": "nextjs",
-  "devCommand": "npm run dev --prefix frontend",
+  "rootDirectory": "frontend",
+  "devCommand": "npm run dev",
   "git": {
     "deploymentEnabled": {
       "main": true,
       "develop": true
     }
-  },
-  "env": {
-    "SUPABASE_URL": "production",
-    "SUPABASE_KEY": "production",
-    "SUPABASE_SERVICE_KEY": "production",
-    "GEMINI_API_KEY": "production",
-    "YOUTUBE_API_KEY": "production"
   }
 }
