@@ -2,7 +2,10 @@ import { NextResponse } from 'next/server';
 import { engagementRecordingService } from '@/lib/services/engagementRecordingService';
 
 // Minimal typing pattern for Next.js 15.3.3 App Router
-export async function POST(request: Request, { params }: { params: { id: string } }) {
+export async function POST(
+  request: Request,
+  { params }: { params: { id: string } }
+) {
   const id = parseInt(params.id, 10);
 
   if (isNaN(id)) {
