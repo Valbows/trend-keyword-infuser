@@ -20,8 +20,8 @@ export function getEnvironmentVariables(): EnvironmentVariables {
   const supabaseUrl = process.env.SUPABASE_URL;
   // Support multiple naming conventions used in different environments
   const supabaseKey =
-    process.env.SUPABASE_SERVICE_KEY || 
-    process.env.SUPABASE_KEY || 
+    process.env.SUPABASE_SERVICE_KEY ||
+    process.env.SUPABASE_KEY ||
     process.env.SUPABASE_ANON_KEY;
 
   // Optional variables
