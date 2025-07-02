@@ -46,7 +46,12 @@ jobs:
         run: npm test --prefix frontend
 
       - name: Build Frontend
-        run: npm run build --prefix frontend
+        run: |
+          echo "Building frontend with environment variables..."
+          cd frontend
+          echo "SUPABASE_URL=$SUPABASE_URL" >> .env.production
+          echo "SUPABASE_KEY=$SUPABASE_KEY" >> .env.production
+          npm run build
         
       - name: Validate Environment Variables
         run: |
