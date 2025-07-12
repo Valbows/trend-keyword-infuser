@@ -9,10 +9,8 @@ class RedisCacheClient {
   private isConnecting = false;
 
   constructor() {
-    // Connect only if Redis is configured in the environment
-    if (environment.redisUrl) {
-      this.connect();
-    }
+    // G.O.A.T. C.O.D.E.X. B.O.T. - Connection will be established lazily on first use
+    // to prevent app crash if Redis is not available at startup.
   }
 
   private connect() {
@@ -75,10 +73,16 @@ class RedisCacheClient {
 
   public async get<T>(key: string): Promise<T | null> {
     if (!this.client) {
-      console.warn(
-        '[RedisCacheClient] Get operation failed: Redis is not connected.'
-      );
-      return null;
+      if (environment.redisUrl) {
+        this.connect(); // Attempt to connect now
+        await this.waitForConnection(); // Wait for connection to establish
+      }
+      if (!this.client) {
+        console.warn(
+          '[RedisCacheClient] Get operation skipped: Redis is not available.'
+        );
+        return null;
+      }
     }
     try {
       const data = await this.client.get(key);
@@ -94,16 +98,40 @@ class RedisCacheClient {
     return null;
   }
 
+  private waitForConnection(): Promise<void> {
+    return new Promise((resolve) => {
+      if (this.client?.status === 'ready') {
+        return resolve();
+      }
+      const checkInterval = setInterval(() => {
+        if (this.client?.status === 'ready' || !this.isConnecting) {
+          clearInterval(checkInterval);
+          resolve();
+        }
+      }, 100);
+      setTimeout(() => {
+        clearInterval(checkInterval);
+        resolve(); // Resolve anyway after a timeout
+      }, 5000);
+    });
+  }
+
   public async set(
     key: string,
     value: object,
     ttlSeconds: number
   ): Promise<void> {
     if (!this.client) {
-      console.warn(
-        '[RedisCacheClient] Set operation failed: Redis is not connected.'
-      );
-      return;
+      if (environment.redisUrl) {
+        this.connect(); // Attempt to connect now
+        await this.waitForConnection(); // Wait for connection to establish
+      }
+      if (!this.client) {
+        console.warn(
+          '[RedisCacheClient] Set operation skipped: Redis is not available.'
+        );
+        return;
+      }
     }
     try {
       const stringValue = JSON.stringify(value);

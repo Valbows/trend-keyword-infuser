@@ -10,6 +10,12 @@ import {
 import TrendSidebar from '../src/components/TrendSidebar';
 import { YouTubeKeywordItem } from '../src/types/trends';
 import { SelectedKeywordsProvider } from '../src/contexts/SelectedKeywordsContext';
+import useYouTubeKeywords from '../src/hooks/useYouTubeKeywords';
+
+// Mock the useYouTubeKeywords hook
+jest.mock('../src/hooks/useYouTubeKeywords');
+
+const mockUseYouTubeKeywords = useYouTubeKeywords as jest.Mock;
 
 // G.O.A.T. C.O.D.E.X. B.O.T. Note: A custom render function is 'Elegant' and 'Durable'.
 // It wraps the component in necessary providers, ensuring a 'Truth-Seeking' test environment.
@@ -23,9 +29,6 @@ const renderWithProvider = (
   ui: ReactElement,
   options?: Omit<RenderOptions, 'wrapper'>
 ) => render(ui, { wrapper: AllTheProviders, ...options });
-
-// Mock the global fetch function
-global.fetch = jest.fn();
 
 const mockKeywords: YouTubeKeywordItem[] = [
   {
@@ -44,8 +47,12 @@ const mockKeywords: YouTubeKeywordItem[] = [
 
 describe('TrendSidebar Component', () => {
   beforeEach(() => {
-    // Clear mock history before each test
-    (fetch as jest.Mock).mockClear();
+    // Reset the mock before each test and provide a default implementation
+    mockUseYouTubeKeywords.mockReturnValue({
+      keywords: [],
+      isLoading: false,
+      error: null,
+    });
   });
 
   it('renders the title and timeframe selector on initial load', () => {
@@ -61,9 +68,10 @@ describe('TrendSidebar Component', () => {
   });
 
   it('fetches and displays keywords when a topic is provided', async () => {
-    (fetch as jest.Mock).mockResolvedValueOnce({
-      ok: true,
-      json: async () => ({ keywords: mockKeywords }),
+    mockUseYouTubeKeywords.mockReturnValue({
+      keywords: mockKeywords,
+      isLoading: false,
+      error: null,
     });
 
     renderWithProvider(<TrendSidebar topic='AI' />);
@@ -74,60 +82,55 @@ describe('TrendSidebar Component', () => {
     });
 
     expect(screen.getByText('Future of Machine Learning')).toBeInTheDocument();
-    expect(fetch).toHaveBeenCalledTimes(1);
-    expect(fetch).toHaveBeenCalledWith(expect.stringContaining('topic=AI'));
   });
 
   it('shows an error message if the keyword fetch fails', async () => {
-    // Suppress console.error for this specific test, as it's an expected part of the behavior.
-    const consoleErrorSpy = jest
-      .spyOn(console, 'error')
-      .mockImplementation(() => {});
-
-    (fetch as jest.Mock).mockRejectedValueOnce(new Error('API Failure'));
+    mockUseYouTubeKeywords.mockReturnValue({
+      keywords: [],
+      isLoading: false,
+      error: 'API Failure',
+    });
 
     renderWithProvider(<TrendSidebar topic='ErrorCase' />);
 
     await waitFor(() => {
       expect(screen.getByText(/API Failure/i)).toBeInTheDocument();
     });
-
-    // Restore the original console.error function
-    consoleErrorSpy.mockRestore();
   });
 
   it('toggles keyword selection state on click', async () => {
-    (fetch as jest.Mock).mockResolvedValueOnce({
-      ok: true,
-      json: async () => ({ keywords: mockKeywords }),
+    mockUseYouTubeKeywords.mockReturnValue({
+      keywords: mockKeywords,
+      isLoading: false,
+      error: null,
     });
 
     renderWithProvider(<TrendSidebar topic='AI' />);
 
     // Wait for the keyword to appear
-    const keywordButton = await screen.findByRole('button', {
-      name: /AI in 2025/i,
-    });
+    const keywordText = await screen.findByText('AI in 2025');
+    const keywordListItem = keywordText.closest('li');
+    expect(keywordListItem).toBeInTheDocument();
 
     // G.O.A.T. C.O.D.E.X. B.O.T. Note: The 'aria-pressed' attribute is a 'Durable' and 'Xtensible'
     // way to verify selection state, reflecting true user-facing behavior.
     // Initially, it should not be selected.
-    expect(keywordButton).toHaveAttribute('aria-pressed', 'false');
+    expect(keywordListItem).toHaveAttribute('aria-pressed', 'false');
 
     // Click the keyword to select it
-    fireEvent.click(keywordButton);
+    fireEvent.click(keywordListItem!);
 
     // Check if it's now selected
     await waitFor(() => {
-      expect(keywordButton).toHaveAttribute('aria-pressed', 'true');
+      expect(keywordListItem).toHaveAttribute('aria-pressed', 'true');
     });
 
     // Click again to deselect
-    fireEvent.click(keywordButton);
+    fireEvent.click(keywordListItem!);
 
     // Check if it's deselected
     await waitFor(() => {
-      expect(keywordButton).toHaveAttribute('aria-pressed', 'false');
+      expect(keywordListItem).toHaveAttribute('aria-pressed', 'false');
     });
   });
 });

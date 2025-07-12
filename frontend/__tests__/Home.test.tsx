@@ -1,5 +1,5 @@
 import '@testing-library/jest-dom';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import Home from '../src/app/page';
 import { SelectedKeywordsProvider } from '../src/contexts/SelectedKeywordsContext';
 
@@ -19,7 +19,7 @@ jest.mock('../src/components/TrendSidebar', () => {
   const MockTrendSidebar = ({ topic }: { topic: string }) => (
     <div data-testid='mock-trend-sidebar'>
       <p>Mocked Trend Sidebar</p>
-      <p>Topic: {topic}</p>
+      <p data-testid='topic-display'>Topic: {topic}</p>
     </div>
   );
   MockTrendSidebar.displayName = 'MockTrendSidebar';
@@ -48,7 +48,7 @@ describe('Home Page', () => {
     expect(heading).toBeInTheDocument();
   });
 
-  it('updates the topic in TrendSidebar when user types in the topic input', () => {
+  it('updates the topic in TrendSidebar when user types in the topic input', async () => {
     renderHome();
 
     const topicInput = screen.getByPlaceholderText(
@@ -57,9 +57,11 @@ describe('Home Page', () => {
     fireEvent.change(topicInput, { target: { value: 'Quantum Computing' } });
 
     // Check if the mocked TrendSidebar receives the correct topic
-    expect(screen.getByTestId('mock-trend-sidebar')).toHaveTextContent(
-      'Topic: Quantum Computing'
-    );
+    await waitFor(() => {
+      expect(screen.getByTestId('topic-display')).toHaveTextContent(
+        'Topic: Quantum Computing'
+      );
+    });
   });
 
   it('derives a topic from a pasted script and passes it to TrendSidebar', () => {

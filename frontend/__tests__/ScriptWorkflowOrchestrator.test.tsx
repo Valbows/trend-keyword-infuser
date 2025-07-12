@@ -227,10 +227,14 @@ describe('ScriptWorkflowOrchestrator - G.O.A.T. C.O.D.E.X. B.O.T. Supreme Valida
 
     await waitFor(() => {
       expect(fetch).toHaveBeenCalledWith(
-        `/api/scripts/${localMockGeneratedScript.scriptId}`,
+        '/api/scripts/modify',
         expect.objectContaining({
-          method: 'PUT',
-          body: JSON.stringify({ content: 'edited content from mock' }),
+          method: 'POST',
+          body: JSON.stringify({
+            scriptId: localMockGeneratedScript.scriptId,
+            newContent: 'edited content from mock',
+            keywords: [],
+          }),
         })
       );
       // Check if ScriptEditor is re-rendered with the saved content (or at least not erroring out)
@@ -288,10 +292,14 @@ describe('ScriptWorkflowOrchestrator - G.O.A.T. C.O.D.E.X. B.O.T. Supreme Valida
 
     await waitFor(() => {
       expect(fetch).toHaveBeenCalledWith(
-        `/api/scripts/${mockExistingScripts[0].id}`,
+        '/api/scripts/modify',
         expect.objectContaining({
-          method: 'PUT',
-          body: JSON.stringify({ content: 'edited content from mock' }),
+          method: 'POST',
+          body: JSON.stringify({
+            scriptId: mockExistingScripts[0].id,
+            newContent: 'edited content from mock',
+            keywords: [],
+          }),
         })
       );
       expect(mockScriptEditor).toHaveBeenLastCalledWith(
@@ -559,12 +567,12 @@ describe('ScriptWorkflowOrchestrator - G.O.A.T. C.O.D.E.X. B.O.T. Supreme Valida
 
     await waitFor(() => {
       expect(fetch).toHaveBeenCalledWith(
-        `/api/scripts/${mockExistingScripts[0].id}`,
+        '/api/scripts/modify',
         expect.anything()
       );
       // Verify the success message is displayed
       expect(
-        screen.getByText('Script saved successfully!')
+        screen.getByText('Script saved (client-side update).')
       ).toBeInTheDocument();
     });
   });
@@ -613,7 +621,7 @@ describe('ScriptWorkflowOrchestrator - G.O.A.T. C.O.D.E.X. B.O.T. Supreme Valida
     // Verify the success message is displayed initially
     await waitFor(() => {
       expect(
-        screen.getByText('Script saved successfully!')
+        screen.getByText('Script saved (client-side update).')
       ).toBeInTheDocument();
     });
 
@@ -625,7 +633,7 @@ describe('ScriptWorkflowOrchestrator - G.O.A.T. C.O.D.E.X. B.O.T. Supreme Valida
     // Verify the success message is no longer displayed
     await waitFor(() => {
       expect(
-        screen.queryByText('Script saved successfully!')
+        screen.queryByText('Script saved (client-side update).')
       ).not.toBeInTheDocument();
     });
 
@@ -695,7 +703,7 @@ describe('ScriptWorkflowOrchestrator - G.O.A.T. C.O.D.E.X. B.O.T. Supreme Valida
     // Wait for the save to complete to ensure the test doesn't end prematurely
     await waitFor(() => {
       expect(fetch).toHaveBeenCalledWith(
-        `/api/scripts/${mockExistingScripts[0].id}`,
+        '/api/scripts/modify',
         expect.anything()
       );
       // And then it should be called with isLoading: false and updated content
