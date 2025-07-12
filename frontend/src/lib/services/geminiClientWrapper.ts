@@ -150,7 +150,9 @@ if (geminiApiKey) {
   console.warn('[GeminiClientWrapper] GEMINI_API_KEY is not set. The Gemini client will not be initialized.');
 }
 
-export { geminiClientWrapper };
+// S.A.F.E. - Exporting client and enums for modular use across the application.
+export const geminiClient = geminiClientWrapper;
+export { HarmCategory, HarmBlockThreshold };
 
 // --- Safety Settings ---
 // S.A.F.E. Principle: Configure strict safety settings to block harmful content.
