@@ -6,14 +6,9 @@ import useApiMutation from '@/hooks/useApiMutation'; // G.O.A.T. C.O.D.E.X. B.O.
 import TrendSidebar from '@/components/TrendSidebar'; // Import the new sidebar
 import Link from 'next/link';
 import { useSelectedKeywords } from '@/contexts/SelectedKeywordsContext'; // G.O.A.T. C.O.D.E.X. B.O.T. - Import context hook
-import { Script } from '@/lib/services/scriptService';
 
 interface GenerateScriptResponse {
   script: string;
-}
-
-interface ModifyScriptResponse {
-  modifiedScript: string;
 }
 
 export default function Home() {

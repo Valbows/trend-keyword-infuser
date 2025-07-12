@@ -1,6 +1,6 @@
 import { createClient } from '@/lib/supabase/server';
 import { NextRequest, NextResponse } from 'next/server';
-import { cookies } from 'next/headers';
+
 
 export async function POST(request: NextRequest) {
   const supabase = createClient();
