@@ -395,7 +395,48 @@ The system consists of:
 
 ## 1.0 Goal
 
-Successfully deploy the full-stack application (frontend and backend) to Vercel by migrating the existing Express.js backend logic into Next.js API routes. This will create a unified, serverless application that aligns with Vercel's architecture, ensuring a 'Durable' and 'Xtensible' deployment.
+Successfully deploy the full-stack application (frontend and backend) to Vercel by migrating the existing Express.js backend logic into Next.js API routes. This will create a unified, serverless application that aligns with Vercel'
+
+## Phase 7: Bug-Fixing & Feature Enhancement Sprint (2025-07-07)
+
+### 1. Bug Fix: Keywords Not Populating in Sidebar
+- **Objective**: Resolve the issue preventing trending keywords from appearing in the side panel.
+- **Task 1.1: Diagnose Frontend Data Fetching**: Inspect `TrendSidebar.tsx` to trace the API call (`fetchYouTubeKeywords`), state updates (`keywords`, `isLoading`, `error`), and rendering logic. Check browser developer tools for network errors or malformed responses.
+- **Task 1.2: Inspect Backend API Response**: Verify the `/api/v1/trends/youtube-keywords` endpoint is running and returning the expected JSON structure. Check backend logs for errors in `trendController.js` or `TrendDiscoveryService.js`.
+- **Task 1.3: Implement & Verify Fix**: Apply necessary corrections to either the frontend or backend and confirm keywords populate correctly.
+
+### 2. Feature: Expand Input Context & Summarization
+- **Objective**: Allow for longer text inputs in the topic and script sections and use summarization to extract more meaningful context for keyword generation.
+- **Task 2.1: Update Frontend `textarea` Components**: Remove or increase the `maxLength` attribute on the "Enter Your Video Topic" and "Paste Your Existing Script" text areas.
+- **Task 2.2: Implement Backend Summarization Logic**: In the relevant services (`TrendDiscoveryService`, `ScriptOrchestrationService`), create a new function that takes the longer text, sends it to the Gemini API with a prompt to summarize it into a concise topic or set of core ideas, and then uses that summary as the basis for keyword searches or script modifications.
+
+### 3. Feature: A/B Testing for Engagement
+- **Objective**: Allow users to track and compare the performance of a script before and after keyword infusion by associating two YouTube video URLs with a single script record.
+- **Task 3.1: Backend - Database Schema Update**: Apply the following SQL to the Supabase database to add columns for the 'after' video and its metrics.
+  ```sql
+  -- Add columns to the 'scripts' table for the second (optimized) video
+  -- This assumes the 'before' video is tracked by the existing 'published_video_id' column.
+  ALTER TABLE scripts
+  ADD COLUMN optimized_video_id TEXT, -- URL or ID for the video post-keyword-infusion
+  ADD COLUMN optimized_views INTEGER,
+  ADD COLUMN optimized_likes INTEGER,
+  ADD COLUMN optimized_comments INTEGER,
+  ADD COLUMN optimized_engagement_rate FLOAT,
+  ADD COLUMN optimized_engagement_retrieved_at TIMESTAMPTZ;
+  ```
+- **Task 3.2: Backend - API Update**: Modify the `POST /api/v1/scripts/:id/record-engagement` endpoint. It should now accept an optional flag (e.g., `"type": "optimized"`) to determine which set of columns (`published_` vs `optimized_`) to update.
+- **Task 3.3: Frontend - UI Update**: Modify the `ExistingScriptListItem.tsx` component to:
+  - Conditionally show a second input form for the 'after' video if the 'before' video URL is already present.
+  - Display a side-by-side comparison of the engagement metrics for both videos.
+
+### 4. Phase 6 Enhancements (from Scratchpad)
+- **Objective**: Begin implementing high-value features from the existing project plan.
+- **Task 4.1: Caching Layer (Redis)**: 
+  - **Action**: Since Redis is not confirmed, we will first implement a robust in-memory cache on the backend as a foundational step to reduce YouTube API quota usage. We will use a library like `node-cache`.
+  - **Implementation**: In `TrendDiscoveryService.js`, before making a call to the YouTube API, check if a result for the same `(topic, timeframe)` key exists in the cache and is not expired. If so, return the cached result. Otherwise, make the API call and store the result in the cache with a TTL (e.g., 30 minutes).
+- **Task 4.2: LLM-Powered Industry Keyword Analysis**:
+  - **Action**: Enhance the keyword suggestion process by using the LLM to analyze the user's script and identify its industry.
+  - **Implementation**: In `ScriptOrchestrationService.js`, create a new function that takes the user's script, prompts Gemini to identify the primary industry (e.g., 'Tech', 'Finance', 'Gaming'), and then uses this industry as an additional term in the YouTube search query to find more relevant trending videos and keywords.s architecture, ensuring a 'Durable' and 'Xtensible' deployment.
 
 ## 2.0 Backend Migration to Next.js API Routes
 

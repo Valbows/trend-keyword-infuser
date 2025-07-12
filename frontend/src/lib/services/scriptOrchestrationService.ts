@@ -3,7 +3,7 @@
 
 import { generateScript } from './scriptGenerationService';
 import { scriptService, Script } from './scriptService';
-import { YouTubeKeywordItem } from './trendDiscoveryService';
+import { YouTubeKeywordTrend } from './trendDiscoveryService';
 
 class ScriptOrchestrationService {
   /**
@@ -14,7 +14,7 @@ class ScriptOrchestrationService {
    */
   async orchestrateScriptCreation(
     topic: string,
-    trends: YouTubeKeywordItem[]
+    trends: YouTubeKeywordTrend[]
   ): Promise<Script> {
     console.info(
       `[OrchestrationService] Starting script creation for topic: "${topic}"`
@@ -33,12 +33,11 @@ class ScriptOrchestrationService {
     // Step 2: Persist the script using our 'Durable' script service
     let savedScript: Script;
     try {
-      const keywords = trends.map((t) => t.keyword);
       savedScript = await scriptService.createScript({
-        title: topic, // Using topic as the default title
         topic: topic,
-        keywords: keywords,
-        content: scriptText,
+        trends_used: trends, // Pass the full trend objects
+        generated_script: scriptText,
+        user_id: null, // Add null user_id to satisfy the interface
       });
       console.info(
         `[OrchestrationService] Script saved to database with ID: ${savedScript.id}`

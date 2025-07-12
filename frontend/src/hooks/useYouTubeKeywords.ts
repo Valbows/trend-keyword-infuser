@@ -51,7 +51,15 @@ function useYouTubeKeywords({
       setIsLoading(true);
       setError(null);
 
-      let queryParams = `topic=${encodeURIComponent(debouncedTopic)}`;
+      const body: {
+        topic: string;
+        timeframe: string;
+        publishedAfter?: string;
+        publishedBefore?: string;
+      } = {
+        topic: debouncedTopic,
+        timeframe: selectedTimeframe,
+      };
 
       if (selectedTimeframe === 'custom' && startDate && endDate) {
         try {
@@ -59,22 +67,15 @@ function useYouTubeKeywords({
           const eDate = new Date(endDate);
 
           if (isNaN(sDate.getTime()) || isNaN(eDate.getTime())) {
-            throw new Error(
-              'Invalid date(s) provided. Please use the date pickers.'
-            );
+            throw new Error('Invalid date(s) provided. Please use the date pickers.');
           }
           if (sDate > eDate) {
             throw new Error('Start date cannot be after end date.');
           }
 
-          const publishedAfterISO = new Date(
-            startDate + 'T00:00:00.000Z'
-          ).toISOString();
-          const publishedBeforeISO = new Date(
-            endDate + 'T23:59:59.999Z'
-          ).toISOString();
-          queryParams += `&publishedAfterISO=${publishedAfterISO}&publishedBeforeISO=${publishedBeforeISO}`;
-          queryParams += `&timeframe=custom`;
+          body.publishedAfter = new Date(startDate + 'T00:00:00.000Z').toISOString();
+          body.publishedBefore = new Date(endDate + 'T23:59:59.999Z').toISOString();
+
         } catch (e: unknown) {
           let errorMessage = 'Error processing custom date range.';
           if (e instanceof Error) errorMessage = e.message;
@@ -85,14 +86,16 @@ function useYouTubeKeywords({
           setKeywords([]);
           return;
         }
-      } else {
-        queryParams += `&timeframe=${selectedTimeframe}`;
       }
 
       try {
-        const response = await fetch(
-          `/api/trends/youtube-keywords?${queryParams}`
-        );
+        const response = await fetch('/api/trends/youtube-keywords', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(body),
+        });
         if (!response.ok) {
           const errorData = await response.json().catch(() => ({
             message: `HTTP error! status: ${response.status}`,
@@ -104,7 +107,7 @@ function useYouTubeKeywords({
           );
         }
         const data = await response.json();
-        setKeywords((data.keywords || []).slice(0, 10)); // Keep the top 10 logic
+        setKeywords(data.data || []);
       } catch (err: unknown) {
         console.error('Failed to fetch YouTube Keywords:', err);
         let errorMessage = 'Failed to load keywords.';

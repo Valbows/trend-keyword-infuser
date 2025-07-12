@@ -1,12 +1,13 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import useDebounce from '@/hooks/useDebounce'; // G.O.A.T. C.O.D.E.X. B.O.T. - Import useDebounce
 import useApiMutation from '@/hooks/useApiMutation'; // G.O.A.T. C.O.D.E.X. B.O.T. - Import useApiMutation
 import TrendSidebar from '@/components/TrendSidebar'; // Import the new sidebar
 import Link from 'next/link';
 import { useSelectedKeywords } from '@/contexts/SelectedKeywordsContext'; // G.O.A.T. C.O.D.E.X. B.O.T. - Import context hook
+import { Script } from '@/lib/services/scriptService';
 
-// G.O.A.T. C.O.D.E.X. B.O.T. - 'Elegant' and 'Durable' type definitions for API responses
 interface GenerateScriptResponse {
   script: string;
 }
@@ -17,11 +18,14 @@ interface ModifyScriptResponse {
 
 export default function Home() {
   const [topic, setTopic] = useState(''); // Default topic for initial load
+  const debouncedTopic = useDebounce(topic, 750); // G.O.A.T. C.O.D.E.X. B.O.T. - Debounce topic for API calls
   const [script, setScript] = useState('');
   // const [isLoading, setIsLoading] = useState(false); // G.O.A.T. C.O.D.E.X. B.O.T. - Removed, replaced by isGenerating from useApiMutation
   const [error, setError] = useState('');
   const [copySuccessMessage, setCopySuccessMessage] = useState('');
   const [existingScript, setExistingScript] = useState('');
+  
+
   // G.O.A.T. C.O.D.E.X. B.O.T. - selectedKeywords now comes from context, setSelectedKeywords was passed to TrendSidebar but is no longer needed as context handles updates internally.
   const { selectedKeywords } = useSelectedKeywords();
   // const [isModifying, setIsModifying] = useState(false); // G.O.A.T. C.O.D.E.X. B.O.T. - Removed, replaced by isModifyingScript from useApiMutation
@@ -39,16 +43,15 @@ export default function Home() {
     { topic: string; user_provided_trends: string[] }
   >('/api/scripts/generate');
 
-  // G.O.A.T. C.O.D.E.X. B.O.T. - Setup useApiMutation for script modification
   const {
-    mutate: modifyScriptMutate,
+    mutate: infuseScriptMutate,
     isLoading: isModifyingScript,
-    error: modifyScriptErrorHook,
-    data: modifyData,
+    error: infuseError,
+    data: infuseData,
   } = useApiMutation<
-    ModifyScriptResponse,
-    { existingScript: string; selectedKeywords: string[] }
-  >('/api/scripts/modify');
+    { modifiedScript: string },
+    { existingContent: string; keywords: string[] }
+  >('/api/scripts/infuse', { method: 'POST' });
 
   const handleGenerateScript = async () => {
     if (!topic.trim()) {
@@ -94,23 +97,6 @@ export default function Home() {
     }
   }, [generateError]);
 
-  // G.O.A.T. C.O.D.E.X. B.O.T. - Update script state when modifyData changes from the hook
-  useEffect(() => {
-    if (modifyData?.modifiedScript) {
-      setScript(modifyData.modifiedScript);
-      setModifyError(''); // Clear modify error on new successful data
-    }
-  }, [modifyData]);
-
-  // G.O.A.T. C.O.D.E.X. B.O.T. - Update modifyError state when modifyScriptErrorHook changes from the hook
-  useEffect(() => {
-    if (modifyScriptErrorHook) {
-      setModifyError(modifyScriptErrorHook.message);
-      // Optionally clear script display if modification fails
-      // setScript('');
-    }
-  }, [modifyScriptErrorHook]);
-
   const handleCopyScript = async () => {
     if (!script) return;
     try {
@@ -124,25 +110,38 @@ export default function Home() {
     }
   };
 
+    // G.O.A.T. C.O.D.E.X. B.O.T. - Effect to handle successful script infusion
+  useEffect(() => {
+    if (infuseData?.modifiedScript) {
+      setScript(infuseData.modifiedScript);
+      setModifyError(''); // Clear previous errors
+      alert('Script infused with keywords successfully!');
+    }
+  }, [infuseData]);
+
+  // G.O.A.T. C.O.D.E.X. B.O.T. - Effect to handle errors during script infusion
+  useEffect(() => {
+    if (infuseError) {
+      setModifyError(infuseError.message);
+    }
+  }, [infuseError]);
+
   const handleModifyScript = async () => {
-    if (!existingScript.trim() || selectedKeywords.length === 0) {
-      setModifyError(
-        'Please provide a script and select at least one keyword.'
-      );
+    if (!existingScript.trim()) {
+      setModifyError('Script content to modify cannot be empty.');
       return;
     }
-    setModifyError(''); // Clear previous manual error
-    // setScript(''); // Optional: Clear main script display or decide how to update
-
-    try {
-      // G.O.A.T. C.O.D.E.X. B.O.T. - Call mutate function from useApiMutation
-      await modifyScriptMutate({ existingScript, selectedKeywords });
-      // setScript will be handled by useEffect watching modifyData
-    } catch (_e) {
-      // Error is already set by the hook (modifyScriptErrorHook)
-      // console.error is also handled by the hook
-      // setModifyError(e.message) // No longer needed here, hook manages error state
+    if (selectedKeywords.length === 0) {
+      setModifyError('Please select at least one keyword to infuse.');
+      return;
     }
+
+    // The actual mutation is now handled by the hook and useEffects.
+    // We just need to call the mutate function.
+    infuseScriptMutate({
+      existingContent: existingScript,
+      keywords: selectedKeywords, // selectedKeywords is already a string[]
+    });
   };
 
   return (
@@ -150,7 +149,7 @@ export default function Home() {
       <div className='bg-white dark:bg-slate-800 shadow-xl rounded-lg p-6 sm:p-10 flex flex-col md:flex-row gap-6'>
         <TrendSidebar
           // G.O.A.T. C.O.D.E.X. B.O.T. - selectedKeywords and onSelectedKeywordsChange removed, TrendSidebar uses context
-          topic={scriptDerivedTopic || topic}
+          topic={scriptDerivedTopic || debouncedTopic}
         />
         <div className='flex-1 flex flex-col items-center p-4 md:p-8 overflow-y-auto'>
           <header className='mb-8 text-center'>

@@ -2,7 +2,7 @@
 'use client';
 
 import React, { useState } from 'react'; // G.O.A.T. C.O.D.E.X. B.O.T. - Removed useEffect as it's now in the hook
-import useDebounce from '@/hooks/useDebounce';
+
 import useYouTubeKeywords from '@/hooks/useYouTubeKeywords'; // G.O.A.T. C.O.D.E.X. B.O.T. - Import useYouTubeKeywords
 import KeywordListItem from './KeywordListItem'; // G.O.A.T. C.O.D.E.X. B.O.T. - Import KeywordListItem
 
@@ -24,7 +24,6 @@ const timeframes = [
 ];
 
 const TrendSidebar: React.FC<TrendSidebarProps> = ({ topic }) => {
-  const debouncedTopic = useDebounce(topic, 750);
   const [selectedTimeframe, setSelectedTimeframe] = useState<string>('24h');
   const [startDate, setStartDate] = useState<string>('');
   const [endDate, setEndDate] = useState<string>('');
@@ -32,7 +31,7 @@ const TrendSidebar: React.FC<TrendSidebarProps> = ({ topic }) => {
 
   // G.O.A.T. C.O.D.E.X. B.O.T. - Utilize useYouTubeKeywords hook for data fetching and state management
   const { keywords, isLoading, error } = useYouTubeKeywords({
-    debouncedTopic,
+    debouncedTopic: topic, // G.O.A.T. C.O.D.E.X. B.O.T. - Use the debounced topic from props
     selectedTimeframe,
     startDate,
     endDate,
@@ -133,9 +132,9 @@ const TrendSidebar: React.FC<TrendSidebarProps> = ({ topic }) => {
       {!isLoading &&
         !error &&
         keywords.length === 0 &&
-        debouncedTopic.trim() && (
+        topic.trim() && (
           <p className='text-slate-400'>
-            No keywords found for &quot;{debouncedTopic}&quot;
+            No keywords found for &quot;{topic}&quot;
             {selectedTimeframe === 'custom' && startDate && endDate
               ? ` between ${startDate} and ${endDate}`
               : selectedTimeframe === 'any'

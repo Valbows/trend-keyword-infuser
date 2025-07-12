@@ -1,31 +1,34 @@
-// G.O.A.T. C.O.D.E.X. B.O.T. - 'Durable', 'Optimized', and 'Clairvoyant' Supabase Client
-// This module provides a singleton instance of the Supabase client for the entire application.
-// Enhanced with smart environment variable handling for different deployment contexts.
+// S.A.F.E. D.R.Y. A.R.C.H.I.T.E.C.T. - 'Durable' Supabase Client for Server-Side Operations
+// This file initializes the Supabase client using a centralized and validated configuration.
 
 import { createClient } from '@supabase/supabase-js';
-import { env } from '../config/environment';
+import { environment } from '../config/environment';
 
-/**
- * Initialize and configure the Supabase client.
- * Uses the centralized environment configuration to ensure consistent access to environment variables.
- * This approach handles different naming conventions between environments and provides better error reporting.
- */
-
-// Create the client using validated environment variables
-const supabaseOptions = {
+// Create a single, 'Durable' Supabase client instance.
+console.log('[SupabaseClient] Initializing with URL:', environment.supabase.url);
+// This ensures that the connection is established using validated credentials from a single
+// authoritative source (environment.ts) and provides a single point of access for all database operations.
+// This client is safe to use on the client-side.
+// It uses the public anon key and respects RLS policies.
+export const supabase = createClient(environment.supabase.url, environment.supabase.anonKey, {
   auth: {
-    autoRefreshToken: true,
-    persistSession: true,
+    persistSession: false,
+    autoRefreshToken: false,
+    detectSessionInUrl: false,
   },
-  global: {
-    // Add custom headers if needed
-    headers: { 'x-application-name': 'trend-keyword-infuser' },
-  },
-};
+});
 
-// Create and export the Supabase client instance
-export const supabase = createClient(
-  env.SUPABASE_URL,
-  env.SUPABASE_KEY,
-  supabaseOptions
+// This client is for server-side use ONLY.
+// It uses the service role key and bypasses RLS.
+// NEVER expose this client to the browser.
+export const supabaseAdmin = createClient(
+  environment.supabase.url,
+  environment.supabase.serviceRoleKey,
+  {
+    auth: {
+      persistSession: false,
+      autoRefreshToken: false,
+      detectSessionInUrl: false,
+    },
+  },
 );

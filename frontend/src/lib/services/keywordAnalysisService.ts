@@ -1,178 +1,144 @@
-// G.O.A.T. C.O.D.E.X. B.O.T. - Migrated and Enhanced KeywordAnalysisService
-// 'Durable', 'Optimized', and 'Xtensible' TypeScript implementation.
+// S.A.F.E. D.R.Y. A.R.C.H.I.T.E.C.T. - Resilient Keyword Analysis Service
+// 'Durable' and 'Fortified' with batch processing for efficiency and error handling.
 
 import {
-  GoogleGenerativeAI,
+  geminiClient,
   HarmCategory,
   HarmBlockThreshold,
-  GenerationConfig,
-  SafetySetting,
-} from '@google/generative-ai';
+  GenerateContentRequest,
+} from './geminiClientWrapper';
 
-// 'Durable' and 'Elegant' type definitions for AI service responses
-interface AIKeywordRelevance {
+// --- Interfaces ---
+export interface KeywordInput {
   keyword: string;
-  reason: string;
-  score: number; // Expecting a numerical score, e.g., 1-10
+  source_video_count: number;
+  engagement_score: number;
+  weighted_recency_score: number;
 }
 
-interface AIResponse {
-  relevant_keywords: AIKeywordRelevance[];
-}
-
-// 'Elegant' and 'Xtensible' type definitions
 export interface AIRelevance {
-  score: number;
+  score: number; // 0-10
   justification: string;
   error?: string;
 }
 
-// Base type for keyword objects
-export interface KeywordInput {
+interface AIRelevanceResponseItem {
   keyword: string;
-  [key: string]: unknown; // Allow other properties
+  score: number;
+  justification: string;
 }
-
-// 'Durable' generic type for keyword objects after AI analysis, using a type intersection.
-export type KeywordWithRelevance<T extends KeywordInput> = T & {
-  aiRelevance: AIRelevance | null;
-};
-
-const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
-let genAI: GoogleGenerativeAI | undefined;
-
-if (GEMINI_API_KEY) {
-  genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
-} else {
-  console.error(
-    'KeywordAnalysisService: GEMINI_API_KEY is not set. AI relevance features will be disabled.'
-  );
-}
-
-const model = genAI
-  ? genAI.getGenerativeModel({ model: 'gemini-1.5-flash-latest' })
-  : null;
-
-const generationConfig: GenerationConfig = {
-  temperature: 0.3,
-  topK: 1,
-  topP: 1,
-  maxOutputTokens: 2048,
-  responseMimeType: 'application/json',
-};
-
-const safetySettings: SafetySetting[] = [
-  {
-    category: HarmCategory.HARM_CATEGORY_HARASSMENT,
-    threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
-  },
-  {
-    category: HarmCategory.HARM_CATEGORY_HATE_SPEECH,
-    threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
-  },
-  {
-    category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT,
-    threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
-  },
-  {
-    category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT,
-    threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
-  },
-];
 
 /**
- * 'Omniscient' AI-powered relevance analysis for keywords against a context topic.
- * @param keywordsArray - Array of keyword objects to analyze.
- * @param contextTopic - The topic to evaluate keyword relevance against.
- * @returns The original keywords array, augmented with 'aiRelevance' data.
+ * 'Automated' batch processing of keywords for relevance analysis.
+ * This function sends a single request to the AI to analyze multiple keywords,
+ * making it 'Resilient' to API rate limits and improving performance.
+ * @param topic The central topic for relevance analysis.
+ * @param keywords An array of keyword data to be analyzed.
+ * @returns A promise that resolves to an array of AIRelevance objects.
  */
-export async function getRelevanceForKeywords<T extends KeywordInput>(
-  keywordsArray: T[],
-  contextTopic: string
-): Promise<KeywordWithRelevance<T>[]> {
-  if (!model) {
-    console.warn(
-      'KeywordAnalysisService: Gemini model not initialized. Skipping AI relevance.'
-    );
-    return keywordsArray.map((kw) => ({ ...kw, aiRelevance: null }));
+export async function getRelevanceForKeywords(
+  topic: string,
+  keywords: KeywordInput[],
+): Promise<AIRelevance[]> {
+  if (!geminiClient) {
+    return keywords.map(() => ({
+      score: 0,
+      justification: '',
+      error: 'Gemini client not initialized.',
+    }));
   }
-  if (!keywordsArray || keywordsArray.length === 0) {
+
+  if (keywords.length === 0) {
     return [];
   }
-  if (
-    !contextTopic ||
-    typeof contextTopic !== 'string' ||
-    contextTopic.trim() === ''
-  ) {
-    console.warn(
-      'KeywordAnalysisService: Context topic is invalid. Skipping AI relevance.'
-    );
-    return keywordsArray.map((kw) => ({ ...kw, aiRelevance: null }));
-  }
 
-  const keywordStringsForPrompt = keywordsArray.map((kw) => kw.keyword);
+  const keywordListForPrompt = keywords.map(k => ({
+    keyword: k.keyword,
+    source_video_count: k.source_video_count,
+    engagement_score: k.engagement_score,
+  }));
 
   const prompt = `
-    You are an expert SEO and content strategist. Your task is to evaluate a list of YouTube keywords based on their relevance to a given primary context topic.
-    Primary Context Topic: "${contextTopic}"
-    YouTube Keywords List: ${JSON.stringify(keywordStringsForPrompt)}
-    For each keyword, provide a relevance score (1-5) and a brief justification (10-15 words).
-    Return your analysis as a VALID JSON array of objects, each with "keyword", "relevance_score", and "justification" properties.
-    The output must ONLY be the JSON array.
+    Analyze the relevance of the following keywords for a video topic: "${topic}".
+    For each keyword, consider its provided metrics (source_video_count, engagement_score).
+    Provide a relevance score from 0 (irrelevant) to 10 (highly relevant) and a brief justification for each.
+
+    Keywords data:
+    ${JSON.stringify(keywordListForPrompt, null, 2)}
+
+    Your response MUST be a single, valid JSON array of objects. Each object in the array must contain "keyword", "score", and "justification" keys.
+    The "keyword" must exactly match one of the keywords provided.
+
+    Example response format:
+    [
+      {
+        "keyword": "example keyword 1",
+        "score": 8,
+        "justification": "This keyword is highly relevant because..."
+      },
+      {
+        "keyword": "example keyword 2",
+        "score": 4,
+        "justification": "This keyword has moderate relevance..."
+      }
+    ]
   `;
 
+  const request: GenerateContentRequest = {
+    contents: [{ role: 'user', parts: [{ text: prompt }] }],
+    generationConfig: {
+      temperature: 0.3,
+      topK: 1,
+      topP: 1,
+      maxOutputTokens: 4096,
+    },
+    safetySettings: [
+      { category: HarmCategory.HARM_CATEGORY_HARASSMENT, threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE },
+      { category: HarmCategory.HARM_CATEGORY_HATE_SPEECH, threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE },
+      { category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT, threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE },
+      { category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT, threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE },
+    ],
+  };
+
   try {
-    console.debug(
-      `KeywordAnalysisService: Sending prompt to Gemini for topic "${contextTopic}".`
-    );
-    const result = await model.generateContent({
-      contents: [{ role: 'user', parts: [{ text: prompt }] }],
-      generationConfig,
-      safetySettings,
+    const result = await geminiClient.generateContent(request);
+    const text = result.response.text();
+    if (!text) {
+      throw new Error('Empty response from AI.');
+    }
+
+    const parsedResponse: AIRelevanceResponseItem[] = JSON.parse(text.replace(/```json|```/g, '').trim());
+
+    const relevanceMap = new Map<string, AIRelevance>();
+    parsedResponse.forEach(item => {
+      relevanceMap.set(item.keyword, { score: item.score, justification: item.justification });
     });
 
-    const responseText = result.response.text();
-    const aiResponse: AIResponse = JSON.parse(responseText);
-
-    // 'Optimized' - Use a Map for O(1) average time complexity lookups
-    const relevanceMap = new Map<string, Omit<AIKeywordRelevance, 'keyword'>>();
-    aiResponse.relevant_keywords.forEach((item) => {
-      relevanceMap.set(item.keyword, {
-        reason: item.reason,
-        score: item.score,
-      });
-    });
-
-    const augmentedKeywords: KeywordWithRelevance<T>[] = keywordsArray.map(
-      (originalKeywordObj) => {
-        const relevance = relevanceMap.get(originalKeywordObj.keyword);
-        return {
-          ...originalKeywordObj,
-          aiRelevance: relevance
-            ? { score: relevance.score, justification: relevance.reason }
-            : {
-                score: 0,
-                justification: 'Keyword not found in AI results.',
-                error: 'Analysis failed for this keyword.',
-              },
-        };
+    return keywords.map(inputKeyword => {
+      const relevance = relevanceMap.get(inputKeyword.keyword);
+      if (relevance) {
+        return relevance;
       }
-    );
-
-    console.info(
-      `KeywordAnalysisService: Successfully processed AI relevance for ${keywordsArray.length} keywords.`
-    );
-    return augmentedKeywords;
-  } catch (error: unknown) {
-    console.error('KeywordAnalysisService: Error calling Gemini API:', error);
-    const errorMessage = error instanceof Error ? error.message : String(error);
-    return keywordsArray.map((kw) => ({
-      ...kw,
-      aiRelevance: {
+      // Return a default value if a keyword was not in the AI response
+      return {
         score: 0,
-        justification: '',
-        error: `AI API call failed: ${errorMessage}`,
-      },
+        justification: 'Keyword not found in AI response.',
+      };
+    });
+
+  } catch (error: any) {
+    console.error(`[KeywordAnalysisService] AI API call failed for batch keyword analysis:`, error);
+    const isQuotaError = error.message?.includes('429');
+    const errorMessage = isQuotaError
+      ? 'Daily AI analysis quota reached. Please try again tomorrow.'
+      : `AI API call failed: ${error.message}`;
+
+    // On failure, return an error object for all keywords
+    return keywords.map(() => ({
+      score: 0,
+      justification: '',
+      error: errorMessage,
     }));
   }
 }
+

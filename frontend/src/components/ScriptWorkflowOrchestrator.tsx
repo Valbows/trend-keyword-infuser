@@ -185,12 +185,18 @@ const ScriptWorkflowOrchestrator: React.FC = () => {
       setSaveSuccessMessage(null);
 
       try {
-        const response = await fetch(`/api/scripts/${currentScriptId}`, {
-          method: 'PUT',
+        // Correctly call the /api/scripts/modify endpoint
+        const response = await fetch('/api/scripts/modify', {
+          method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({ content: editedContent }),
+          // Send the payload expected by the API route
+          body: JSON.stringify({
+            scriptId: currentScriptId,
+            newContent: editedContent,
+            keywords: [], // Sending empty keywords as this UI doesn't select them
+          }),
         });
 
         const data = await response.json();
@@ -201,17 +207,16 @@ const ScriptWorkflowOrchestrator: React.FC = () => {
           );
         }
 
-        // Assuming the backend returns the updated script object
-        if (data && typeof data.generated_script === 'string') {
-          setCurrentScriptContent(data.generated_script); // Update content with response from server (source of truth)
+        // Assuming the backend returns the updated script in a 'modifiedScript' field
+        if (data && typeof data.modifiedScript === 'string') {
+          setCurrentScriptContent(data.modifiedScript);
           setSaveSuccessMessage('Script saved successfully!');
         } else {
-          // Fallback if response structure is not as expected, but was OK
+          // Fallback if response structure is not as expected
           setCurrentScriptContent(editedContent);
-          setSaveSuccessMessage(
-            'Script saved (client-side update). Ensure backend returns full script object for optimal sync.'
-          );
+          setSaveSuccessMessage('Script saved (client-side update).');
         }
+
         // Auto-clear success message after a few seconds
         setTimeout(() => setSaveSuccessMessage(null), 3000);
       } catch (error: unknown) {

@@ -1,7 +1,8 @@
-// G.O.A.T. C.O.D.E.X. B.O.T. - Migrated and Enhanced TrendDiscoveryService
-// 'Durable', 'Optimized', and 'Xtensible' TypeScript implementation.
+// S.A.F.E. D.R.Y. A.R.C.H.I.T.E.C.T. - Resilient TrendDiscoveryService
+// 'Durable' and 'Fortified' with persistent caching and improved data handling.
 
 import { youtube_v3 } from 'googleapis';
+import { redisCacheClient } from './redisCacheClient'; // S.A.F.E. - Replaced NodeCache with Resilient Redis client
 import { youTubeDataService } from './youTubeDataService';
 import {
   getRelevanceForKeywords,
@@ -9,363 +10,152 @@ import {
   AIRelevance,
 } from './keywordAnalysisService';
 
-// 'Optimized' list of stop words to filter out common noise from video titles and descriptions.
-const STOP_WORDS = new Set([
-  'a',
-  'an',
-  'and',
-  'are',
-  'as',
-  'at',
-  'be',
-  'but',
-  'by',
-  'for',
-  'if',
-  'in',
-  'into',
-  'is',
-  'it',
-  'no',
-  'not',
-  'of',
-  'on',
-  'or',
-  'such',
-  'that',
-  'the',
-  'their',
-  'then',
-  'there',
-  'these',
-  'they',
-  'this',
-  'to',
-  'was',
-  'will',
-  'with',
-  'i',
-  'me',
-  'my',
-  'myself',
-  'we',
-  'our',
-  'ours',
-  'ourselves',
-  'you',
-  'your',
-  'yours',
-  'yourself',
-  'yourselves',
-  'he',
-  'him',
-  'his',
-  'himself',
-  'she',
-  'her',
-  'hers',
-  'herself',
-  'it',
-  'its',
-  'itself',
-  'they',
-  'them',
-  'their',
-  'theirs',
-  'themselves',
-  'what',
-  'which',
-  'who',
-  'whom',
-  'this',
-  'that',
-  'these',
-  'those',
-  'am',
-  'is',
-  'are',
-  'was',
-  'were',
-  'be',
-  'been',
-  'being',
-  'have',
-  'has',
-  'had',
-  'having',
-  'do',
-  'does',
-  'did',
-  'doing',
-  'a',
-  'an',
-  'the',
-  'and',
-  'but',
-  'if',
-  'or',
-  'because',
-  'as',
-  'until',
-  'while',
-  'of',
-  'at',
-  'by',
-  'for',
-  'with',
-  'about',
-  'against',
-  'between',
-  'into',
-  'through',
-  'during',
-  'before',
-  'after',
-  'above',
-  'below',
-  'to',
-  'from',
-  'up',
-  'down',
-  'in',
-  'out',
-  'on',
-  'off',
-  'over',
-  'under',
-  'again',
-  'further',
-  'then',
-  'once',
-  'here',
-  'there',
-  'when',
-  'where',
-  'why',
-  'how',
-  'all',
-  'any',
-  'both',
-  'each',
-  'few',
-  'more',
-  'most',
-  'other',
-  'some',
-  'such',
-  'no',
-  'nor',
-  'not',
-  'only',
-  'own',
-  'same',
-  'so',
-  'than',
-  'too',
-  'very',
-  's',
-  't',
-  'can',
-  'will',
-  'just',
-  'don',
-  'should',
-  'now',
-  'com',
-  'http',
-  'https',
-  'www',
-  'youtube',
-  'channel',
-  'video',
-  'videos',
-  'playlist',
-  'playlists',
-  'watch',
-  'new',
-  'official',
-  'music',
-  'trailer',
-  'episode',
-  'series',
-  'full',
-  'hd',
-  'live',
-  'stream',
-  'highlights',
-  'interview',
-  'podcast',
-  'review',
-  'tutorial',
-  'guide',
-  'how',
-  'best',
-  'top',
-  'update',
-  'news',
-  'daily',
-  'weekly',
-  'monthly',
-  'yearly',
-  '2023',
-  '2024',
-  '2025',
-  'like',
-  'subscribe',
-  'comment',
-  'share',
-  'follow',
-  'description',
-  'link',
-  'check',
-  'get',
-  'free',
-  'buy',
-  'download',
-  'learn',
-  'discover',
-  'explore',
-  'join',
-  'visit',
-  'find',
-  'out',
-  'more',
-  'info',
-  'details',
-  'contact',
-  'us',
-  'today',
-  'latest',
-]);
-
-// 'Elegant' and 'Xtensible' type definitions
-interface ExtractedKeyword extends KeywordInput {
+// --- Interfaces ---
+export interface YouTubeKeywordTrend {
+  keyword: string;
   engagement_score: number;
   weighted_recency_score: number;
   source_video_count: number;
-}
-
-export interface YouTubeKeywordItem extends ExtractedKeyword {
+  aiRelevance: AIRelevance;
   timeframe: string;
-  aiRelevance: AIRelevance | null;
 }
 
 class TrendDiscoveryService {
-  private async _extractKeywordsFromVideos(
-    videos: youtube_v3.Schema$SearchResult[]
-  ): Promise<ExtractedKeyword[]> {
-    const keywordMap = new Map<
-      string,
-      {
-        count: number;
-        weighted_recency_score_sum: number;
-        source_videos: Set<string>;
-      }
-    >();
-    const MIN_KEYWORD_LENGTH = 3;
+  private youtube: youtube_v3.Youtube;
 
-    if (videos.length === 0) return [];
-
-    const videoDates = videos
-      .map((v) => new Date(v.snippet?.publishedAt || 0))
-      .filter((d) => !isNaN(d.getTime()));
-    const minDate =
-      videoDates.length > 0
-        ? Math.min(...videoDates.map((d) => d.getTime()))
-        : Date.now();
-    const maxDate =
-      videoDates.length > 0
-        ? Math.max(...videoDates.map((d) => d.getTime()))
-        : Date.now();
-    const dateRange = maxDate - minDate > 0 ? maxDate - minDate : 1;
-
-    for (const video of videos) {
-      if (!video.snippet || !video.id?.videoId) continue;
-
-      const title = video.snippet.title || '';
-      const description = video.snippet.description || '';
-      const combinedText = `${title} ${description}`.toLowerCase();
-      const tokens = combinedText
-        .split(/[^a-z0-9'-]+/)
-        .filter((t) => t && t.length > 0 && t !== "'" && t !== '-');
-
-      for (const token of tokens) {
-        if (token.length >= MIN_KEYWORD_LENGTH && !STOP_WORDS.has(token)) {
-          if (!keywordMap.has(token)) {
-            keywordMap.set(token, {
-              count: 0,
-              weighted_recency_score_sum: 0,
-              source_videos: new Set(),
-            });
-          }
-          const keywordData = keywordMap.get(token)!;
-          const currentVideoDate = new Date(video.snippet.publishedAt!);
-          const recencyScore = !isNaN(currentVideoDate.getTime())
-            ? (currentVideoDate.getTime() - minDate) / dateRange
-            : 0.5;
-
-          keywordData.count++;
-          keywordData.weighted_recency_score_sum += recencyScore;
-          if (!keywordData.source_videos.has(video.id.videoId)) {
-            keywordData.source_videos.add(video.id.videoId);
-          }
-        }
-      }
-    }
-
-    const extractedKeywords: ExtractedKeyword[] = [];
-    for (const [keyword, data] of keywordMap.entries()) {
-      extractedKeywords.push({
-        keyword,
-        engagement_score: data.count, // Simple count-based engagement for now
-        weighted_recency_score: data.weighted_recency_score_sum / data.count, // Average recency
-        source_video_count: data.source_videos.size,
-      });
-    }
-
-    return extractedKeywords
-      .sort((a, b) => b.engagement_score - a.engagement_score)
-      .slice(0, 50); // Return top 50 keywords
+  constructor() {
+    this.youtube = youTubeDataService.getYoutubeClient();
   }
 
-  public async findYouTubeKeywordTrends(
+  // 'Fortified' method to safely extract keywords from video data
+  private extractKeywords(videos: youtube_v3.Schema$Video[]): KeywordInput[] {
+    if (!Array.isArray(videos) || videos.length === 0) {
+      return []; // Return empty array if no videos
+    }
+
+    const keywordMap = new Map<string, { count: number; totalEngagement: number; totalRecency: number }>();
+
+    videos.forEach(video => {
+      const title = video.snippet?.title || '';
+      const tags = video.snippet?.tags || [];
+      const allText = [title, ...tags].join(' ');
+
+      const engagement = youTubeDataService.calculateEngagementScore(video.statistics);
+      const recency = youTubeDataService.calculateRecencyScore(video.snippet?.publishedAt);
+
+      const words = allText
+        .toLowerCase()
+        .replace(/[^a-z0-9\s-]/g, '') // Allow letters, numbers, spaces, and hyphens
+        .split(/\s+/)
+        .filter(word => word.length > 2 && !/^[0-9]+$/.test(word)); // Filter out short words and purely numeric strings
+
+      words.forEach(word => {
+        const existing = keywordMap.get(word) || { count: 0, totalEngagement: 0, totalRecency: 0 };
+        keywordMap.set(word, {
+          count: existing.count + 1,
+          totalEngagement: existing.totalEngagement + engagement,
+          totalRecency: existing.totalRecency + recency,
+        });
+      });
+    });
+
+    const extractedKeywords: KeywordInput[] = [];
+    keywordMap.forEach((value, key) => {
+      extractedKeywords.push({
+        keyword: key,
+        source_video_count: value.count,
+        engagement_score: value.totalEngagement / value.count, // Average engagement
+        weighted_recency_score: value.totalRecency / value.count, // Average recency
+      });
+    });
+
+    return extractedKeywords;
+  }
+
+  // 'Durable' main method to find trends
+  async findYouTubeKeywordTrends(
     topic: string,
     timeframe: string,
     publishedAfter?: string,
     publishedBefore?: string
-  ): Promise<YouTubeKeywordItem[]> {
-    if (!youTubeDataService) {
-      throw new Error(
-        'YouTubeDataService is not initialized. Check YOUTUBE_API_KEY.'
-      );
+  ): Promise<YouTubeKeywordTrend[]> {
+    // S.A.F.E. - Cache key generation for Redis
+    const cacheKey = `youtube-trends:${topic}:${timeframe}:${publishedAfter || ''}:${publishedBefore || ''}`;
+    const cachedTrends = await redisCacheClient.get<YouTubeKeywordTrend[]>(cacheKey);
+
+    if (cachedTrends) {
+      console.log(`[TrendDiscoveryService] Returning cached trends for key: ${cacheKey}`);
+      return cachedTrends;
     }
 
-    const query = `${topic} tutorial "how to" update news`;
-    const videos = await youTubeDataService.searchVideos(
-      query,
-      50,
+    console.log(`[TrendDiscoveryService] No cache hit for key: ${cacheKey}. Fetching fresh data.`);
+    console.info(`[TrendDiscoveryService] Searching YouTube for topic: "${topic}"`);
+    const videos = await youTubeDataService.searchTrendingVideos(
+      topic,
+      50, // Fetch max results to get a good keyword sample
       publishedAfter,
       publishedBefore
     );
 
-    if (videos.length === 0) {
+    const allExtractedKeywords: KeywordInput[] = this.extractKeywords(videos);
+
+    if (allExtractedKeywords.length === 0) {
+      console.warn('[TrendDiscoveryService] No keywords extracted from YouTube videos.');
       return [];
     }
 
-    const extractedKeywords = await this._extractKeywordsFromVideos(videos);
-    const keywordsWithRelevance = await getRelevanceForKeywords(
-      extractedKeywords,
-      topic
-    );
+    // Sort by engagement and recency first to find the most promising candidates for AI analysis
+    allExtractedKeywords.sort((a, b) => {
+        const scoreA = a.engagement_score * 0.6 + a.weighted_recency_score * 0.4;
+        const scoreB = b.engagement_score * 0.6 + b.weighted_recency_score * 0.4;
+        return scoreB - scoreA;
+    });
 
-    const finalResult: YouTubeKeywordItem[] = keywordsWithRelevance.map(
-      (kw) => ({
-        ...kw,
+    // Limit the number of keywords sent to the AI to stay within API rate limits
+    const keywordsForAI = allExtractedKeywords.slice(0, 5);
+    const otherKeywords = allExtractedKeywords.slice(5);
+
+    console.info(`[TrendDiscoveryService] Getting AI relevance for top ${keywordsForAI.length} keywords.`);
+    let aiRelevanceData: AIRelevance[] = [];
+    if (keywordsForAI.length > 0) {
+      // The 'getRelevanceForKeywords' service is 'Resilient' and handles its own errors,
+      // returning a structured response with an error message if the API call fails.
+      aiRelevanceData = await getRelevanceForKeywords(topic, keywordsForAI);
+    }
+
+    // Combine the AI-analyzed keywords with the rest
+    const trendsWithAI: YouTubeKeywordTrend[] = keywordsForAI.map((keyword, index) => ({
+      ...keyword,
+      aiRelevance: aiRelevanceData[index],
+      timeframe,
+    }));
+
+    const trendsWithoutAI: YouTubeKeywordTrend[] = otherKeywords.map(keyword => ({
+        ...keyword,
+        aiRelevance: { score: 0, justification: 'Not analyzed for AI relevance to conserve quota.', error: undefined },
         timeframe,
-      })
-    );
+    }));
 
-    return finalResult;
+    const combinedTrends = [...trendsWithAI, ...trendsWithoutAI];
+
+    // Final sort: prioritize keywords with an AI score, then fall back to the original sorting
+    const finalTrends = combinedTrends
+      .sort(
+        (a, b) =>
+          (b.aiRelevance.score || 0) * 0.5 +
+          b.engagement_score * 0.3 +
+          b.weighted_recency_score * 0.2 -
+          ((a.aiRelevance.score || 0) * 0.5 +
+            a.engagement_score * 0.3 +
+            a.weighted_recency_score * 0.2)
+      )
+      .slice(0, 50);
+
+    // S.A.F.E. - Store fresh data in Redis cache for 30 minutes
+    await redisCacheClient.set(cacheKey, finalTrends, 1800);
+    console.log(`[TrendDiscoveryService] Stored fresh trends in Redis cache for key: ${cacheKey}`);
+
+    return finalTrends;
   }
 }
 

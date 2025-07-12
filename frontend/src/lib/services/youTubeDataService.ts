@@ -1,142 +1,105 @@
-// G.O.A.T. C.O.D.E.X. B.O.T. - Migrated and Enhanced YouTubeDataService
-// 'Durable', 'Optimized', and 'Xtensible' TypeScript implementation.
+// G.O.A.T. C.O.D.E.X. B.O.T. - Refactored YouTubeDataService
+// 'Durable' and 'Optimized' for providing reliable YouTube API interactions.
 
 import { google, youtube_v3 } from 'googleapis';
 
-// 'Elegant' interface for video statistics
-interface VideoStatistics {
-  views: number;
-  likes: number;
-  comments: number;
-}
-
 class YouTubeDataService {
   private youtube: youtube_v3.Youtube;
+  private apiKey: string;
 
-  constructor(apiKey: string) {
-    if (!apiKey) {
-      const errorMessage =
-        'FATAL: YOUTUBE_API_KEY is not configured. The service cannot operate.';
-      console.error(`[YouTubeDataService] ${errorMessage}`);
-      throw new Error(errorMessage);
+  constructor() {
+    this.apiKey = process.env.YOUTUBE_API_KEY || '';
+    if (!this.apiKey) {
+      console.error('[YouTubeDataService] YOUTUBE_API_KEY is not set. Service will not function.');
     }
     this.youtube = google.youtube({
       version: 'v3',
-      auth: apiKey,
+      auth: this.apiKey,
     });
-    console.info('[YouTubeDataService] Service initialized successfully.');
   }
 
-  /**
-   * 'Elegant' and 'Xtensible' method to extract a YouTube video ID from various URL formats.
-   * @param {string} url The YouTube URL.
-   * @returns {string|null} The extracted video ID or null if not found.
-   */
-  public extractYouTubeVideoId(url: string): string | null {
-    if (!url) return null;
-    const regex =
-      /(?:youtube\.com\/(?:[^/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|\S*?[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/;
-    const match = url.match(regex);
-    const videoId = match ? match[1] : null;
-    console.info(
-      `[YouTubeDataService] Extracted videoId: ${videoId} from URL: ${url}`
-    );
-    return videoId;
+  public getYoutubeClient(): youtube_v3.Youtube {
+    return this.youtube;
   }
 
-  /**
-   * 'Boundless' method to fetch video statistics from the YouTube Data API.
-   * @param {string} videoId The ID of the YouTube video.
-   * @returns {Promise<VideoStatistics>} A promise that resolves with the video statistics.
-   */
-  /**
-   * 'Boundless' method to search for videos on YouTube.
-   * @param query The search query.
-   * @param maxResults The maximum number of results to return.
-   * @param publishedAfter Optional ISO 8601 date string.
-   * @param publishedBefore Optional ISO 8601 date string.
-   * @returns A promise that resolves with an array of search results.
-   */
-  public async searchVideos(
-    query: string,
-    maxResults: number,
+  public calculateEngagementScore(stats: youtube_v3.Schema$VideoStatistics | undefined | null): number {
+    if (!stats) return 0;
+    const viewCount = parseInt(stats.viewCount || '0', 10);
+    const likeCount = parseInt(stats.likeCount || '0', 10);
+    const commentCount = parseInt(stats.commentCount || '0', 10);
+    if (viewCount === 0) return 0;
+    return ((likeCount + commentCount) / viewCount) * 1000; // Engagement per 1000 views
+  }
+
+  public calculateRecencyScore(publishedAt: string | undefined | null): number {
+    if (!publishedAt) return 0;
+    const publishedDate = new Date(publishedAt);
+    const now = new Date();
+    const ageInHours = (now.getTime() - publishedDate.getTime()) / (1000 * 60 * 60);
+    // Use an inverse function for recency, score is higher for newer videos. Capped at 1.
+    return Math.max(0, 1 - ageInHours / (30 * 24)); // Normalize over a 30-day period
+  }
+
+  async searchTrendingVideos(
+    topic: string,
+    maxResults = 50,
     publishedAfter?: string,
     publishedBefore?: string
-  ): Promise<youtube_v3.Schema$SearchResult[]> {
-    console.info(
-      `[YouTubeDataService] Searching for videos with query: "${query}"`
-    );
+  ): Promise<youtube_v3.Schema$Video[]> {
+    if (!this.apiKey) {
+        console.error('[YouTubeDataService] Cannot search videos, API key not configured.');
+        return [];
+    }
+
     try {
-      const params: youtube_v3.Params$Resource$Search$List = {
+      const searchResponse = await this.youtube.search.list({
         part: ['snippet'],
-        q: query,
+        q: `${topic} tutorial`, // Add 'tutorial' to focus the search
         type: ['video'],
-        order: 'viewCount', // Prioritize popular videos
-        maxResults: maxResults,
-        publishedAfter: publishedAfter,
-        publishedBefore: publishedBefore,
-      };
+        videoDefinition: 'high',
+        maxResults,
+        order: 'relevance', // Start with relevance to find good topic matches
+        publishedAfter,
+        publishedBefore,
+      });
 
-      const response = await this.youtube.search.list(params);
+      const videoIds = searchResponse.data.items
+        ?.map(item => item.id?.videoId)
+        .filter((id): id is string => !!id);
 
-      const items = response.data.items;
-      if (!items) {
-        console.warn(
-          `[YouTubeDataService] No videos found for query: "${query}"`
-        );
+      if (!videoIds || videoIds.length === 0) {
+        console.warn(`[YouTubeDataService] No videos found for topic: "${topic}"`);
         return [];
       }
 
-      console.info(
-        `[YouTubeDataService] Found ${items.length} videos for query: "${query}"`
-      );
-      return items;
-    } catch (error: unknown) {
-      console.error(
-        `[YouTubeDataService] CRITICAL ERROR searching for videos with query "${query}".`
-      );
-      console.error(
-        '[YouTubeDataService] Full Google API Error:',
-        JSON.stringify(error, null, 2)
-      );
-      let errorMessage;
-      if (error instanceof Error) {
-        // The googleapis library can throw errors with a 'response' property.
-        // This is a 'Durable' way to check for a more specific error message.
-        const response = (error as { response?: unknown }).response;
-        if (
-          response &&
-          typeof response === 'object' &&
-          'data' in response &&
-          response.data &&
-          typeof response.data === 'object' &&
-          'error' in response.data &&
-          response.data.error &&
-          typeof response.data.error === 'object' &&
-          'message' in response.data.error &&
-          typeof (response.data.error as { message: unknown }).message ===
-            'string'
-        ) {
-          errorMessage = (response.data.error as { message: string }).message;
-        } else {
-          errorMessage = error.message;
-        }
-      } else {
-        errorMessage =
-          'An unknown error occurred while contacting the YouTube API.';
-      }
-      throw new Error(`YouTube API Error: ${errorMessage}`);
+      const videoDetailsResponse = await this.youtube.videos.list({
+        part: ['snippet', 'statistics', 'contentDetails'],
+        id: videoIds,
+        maxResults,
+      });
+
+      return videoDetailsResponse.data.items || [];
+    } catch (error) {
+      console.error(`[YouTubeDataService] Error fetching trending videos for topic "${topic}":`, error);
+      // In case of error, return an empty array to prevent downstream crashes
+      return [];
     }
   }
 
-  public async getVideoStatistics(videoId: string): Promise<VideoStatistics> {
-    if (!videoId) {
-      throw new Error('Invalid videoId provided to getVideoStatistics.');
-    }
+  public extractYouTubeVideoId(url: string): string | null {
+    if (!url) return null;
+    const regex = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/;
+    const match = url.match(regex);
+    return match ? match[1] : null;
+  }
 
-    console.info(
-      `[YouTubeDataService] Fetching statistics for videoId: ${videoId}`
-    );
+  async getVideoStatistics(
+    videoId: string
+  ): Promise<{ views: number; likes: number; comments: number }> {
+    if (!this.apiKey) {
+      console.error('[YouTubeDataService] Cannot get stats, API key not configured.');
+      throw new Error('YouTube API key not configured.');
+    }
 
     try {
       const response = await this.youtube.videos.list({
@@ -144,74 +107,21 @@ class YouTubeDataService {
         id: [videoId],
       });
 
-      const items = response.data.items;
-      if (!items || items.length === 0) {
-        throw new Error(`No video found with ID: ${videoId}`);
-      }
-
-      const stats = items[0].statistics;
+      const stats = response.data.items?.[0]?.statistics;
       if (!stats) {
-        throw new Error(`Statistics not found for video ID: ${videoId}`);
+        throw new Error('Video statistics not found.');
       }
 
-      console.info(
-        `[YouTubeDataService] Successfully fetched stats for videoId ${videoId}:`,
-        stats
-      );
       return {
         views: parseInt(stats.viewCount || '0', 10),
         likes: parseInt(stats.likeCount || '0', 10),
         comments: parseInt(stats.commentCount || '0', 10),
       };
-    } catch (error: unknown) {
-      // 'Clairvoyant' and 'Omniscient' logging for durable error diagnostics.
-      console.error(
-        `[YouTubeDataService] CRITICAL ERROR fetching video statistics for ID ${videoId}.`
-      );
-      console.error(
-        '[YouTubeDataService] Full Google API Error:',
-        JSON.stringify(error, null, 2)
-      );
-      let errorMessage;
-      if (error instanceof Error) {
-        // The googleapis library can throw errors with a 'response' property.
-        // This is a 'Durable' way to check for a more specific error message.
-        const response = (error as { response?: unknown }).response;
-        if (
-          response &&
-          typeof response === 'object' &&
-          'data' in response &&
-          response.data &&
-          typeof response.data === 'object' &&
-          'error' in response.data &&
-          response.data.error &&
-          typeof response.data.error === 'object' &&
-          'message' in response.data.error &&
-          typeof (response.data.error as { message: unknown }).message ===
-            'string'
-        ) {
-          errorMessage = (response.data.error as { message: string }).message;
-        } else {
-          errorMessage = error.message;
-        }
-      } else {
-        errorMessage =
-          'An unknown error occurred while contacting the YouTube API.';
-      }
-      throw new Error(`YouTube API Error: ${errorMessage}`);
+    } catch (error) {
+      console.error(`[YouTubeDataService] Error fetching video statistics for ID "${videoId}":`, error);
+      throw new Error('Failed to fetch video statistics.');
     }
   }
 }
 
-// 'Altruistic' Singleton Pattern: Ensures a single, configured instance throughout the application.
-const apiKey = process.env.YOUTUBE_API_KEY;
-if (!apiKey) {
-  console.warn(
-    '[YouTubeDataService] YOUTUBE_API_KEY is not set. Service will not be available.'
-  );
-}
-
-// Export the instance, which may be null if the API key is not provided.
-export const youTubeDataService = apiKey
-  ? new YouTubeDataService(apiKey)
-  : null;
+export const youTubeDataService = new YouTubeDataService();

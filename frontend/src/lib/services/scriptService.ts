@@ -2,27 +2,27 @@
 // This service provides a centralized, 'Optimized' interface for all script-related database operations.
 // Enhanced with robust error handling and standardized service responses.
 
-import { supabase } from './supabaseClient';
+import { supabaseAdmin as supabase } from './supabaseClient';
 import { ServiceResponse, withErrorHandling } from '../utils/serviceUtils';
-import { env as _env } from '../config/environment';
 
 // 'Elegant' and 'Xtensible' type definition for a Script
 // 'Elegant' and 'Xtensible' type definition for a Script, including engagement metrics
 export interface Script {
-  id: number;
-  title: string;
-  content: string;
+  id: string; // Changed from number to string for UUID
   topic: string;
-  keywords: string[];
+  trends_used: any; // Changed from keywords: string[] to trends_used: any for jsonb type
+  generated_script: string; // Changed from script_text
+  user_id: string | null;
   created_at: string;
   updated_at: string;
-  // Optional fields for YouTube engagement metrics
-  published_video_id?: string;
-  engagement_rate?: number;
-  views?: number;
-  likes?: number;
-  comments?: number;
-  engagement_retrieved_at?: string;
+
+  // Engagement Metrics
+  published_video_id?: string | null;
+  engagement_rate?: number | null;
+  views?: number | null;
+  likes?: number | null;
+  comments?: number | null;
+  engagement_retrieved_at?: string | null;
 }
 
 class ScriptService {
@@ -57,7 +57,7 @@ class ScriptService {
    * @param id The ID of the script to retrieve.
    * @returns A promise that resolves to the script object or null if not found.
    */
-  async getScriptById(id: number): Promise<Script | null> {
+  async getScriptById(id: string): Promise<Script | null> {
     console.info(`[ScriptService] Fetching script with ID: ${id}.`);
     const { data, error } = await supabase
       .from('scripts')
@@ -87,9 +87,11 @@ class ScriptService {
   async createScript(
     scriptData: Omit<Script, 'id' | 'created_at' | 'updated_at'>
   ): Promise<Script> {
-    console.info(
-      `[ScriptService] Creating new script with title: "${scriptData.title}".`
-    );
+    const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || 'Not Found';
+    const keySnippet = serviceKey === 'Not Found' ? 'Not Found' : `${serviceKey.substring(0, 5)}...${serviceKey.substring(serviceKey.length - 5)}`;
+    console.info(`[ScriptService] Using Service Role Key starting with: ${keySnippet}`);
+    console.info(`[ScriptService] Creating new script with topic: "${scriptData.topic}".`);
+
     const { data, error } = await supabase
       .from('scripts')
       .insert([scriptData])
@@ -97,8 +99,9 @@ class ScriptService {
       .single();
 
     if (error) {
-      console.error('[ScriptService] Error creating script:', error);
-      throw new Error('Could not create the new script.');
+      console.error('Error creating script:', error);
+      // Throw the specific error message from Supabase for better debugging.
+      throw new Error(`Failed to create script: ${error.message}`);
     }
 
     console.info(
@@ -114,7 +117,7 @@ class ScriptService {
    * @returns A promise that resolves to the updated script.
    */
   async updateScript(
-    id: number,
+    id: string,
     updates: Partial<Omit<Script, 'id' | 'created_at'>>
   ): Promise<Script> {
     console.info(`[ScriptService] Updating script with ID: ${id}.`);

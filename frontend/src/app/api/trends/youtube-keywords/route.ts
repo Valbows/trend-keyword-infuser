@@ -4,21 +4,18 @@ import { NextResponse } from 'next/server';
 import { trendDiscoveryService } from '@/lib/services/trendDiscoveryService';
 
 // 'Elegant' and 'Xtensible' handler for GET requests
-export async function GET(request: Request) {
-  const { searchParams } = new URL(request.url);
-  const topic = searchParams.get('topic');
-  const timeframe = searchParams.get('timeframe') || '7d'; // Default to 7 days
-  const publishedAfter = searchParams.get('publishedAfter') || undefined;
-  const publishedBefore = searchParams.get('publishedBefore') || undefined;
-
-  if (!topic) {
-    return NextResponse.json(
-      { success: false, message: 'Missing required query parameter: topic' },
-      { status: 400 }
-    );
-  }
-
+export async function POST(request: Request) {
   try {
+    const body = await request.json();
+    const { topic, timeframe = '7d', publishedAfter, publishedBefore } = body;
+
+    if (!topic) {
+      return NextResponse.json(
+        { success: false, message: 'Missing required body parameter: topic' },
+        { status: 400 }
+      );
+    }
+
     console.info(
       `[API /trends/youtube-keywords] Fetching trends for topic: "${topic}"`
     );
@@ -34,10 +31,16 @@ export async function GET(request: Request) {
     );
     return NextResponse.json({ success: true, data: trends });
   } catch (error: unknown) {
-    console.error(
-      `[API /trends/youtube-keywords] Error fetching trends for topic "${topic}":`,
-      error
-    );
+    // D.R.Y. - 'Resilient' error handling
+    console.error('[API /trends/youtube-keywords] Error fetching trends:', error);
+
+    if (error instanceof SyntaxError) {
+      return NextResponse.json(
+        { success: false, message: 'Invalid JSON in request body.' },
+        { status: 400 }
+      );
+    }
+
     return NextResponse.json(
       {
         success: false,

@@ -11,7 +11,7 @@ class EngagementRecordingService {
    * @param videoUrl The URL of the published YouTube video.
    * @returns A promise that resolves to the updated script object.
    */
-  async recordEngagement(scriptId: number, videoUrl: string) {
+  async recordEngagement(scriptId: string, videoUrl: string) {
     if (!youTubeDataService) {
       const errorMessage =
         'YouTube Data Service is not available. Please check API key configuration.';
