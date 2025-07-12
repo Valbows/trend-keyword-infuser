@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { engagementRecordingService } from '@/lib/services/engagementRecordingService';
 
 /**
@@ -6,7 +6,7 @@ import { engagementRecordingService } from '@/lib/services/engagementRecordingSe
  * Uses a single request parameter approach to avoid Next.js 15.3.3 type issues
  */
 export async function POST(
-  request: Request,
+  request: NextRequest,
   context: { params: { id: string } }
 ) {
   const { id } = context.params;
