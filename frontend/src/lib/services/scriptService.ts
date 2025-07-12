@@ -4,13 +4,14 @@
 
 import { supabaseAdmin as supabase } from './supabaseClient';
 import { ServiceResponse, withErrorHandling } from '../utils/serviceUtils';
+import { YouTubeKeywordTrend } from './trendDiscoveryService';
 
 // 'Elegant' and 'Xtensible' type definition for a Script
 // 'Elegant' and 'Xtensible' type definition for a Script, including engagement metrics
 export interface Script {
   id: string; // Changed from number to string for UUID
   topic: string;
-  trends_used: any; // Changed from keywords: string[] to trends_used: any for jsonb type
+  trends_used: YouTubeKeywordTrend[]; // Changed from keywords: string[] to trends_used: any for jsonb type
   generated_script: string; // Changed from script_text
   user_id: string | null;
   created_at: string;

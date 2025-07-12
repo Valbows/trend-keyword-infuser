@@ -1,7 +1,7 @@
 import { createServerClient, type CookieOptions } from '@supabase/ssr';
 import { cookies } from 'next/headers';
 
-import { env } from '../config/environment';
+import { environment as env } from '../config/environment';
 
 export const createClient = () => {
   const cookieStore = cookies();
@@ -15,7 +15,7 @@ export const createClient = () => {
       async set(name: string, value: string, options: CookieOptions) {
         try {
           await (await cookieStore).set({ name, value, ...options });
-        } catch (error) {
+        } catch (_error) {
           // The `set` method was called from a Server Component.
           // This can be ignored if you have middleware refreshing
           // user sessions.
@@ -24,7 +24,7 @@ export const createClient = () => {
       async remove(name: string, options: CookieOptions) {
         try {
           await (await cookieStore).set({ name, value: '', ...options });
-        } catch (error) {
+        } catch (_error) {
           // The `delete` method was called from a Server Component.
           // This can be ignored if you have middleware refreshing
           // user sessions.

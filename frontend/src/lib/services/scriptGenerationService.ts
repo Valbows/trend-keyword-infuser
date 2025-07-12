@@ -182,13 +182,16 @@ Example of desired output format for a script with keywords:
     console.log(`[ScriptGenerationService] Stored fresh script in cache for key: ${cacheKey}`);
 
     return scriptText;
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error(
-      `[ScriptGenerationService] Failed to generate script for topic: "${topic}"`, 
+      `[ScriptGenerationService] Failed to generate script for topic: "${topic}"`,
       error
     );
     // G.O.A.T. C.O.D.E.X. B.O.T. - Always propagate errors for the API route to handle.
     // This ensures that transient issues like quota errors don't result in failed data persistence attempts.
-    throw new Error(`Script generation failed: ${error.message}`);
+    if (error instanceof Error) {
+      throw new Error(`Script generation failed: ${error.message}`);
+    }
+    throw new Error(`Script generation failed due to an unknown error.`);
   }
 };

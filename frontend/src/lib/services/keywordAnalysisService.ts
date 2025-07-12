@@ -126,12 +126,17 @@ export async function getRelevanceForKeywords(
       };
     });
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error(`[KeywordAnalysisService] AI API call failed for batch keyword analysis:`, error);
-    const isQuotaError = error.message?.includes('429');
-    const errorMessage = isQuotaError
-      ? 'Daily AI analysis quota reached. Please try again tomorrow.'
-      : `AI API call failed: ${error.message}`;
+    let errorMessage: string;
+    if (error instanceof Error) {
+      const isQuotaError = error.message?.includes('429');
+      errorMessage = isQuotaError
+        ? 'Daily AI analysis quota reached. Please try again tomorrow.'
+        : `AI API call failed: ${error.message}`;
+    } else {
+      errorMessage = 'An unknown error occurred during AI analysis.';
+    }
 
     // On failure, return an error object for all keywords
     return keywords.map(() => ({
