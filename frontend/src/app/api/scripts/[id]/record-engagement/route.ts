@@ -7,9 +7,9 @@ import { engagementRecordingService } from '@/lib/services/engagementRecordingSe
  */
 export async function POST(
   request: Request,
-  { params }: { params: { id: string } }
+  context: { params: { id:string } }
 ) {
-  const { id } = params;
+  const { id } = context.params;
 
   if (!id) {
     return NextResponse.json(
