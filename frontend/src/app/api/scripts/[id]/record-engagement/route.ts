@@ -7,7 +7,7 @@ import { engagementRecordingService } from '@/lib/services/engagementRecordingSe
  */
 export async function POST(
   request: Request,
-  context: { params: { id:string } }
+  context: { params: { id: string } }
 ) {
   const { id } = context.params;
 
