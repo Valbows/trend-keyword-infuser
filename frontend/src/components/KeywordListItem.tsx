@@ -75,7 +75,8 @@ const KeywordListItem: React.FC<KeywordListItemProps> = ({ keywordItem }) => {
           )}
           {keywordItem.aiRelevance.error && (
             <p className='text-xs text-amber-400'>
-              <strong className='font-semibold'>AI Note:</strong> {keywordItem.aiRelevance.error}
+              <strong className='font-semibold'>AI Note:</strong>{' '}
+              {keywordItem.aiRelevance.error}
             </p>
           )}
         </div>

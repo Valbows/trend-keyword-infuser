@@ -89,9 +89,16 @@ class ScriptService {
     scriptData: Omit<Script, 'id' | 'created_at' | 'updated_at'>
   ): Promise<Script> {
     const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || 'Not Found';
-    const keySnippet = serviceKey === 'Not Found' ? 'Not Found' : `${serviceKey.substring(0, 5)}...${serviceKey.substring(serviceKey.length - 5)}`;
-    console.info(`[ScriptService] Using Service Role Key starting with: ${keySnippet}`);
-    console.info(`[ScriptService] Creating new script with topic: "${scriptData.topic}".`);
+    const keySnippet =
+      serviceKey === 'Not Found'
+        ? 'Not Found'
+        : `${serviceKey.substring(0, 5)}...${serviceKey.substring(serviceKey.length - 5)}`;
+    console.info(
+      `[ScriptService] Using Service Role Key starting with: ${keySnippet}`
+    );
+    console.info(
+      `[ScriptService] Creating new script with topic: "${scriptData.topic}".`
+    );
 
     const { data, error } = await supabase
       .from('scripts')

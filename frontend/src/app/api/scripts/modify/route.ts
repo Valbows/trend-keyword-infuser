@@ -1,7 +1,6 @@
 import { createClient } from '@/lib/supabase/server';
 import { NextRequest, NextResponse } from 'next/server';
 
-
 export async function POST(request: NextRequest) {
   const supabase = createClient();
   const { scriptId, content, keywords } = await request.json();
@@ -20,7 +19,11 @@ export async function POST(request: NextRequest) {
     });
   }
 
-  const updateData: { generated_script: string; keywords?: string[]; updated_at: string } = {
+  const updateData: {
+    generated_script: string;
+    keywords?: string[];
+    updated_at: string;
+  } = {
     generated_script: content,
     updated_at: new Date().toISOString(),
   };

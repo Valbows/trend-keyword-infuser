@@ -27,7 +27,9 @@ class GeminiClientWrapper {
 
   constructor(apiKey: string) {
     if (!apiKey) {
-      console.error('[GeminiClientWrapper] API key is missing. Service will be disabled.');
+      console.error(
+        '[GeminiClientWrapper] API key is missing. Service will be disabled.'
+      );
       throw new Error('Gemini API key not provided.');
     }
     this.genAI = new GoogleGenerativeAI(apiKey);
@@ -47,7 +49,7 @@ class GeminiClientWrapper {
   }
 
   private async acquireToken(): Promise<void> {
-    return new Promise(resolve => {
+    return new Promise((resolve) => {
       const tryAcquire = () => {
         if (this.tokens >= 1) {
           this.tokens -= 1;
@@ -66,7 +68,9 @@ class GeminiClientWrapper {
     return this.genAI.getGenerativeModel({ model: AI_MODEL_NAME });
   }
 
-  public async generateContent(request: GenerateContentRequest): Promise<GenerateContentResult> {
+  public async generateContent(
+    request: GenerateContentRequest
+  ): Promise<GenerateContentResult> {
     return this.enqueue(async () => {
       return this.executeWithRetry(async () => {
         const model = this.getGenerativeModel();
@@ -101,7 +105,10 @@ class GeminiClientWrapper {
   }
 
   private processQueue() {
-    if (this.requestQueue.length > 0 && this.activeRequests < MAX_CONCURRENT_REQUESTS) {
+    if (
+      this.requestQueue.length > 0 &&
+      this.activeRequests < MAX_CONCURRENT_REQUESTS
+    ) {
       const nextTask = this.requestQueue.shift();
       if (nextTask) {
         nextTask();
@@ -109,30 +116,47 @@ class GeminiClientWrapper {
     }
   }
 
-  private async executeWithRetry<T>(fn: () => Promise<T>, retries = MAX_RETRIES, backoff = INITIAL_BACKOFF_MS): Promise<T> {
+  private async executeWithRetry<T>(
+    fn: () => Promise<T>,
+    retries = MAX_RETRIES,
+    backoff = INITIAL_BACKOFF_MS
+  ): Promise<T> {
     try {
       return await fn();
     } catch (error) {
       // S.A.F.E. - Handle 'unknown' error type correctly
-      const errorMessage = error instanceof Error ? error.message : String(error);
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
       const isRateLimitError = errorMessage.includes('429');
-      const isHardQuotaError = isRateLimitError && errorMessage.includes('exceeded your current quota');
-      const isServerError = errorMessage.includes('503') || errorMessage.includes('500');
+      const isHardQuotaError =
+        isRateLimitError &&
+        errorMessage.includes('exceeded your current quota');
+      const isServerError =
+        errorMessage.includes('503') || errorMessage.includes('500');
 
       // 'Evolving' Logic: If it's a hard quota error, stop immediately.
       if (isHardQuotaError) {
-        console.error('[GeminiClientWrapper] Hard quota limit reached. Halting retries.', { error });
+        console.error(
+          '[GeminiClientWrapper] Hard quota limit reached. Halting retries.',
+          { error }
+        );
         throw error; // Re-throw the original error to be caught by the caller
       }
 
       // 'Durable' Logic: Retry on transient server errors or temporary rate limits.
       if (retries > 0 && (isRateLimitError || isServerError)) {
-        console.warn(`[GeminiClientWrapper] Retrying request. Retries left: ${retries - 1}`, { error });
-        await new Promise(res => setTimeout(res, backoff));
+        console.warn(
+          `[GeminiClientWrapper] Retrying request. Retries left: ${retries - 1}`,
+          { error }
+        );
+        await new Promise((res) => setTimeout(res, backoff));
         return this.executeWithRetry(fn, retries - 1, backoff * 2); // Exponential backoff
       }
 
-      console.error('[GeminiClientWrapper] Non-retriable error or max retries reached.', { error });
+      console.error(
+        '[GeminiClientWrapper] Non-retriable error or max retries reached.',
+        { error }
+      );
       throw error; // Re-throw for other errors
     }
   }
@@ -147,7 +171,9 @@ let geminiClientWrapper: GeminiClientWrapper | null = null;
 if (geminiApiKey) {
   geminiClientWrapper = new GeminiClientWrapper(geminiApiKey);
 } else {
-  console.warn('[GeminiClientWrapper] GEMINI_API_KEY is not set. The Gemini client will not be initialized.');
+  console.warn(
+    '[GeminiClientWrapper] GEMINI_API_KEY is not set. The Gemini client will not be initialized.'
+  );
 }
 
 // S.A.F.E. - Exporting client and enums for modular use across the application.
@@ -157,10 +183,22 @@ export { HarmCategory, HarmBlockThreshold };
 // --- Safety Settings ---
 // S.A.F.E. Principle: Configure strict safety settings to block harmful content.
 export const safetySettings = [
-  { category: HarmCategory.HARM_CATEGORY_HARASSMENT, threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE },
-  { category: HarmCategory.HARM_CATEGORY_HATE_SPEECH, threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE },
-  { category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT, threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE },
-  { category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT, threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE },
+  {
+    category: HarmCategory.HARM_CATEGORY_HARASSMENT,
+    threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
+  },
+  {
+    category: HarmCategory.HARM_CATEGORY_HATE_SPEECH,
+    threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
+  },
+  {
+    category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT,
+    threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
+  },
+  {
+    category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT,
+    threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
+  },
 ];
 
 export type { GenerateContentRequest };

@@ -25,7 +25,9 @@ class RedisCacheClient {
 
     try {
       if (!environment.redisUrl) {
-        console.error('[RedisCacheClient] Connection attempt failed: REDIS_URL is not defined.');
+        console.error(
+          '[RedisCacheClient] Connection attempt failed: REDIS_URL is not defined.'
+        );
         this.isConnecting = false;
         return;
       }
@@ -55,20 +57,27 @@ class RedisCacheClient {
       });
 
       // Initial connection attempt
-      redisClient.connect().catch(err => {
-        console.error('[RedisCacheClient] Initial Redis connection failed:', err);
+      redisClient.connect().catch((err) => {
+        console.error(
+          '[RedisCacheClient] Initial Redis connection failed:',
+          err
+        );
         this.isConnecting = false;
       });
-
     } catch (error) {
-        console.error('[RedisCacheClient] Failed to create Redis client instance:', error);
-        this.isConnecting = false;
+      console.error(
+        '[RedisCacheClient] Failed to create Redis client instance:',
+        error
+      );
+      this.isConnecting = false;
     }
   }
 
   public async get<T>(key: string): Promise<T | null> {
     if (!this.client) {
-      console.warn('[RedisCacheClient] Get operation failed: Redis is not connected.');
+      console.warn(
+        '[RedisCacheClient] Get operation failed: Redis is not connected.'
+      );
       return null;
     }
     try {
@@ -77,21 +86,33 @@ class RedisCacheClient {
         return JSON.parse(data) as T;
       }
     } catch (error) {
-      console.error(`[RedisCacheClient] Error getting data for key "${key}":`, error);
+      console.error(
+        `[RedisCacheClient] Error getting data for key "${key}":`,
+        error
+      );
     }
     return null;
   }
 
-  public async set(key: string, value: object, ttlSeconds: number): Promise<void> {
+  public async set(
+    key: string,
+    value: object,
+    ttlSeconds: number
+  ): Promise<void> {
     if (!this.client) {
-      console.warn('[RedisCacheClient] Set operation failed: Redis is not connected.');
+      console.warn(
+        '[RedisCacheClient] Set operation failed: Redis is not connected.'
+      );
       return;
     }
     try {
       const stringValue = JSON.stringify(value);
       await this.client.set(key, stringValue, 'EX', ttlSeconds);
     } catch (error) {
-      console.error(`[RedisCacheClient] Error setting data for key "${key}":`, error);
+      console.error(
+        `[RedisCacheClient] Error setting data for key "${key}":`,
+        error
+      );
     }
   }
 }

@@ -129,20 +129,17 @@ const TrendSidebar: React.FC<TrendSidebarProps> = ({ topic }) => {
           Error: {error}
         </p>
       )}
-      {!isLoading &&
-        !error &&
-        keywords.length === 0 &&
-        topic.trim() && (
-          <p className='text-slate-400'>
-            No keywords found for &quot;{topic}&quot;
-            {selectedTimeframe === 'custom' && startDate && endDate
-              ? ` between ${startDate} and ${endDate}`
-              : selectedTimeframe === 'any'
-                ? ' for all time'
-                : ` within the last ${selectedTimeframe}`}
-            .
-          </p>
-        )}
+      {!isLoading && !error && keywords.length === 0 && topic.trim() && (
+        <p className='text-slate-400'>
+          No keywords found for &quot;{topic}&quot;
+          {selectedTimeframe === 'custom' && startDate && endDate
+            ? ` between ${startDate} and ${endDate}`
+            : selectedTimeframe === 'any'
+              ? ' for all time'
+              : ` within the last ${selectedTimeframe}`}
+          .
+        </p>
+      )}
       {!isLoading && !error && keywords.length === 0 && !topic && (
         <p className='text-slate-400'>Enter a topic to search for keywords.</p>
       )}

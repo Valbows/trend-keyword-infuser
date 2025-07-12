@@ -11,12 +11,8 @@ import NodeCache from 'node-cache';
 import { GenerationConfig, SafetySetting } from '@google/generative-ai';
 import { YouTubeKeywordTrend } from './trendDiscoveryService';
 
-
-
 // G.O.A.T. C.O.D.E.X. B.O.T. - 'Durable' Caching Layer for Scripts
 const scriptCache = new NodeCache({ stdTTL: 1800 }); // Cache scripts for 30 minutes
-
-
 
 const generationConfig: GenerationConfig = {
   temperature: 0.5, // Slightly more creative for script writing
@@ -58,7 +54,9 @@ export const infuseKeywordsIntoScript = async (
     throw new Error('ScriptGenerationService: Gemini client not initialized.');
   }
 
-  console.log(`[ScriptGenerationService] Infusing keywords into existing script.`);
+  console.log(
+    `[ScriptGenerationService] Infusing keywords into existing script.`
+  );
 
   let keywordDetails: string;
   if (keywords && keywords.length > 0) {
@@ -67,7 +65,9 @@ export const infuseKeywordsIntoScript = async (
   } else {
     // If no keywords are provided, we can just return the original content
     // as there is nothing to infuse.
-    console.log('[ScriptGenerationService] No keywords provided for infusion, returning original content.');
+    console.log(
+      '[ScriptGenerationService] No keywords provided for infusion, returning original content.'
+    );
     return existingContent;
   }
 
@@ -102,10 +102,14 @@ ${keywordDetails}
 
     console.info(`[ScriptGenerationService] Keyword infusion successful.`);
     return modifiedScript;
-
   } catch (error) {
-    console.error('[ScriptGenerationService] Error during keyword infusion:', error);
-    throw new Error('Failed to infuse keywords into the script via AI service.');
+    console.error(
+      '[ScriptGenerationService] Error during keyword infusion:',
+      error
+    );
+    throw new Error(
+      'Failed to infuse keywords into the script via AI service.'
+    );
   }
 };
 
@@ -124,20 +128,29 @@ export const generateScript = async (
   }
 
   // G.O.A.T. C.O.D.E.X. B.O.T. - Cache key generation
-  const sortedKeywords = trends.map(t => t.keyword).sort().join(',');
+  const sortedKeywords = trends
+    .map((t) => t.keyword)
+    .sort()
+    .join(',');
   const cacheKey = `script:${topic}:${sortedKeywords}`;
   const cachedScript = scriptCache.get<string>(cacheKey);
 
   if (cachedScript) {
-    console.log(`[ScriptGenerationService] Returning cached script for key: ${cacheKey}`);
+    console.log(
+      `[ScriptGenerationService] Returning cached script for key: ${cacheKey}`
+    );
     return cachedScript;
   }
 
-  console.log(`[ScriptGenerationService] No cache hit for key: ${cacheKey}. Generating fresh script.`);
+  console.log(
+    `[ScriptGenerationService] No cache hit for key: ${cacheKey}. Generating fresh script.`
+  );
 
   let keywordDetails: string;
   if (trends && trends.length > 0) {
-    const keywordList = trends.map((trend) => `\"${trend.keyword}\"`).join(', ');
+    const keywordList = trends
+      .map((trend) => `\"${trend.keyword}\"`)
+      .join(', ');
     keywordDetails = `Incorporate the following current trending keywords seamlessly and naturally into the script:\n${keywordList}`;
   } else {
     keywordDetails =
@@ -179,7 +192,9 @@ Example of desired output format for a script with keywords:
 
     // G.O.A.T. C.O.D.E.X. B.O.T. - Store fresh script in cache
     scriptCache.set(cacheKey, scriptText);
-    console.log(`[ScriptGenerationService] Stored fresh script in cache for key: ${cacheKey}`);
+    console.log(
+      `[ScriptGenerationService] Stored fresh script in cache for key: ${cacheKey}`
+    );
 
     return scriptText;
   } catch (error: unknown) {

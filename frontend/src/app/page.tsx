@@ -19,7 +19,6 @@ export default function Home() {
   const [error, setError] = useState('');
   const [copySuccessMessage, setCopySuccessMessage] = useState('');
   const [existingScript, setExistingScript] = useState('');
-  
 
   // G.O.A.T. C.O.D.E.X. B.O.T. - selectedKeywords now comes from context, setSelectedKeywords was passed to TrendSidebar but is no longer needed as context handles updates internally.
   const { selectedKeywords } = useSelectedKeywords();
@@ -105,7 +104,7 @@ export default function Home() {
     }
   };
 
-    // G.O.A.T. C.O.D.E.X. B.O.T. - Effect to handle successful script infusion
+  // G.O.A.T. C.O.D.E.X. B.O.T. - Effect to handle successful script infusion
   useEffect(() => {
     if (infuseData?.modifiedScript) {
       setScript(infuseData.modifiedScript);

@@ -1,8 +1,6 @@
 // /app/api/scripts/infuse/route.ts
 import { NextResponse } from 'next/server';
-import {
-  infuseKeywordsIntoScript,
-} from '@/lib/services/scriptGenerationService';
+import { infuseKeywordsIntoScript } from '@/lib/services/scriptGenerationService';
 
 export async function POST(request: Request) {
   try {

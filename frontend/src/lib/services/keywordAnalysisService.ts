@@ -38,7 +38,7 @@ interface AIRelevanceResponseItem {
  */
 export async function getRelevanceForKeywords(
   topic: string,
-  keywords: KeywordInput[],
+  keywords: KeywordInput[]
 ): Promise<AIRelevance[]> {
   if (!geminiClient) {
     return keywords.map(() => ({
@@ -52,7 +52,7 @@ export async function getRelevanceForKeywords(
     return [];
   }
 
-  const keywordListForPrompt = keywords.map(k => ({
+  const keywordListForPrompt = keywords.map((k) => ({
     keyword: k.keyword,
     source_video_count: k.source_video_count,
     engagement_score: k.engagement_score,
@@ -93,10 +93,22 @@ export async function getRelevanceForKeywords(
       maxOutputTokens: 4096,
     },
     safetySettings: [
-      { category: HarmCategory.HARM_CATEGORY_HARASSMENT, threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE },
-      { category: HarmCategory.HARM_CATEGORY_HATE_SPEECH, threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE },
-      { category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT, threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE },
-      { category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT, threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE },
+      {
+        category: HarmCategory.HARM_CATEGORY_HARASSMENT,
+        threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
+      },
+      {
+        category: HarmCategory.HARM_CATEGORY_HATE_SPEECH,
+        threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
+      },
+      {
+        category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT,
+        threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
+      },
+      {
+        category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT,
+        threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
+      },
     ],
   };
 
@@ -107,14 +119,19 @@ export async function getRelevanceForKeywords(
       throw new Error('Empty response from AI.');
     }
 
-    const parsedResponse: AIRelevanceResponseItem[] = JSON.parse(text.replace(/```json|```/g, '').trim());
+    const parsedResponse: AIRelevanceResponseItem[] = JSON.parse(
+      text.replace(/```json|```/g, '').trim()
+    );
 
     const relevanceMap = new Map<string, AIRelevance>();
-    parsedResponse.forEach(item => {
-      relevanceMap.set(item.keyword, { score: item.score, justification: item.justification });
+    parsedResponse.forEach((item) => {
+      relevanceMap.set(item.keyword, {
+        score: item.score,
+        justification: item.justification,
+      });
     });
 
-    return keywords.map(inputKeyword => {
+    return keywords.map((inputKeyword) => {
       const relevance = relevanceMap.get(inputKeyword.keyword);
       if (relevance) {
         return relevance;
@@ -125,9 +142,11 @@ export async function getRelevanceForKeywords(
         justification: 'Keyword not found in AI response.',
       };
     });
-
   } catch (error: unknown) {
-    console.error(`[KeywordAnalysisService] AI API call failed for batch keyword analysis:`, error);
+    console.error(
+      `[KeywordAnalysisService] AI API call failed for batch keyword analysis:`,
+      error
+    );
     let errorMessage: string;
     if (error instanceof Error) {
       const isQuotaError = error.message?.includes('429');
@@ -146,4 +165,3 @@ export async function getRelevanceForKeywords(
     }));
   }
 }
-

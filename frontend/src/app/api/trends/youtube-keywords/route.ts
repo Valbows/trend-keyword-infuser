@@ -32,7 +32,10 @@ export async function POST(request: Request) {
     return NextResponse.json({ success: true, data: trends });
   } catch (error: unknown) {
     // D.R.Y. - 'Resilient' error handling
-    console.error('[API /trends/youtube-keywords] Error fetching trends:', error);
+    console.error(
+      '[API /trends/youtube-keywords] Error fetching trends:',
+      error
+    );
 
     if (error instanceof SyntaxError) {
       return NextResponse.json(

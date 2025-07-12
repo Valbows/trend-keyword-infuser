@@ -10,7 +10,9 @@ class YouTubeDataService {
   constructor() {
     this.apiKey = process.env.YOUTUBE_API_KEY || '';
     if (!this.apiKey) {
-      console.error('[YouTubeDataService] YOUTUBE_API_KEY is not set. Service will not function.');
+      console.error(
+        '[YouTubeDataService] YOUTUBE_API_KEY is not set. Service will not function.'
+      );
     }
     this.youtube = google.youtube({
       version: 'v3',
@@ -22,7 +24,9 @@ class YouTubeDataService {
     return this.youtube;
   }
 
-  public calculateEngagementScore(stats: youtube_v3.Schema$VideoStatistics | undefined | null): number {
+  public calculateEngagementScore(
+    stats: youtube_v3.Schema$VideoStatistics | undefined | null
+  ): number {
     if (!stats) return 0;
     const viewCount = parseInt(stats.viewCount || '0', 10);
     const likeCount = parseInt(stats.likeCount || '0', 10);
@@ -35,7 +39,8 @@ class YouTubeDataService {
     if (!publishedAt) return 0;
     const publishedDate = new Date(publishedAt);
     const now = new Date();
-    const ageInHours = (now.getTime() - publishedDate.getTime()) / (1000 * 60 * 60);
+    const ageInHours =
+      (now.getTime() - publishedDate.getTime()) / (1000 * 60 * 60);
     // Use an inverse function for recency, score is higher for newer videos. Capped at 1.
     return Math.max(0, 1 - ageInHours / (30 * 24)); // Normalize over a 30-day period
   }
@@ -47,8 +52,10 @@ class YouTubeDataService {
     publishedBefore?: string
   ): Promise<youtube_v3.Schema$Video[]> {
     if (!this.apiKey) {
-        console.error('[YouTubeDataService] Cannot search videos, API key not configured.');
-        return [];
+      console.error(
+        '[YouTubeDataService] Cannot search videos, API key not configured.'
+      );
+      return [];
     }
 
     try {
@@ -64,11 +71,13 @@ class YouTubeDataService {
       });
 
       const videoIds = searchResponse.data.items
-        ?.map(item => item.id?.videoId)
+        ?.map((item) => item.id?.videoId)
         .filter((id): id is string => !!id);
 
       if (!videoIds || videoIds.length === 0) {
-        console.warn(`[YouTubeDataService] No videos found for topic: "${topic}"`);
+        console.warn(
+          `[YouTubeDataService] No videos found for topic: "${topic}"`
+        );
         return [];
       }
 
@@ -80,7 +89,10 @@ class YouTubeDataService {
 
       return videoDetailsResponse.data.items || [];
     } catch (error) {
-      console.error(`[YouTubeDataService] Error fetching trending videos for topic "${topic}":`, error);
+      console.error(
+        `[YouTubeDataService] Error fetching trending videos for topic "${topic}":`,
+        error
+      );
       // In case of error, return an empty array to prevent downstream crashes
       return [];
     }
@@ -88,7 +100,8 @@ class YouTubeDataService {
 
   public extractYouTubeVideoId(url: string): string | null {
     if (!url) return null;
-    const regex = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/;
+    const regex =
+      /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/;
     const match = url.match(regex);
     return match ? match[1] : null;
   }
@@ -97,7 +110,9 @@ class YouTubeDataService {
     videoId: string
   ): Promise<{ views: number; likes: number; comments: number }> {
     if (!this.apiKey) {
-      console.error('[YouTubeDataService] Cannot get stats, API key not configured.');
+      console.error(
+        '[YouTubeDataService] Cannot get stats, API key not configured.'
+      );
       throw new Error('YouTube API key not configured.');
     }
 
@@ -118,7 +133,10 @@ class YouTubeDataService {
         comments: parseInt(stats.commentCount || '0', 10),
       };
     } catch (error) {
-      console.error(`[YouTubeDataService] Error fetching video statistics for ID "${videoId}":`, error);
+      console.error(
+        `[YouTubeDataService] Error fetching video statistics for ID "${videoId}":`,
+        error
+      );
       throw new Error('Failed to fetch video statistics.');
     }
   }

@@ -67,15 +67,20 @@ function useYouTubeKeywords({
           const eDate = new Date(endDate);
 
           if (isNaN(sDate.getTime()) || isNaN(eDate.getTime())) {
-            throw new Error('Invalid date(s) provided. Please use the date pickers.');
+            throw new Error(
+              'Invalid date(s) provided. Please use the date pickers.'
+            );
           }
           if (sDate > eDate) {
             throw new Error('Start date cannot be after end date.');
           }
 
-          body.publishedAfter = new Date(startDate + 'T00:00:00.000Z').toISOString();
-          body.publishedBefore = new Date(endDate + 'T23:59:59.999Z').toISOString();
-
+          body.publishedAfter = new Date(
+            startDate + 'T00:00:00.000Z'
+          ).toISOString();
+          body.publishedBefore = new Date(
+            endDate + 'T23:59:59.999Z'
+          ).toISOString();
         } catch (e: unknown) {
           let errorMessage = 'Error processing custom date range.';
           if (e instanceof Error) errorMessage = e.message;
