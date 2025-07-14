@@ -10,16 +10,15 @@ jobs:
   build-and-test:
     runs-on: ubuntu-latest
     env:
-      # Define global environment variables for all steps
-      # Map the GitHub secrets to the environment variable names expected by the application
-      SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
-      SUPABASE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}  # Map service key to SUPABASE_KEY for compatibility
-      SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}  # Also support SUPABASE_ANON_KEY naming
-      SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+      # Global environment variables for all steps
+      # These are mapped from GitHub secrets
+      NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
       GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
       YOUTUBE_API_KEY: ${{ secrets.YOUTUBE_API_KEY }}
       NODE_ENV: test
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -29,7 +28,7 @@ jobs:
         with:
           node-version: '20.x'
           cache: 'npm'
-          cache-dependency-path: '**/package-lock.json' # Cache based on all lock files in the repo
+          cache-dependency-path: '**/package-lock.json'
 
       - name: Install Root Dependencies
         run: npm install
@@ -47,31 +46,28 @@ jobs:
         run: npm test --prefix frontend
 
       - name: Build Frontend
-        env:
-          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
-          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
-          SUPABASE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
-          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
-          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-          YOUTUBE_API_KEY: ${{ secrets.YOUTUBE_API_KEY }}
-          NODE_ENV: production
+        # This step uses the global env vars defined at the job level
         run: |
           echo "Building frontend with environment variables..."
           cd frontend
-          echo "SUPABASE_URL=$SUPABASE_URL" >> .env.production
-          echo "SUPABASE_KEY=$SUPABASE_KEY" >> .env.production
-          echo "SUPABASE_ANON_KEY=$SUPABASE_ANON_KEY" >> .env.production
+          echo "NEXT_PUBLIC_SUPABASE_URL=$NEXT_PUBLIC_SUPABASE_URL" > .env.production
+          echo "NEXT_PUBLIC_SUPABASE_ANON_KEY=$NEXT_PUBLIC_SUPABASE_ANON_KEY" >> .env.production
+          echo "SUPABASE_SERVICE_ROLE_KEY=$SUPABASE_SERVICE_ROLE_KEY" >> .env.production
           npm run build
-        
+
       - name: Validate Environment Variables
         run: |
           echo "Validating environment variables availability..."
-          if [ -z "$SUPABASE_URL" ]; then
-            echo "Error: SUPABASE_URL is not set"
+          if [ -z "$NEXT_PUBLIC_SUPABASE_URL" ]; then
+            echo "Error: NEXT_PUBLIC_SUPABASE_URL is not set"
             exit 1
           fi
-          if [ -z "$SUPABASE_KEY" ]; then
-            echo "Error: SUPABASE_KEY is not set"
+          if [ -z "$NEXT_PUBLIC_SUPABASE_ANON_KEY" ]; then
+            echo "Error: NEXT_PUBLIC_SUPABASE_ANON_KEY is not set"
+            exit 1
+          fi
+          if [ -z "$SUPABASE_SERVICE_ROLE_KEY" ]; then
+            echo "Error: SUPABASE_SERVICE_ROLE_KEY is not set"
             exit 1
           fi
           echo "Environment validation successful - all required variables are present"
