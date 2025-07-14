@@ -9,7 +9,7 @@ const nextConfig = {
     // This makes the variables available to the client-side code
     SUPABASE_URL: process.env.SUPABASE_URL,
     // Support both naming conventions used in different environments
-    SUPABASE_KEY: process.env.SUPABASE_SERVICE_KEY || process.env.SUPABASE_KEY,
+    SUPABASE_SERVICE_ROLE_KEY: process.env.SUPABASE_SERVICE_ROLE_KEY,
   },
 
   // Output a standalone build that doesn't require the Next.js installation
