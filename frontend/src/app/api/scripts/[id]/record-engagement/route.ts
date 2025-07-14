@@ -46,7 +46,8 @@ export async function POST(
       return NextResponse.json(
         {
           success: false,
-          message: 'This YouTube video has already been linked to another script.',
+          message:
+            'This YouTube video has already been linked to another script.',
         },
         { status: 409 }
       );
