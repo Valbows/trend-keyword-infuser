@@ -12,18 +12,11 @@ interface UpdateScriptBody {
  * 'Elegant' and 'Xtensible' handler for fetching a single script by its ID.
  * Uses URL path extraction to avoid Next.js 15.3.3 type issues.
  */
-export async function GET(request: Request) {
-  // Extract id from URL path segments
-  const segments = request.url.split('/');
-  const idParam = segments[segments.length - 1]; // Get the ID from the URL pattern
-  const id = parseInt(idParam, 10);
-
-  if (isNaN(id)) {
-    return NextResponse.json(
-      { success: false, message: 'Invalid script ID.' },
-      { status: 400 }
-    );
-  }
+export async function GET(
+  request: Request,
+  context: { params: { id: string } }
+) {
+  const { id } = context.params;
 
   try {
     console.info(`[API /scripts/{id}] Fetching script with ID: ${id}`);
@@ -60,18 +53,11 @@ export async function GET(request: Request) {
  * 'Durable' and 'Optimized' handler for updating a script's content and title.
  * Uses URL path extraction to avoid Next.js 15.3.3 type issues.
  */
-export async function PUT(request: Request) {
-  // Extract id from URL path segments
-  const segments = request.url.split('/');
-  const idParam = segments[segments.length - 1]; // Get the ID from the URL pattern
-  const id = parseInt(idParam, 10);
-
-  if (isNaN(id)) {
-    return NextResponse.json(
-      { success: false, message: 'Invalid script ID.' },
-      { status: 400 }
-    );
-  }
+export async function PUT(
+  request: Request,
+  context: { params: { id: string } }
+) {
+  const { id } = context.params;
 
   try {
     const body: UpdateScriptBody = await request.json();
@@ -90,8 +76,8 @@ export async function PUT(request: Request) {
 
     console.info(`[API /scripts/{id}] Updating script with ID: ${id}`);
     const updatedScript = await scriptService.updateScript(id, {
-      title,
-      content,
+      topic: title, // Assuming 'title' maps to 'topic'
+      generated_script: content, // Assuming 'content' maps to 'generated_script'
     });
     console.info(
       `[API /scripts/{id}] Successfully updated script with ID: ${id}`
