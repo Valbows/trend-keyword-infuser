@@ -1,6 +1,8 @@
 // G.O.A.T. C.O.D.E.X. B.O.T. - 'Durable' and 'Optimized' API Route for Fetching All Scripts
 
 import { NextResponse } from 'next/server';
+
+export const dynamic = 'force-dynamic'; // Force dynamic rendering, disable caching
 import { scriptService } from '@/lib/services/scriptService';
 
 // 'Elegant' and 'Xtensible' handler for GET requests
