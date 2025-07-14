@@ -1,15 +1,15 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { engagementRecordingService } from '@/lib/services/engagementRecordingService';
 
 /**
  * Handler for recording YouTube engagement metrics
- * Uses a single request parameter approach to avoid Next.js 15.3.3 type issues
  */
 export async function POST(
-  request: NextRequest,
-  context: { params: { id: string } }
+  request: Request,
+  context: { params: Promise<{ id: string }> }
 ) {
-  const { id } = context.params;
+  // In recent Next.js versions, params is a promise that must be awaited.
+  const { id } = await context.params;
 
   if (!id) {
     return NextResponse.json(
@@ -29,23 +29,26 @@ export async function POST(
       );
     }
 
-    console.info(
-      `[API /record-engagement] Received request for script ID: ${id}`
-    );
     const updatedScript = await engagementRecordingService.recordEngagement(
       id,
       videoUrl
     );
-    console.info(
-      `[API /record-engagement] Successfully recorded engagement for script ID: ${id}`
-    );
 
     return NextResponse.json({ success: true, data: updatedScript });
-  } catch (error: unknown) {
-    console.error(
-      `[API /record-engagement] Error recording engagement for script ${id}:`,
-      error
-    );
+  } catch (error: any) {
+    // Specific check for Supabase/Postgres unique constraint violation
+    // Now that the service layer throws the original DB error, we can check the code directly.
+    if (error && error.code === '23505') {
+      return NextResponse.json(
+        {
+          success: false,
+          message: 'This YouTube video has already been linked to another script.',
+        },
+        { status: 409 }
+      );
+    }
+
+    // General error handling
     return NextResponse.json(
       {
         success: false,

@@ -138,7 +138,7 @@ class ScriptService {
 
     if (error) {
       console.error(`[ScriptService] Error updating script ${id}:`, error);
-      throw new Error(`Could not update script with ID ${id}.`);
+      throw error;
     }
 
     console.info(`[ScriptService] Successfully updated script with ID: ${id}.`);
