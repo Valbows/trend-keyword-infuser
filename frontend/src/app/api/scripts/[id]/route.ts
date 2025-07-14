@@ -1,6 +1,6 @@
 // G.O.A.T. C.O.D.E.X. B.O.T. - 'Durable' and 'Optimized' API Route for Specific Script Operations
 
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { scriptService } from '@/lib/services/scriptService';
 
 interface UpdateScriptBody {
@@ -13,10 +13,10 @@ interface UpdateScriptBody {
  * Uses URL path extraction to avoid Next.js 15.3.3 type issues.
  */
 export async function GET(
-  request: Request,
-  { params }: { params: { id: string } }
+  request: NextRequest,
+  context: { params: { id: string } }
 ) {
-  const { id } = params;
+  const { id } = context.params;
 
   try {
     console.info(`[API /scripts/{id}] Fetching script with ID: ${id}`);
@@ -54,10 +54,10 @@ export async function GET(
  * Uses URL path extraction to avoid Next.js 15.3.3 type issues.
  */
 export async function PUT(
-  request: Request,
-  { params }: { params: { id: string } }
+  request: NextRequest,
+  context: { params: { id: string } }
 ) {
-  const { id } = params;
+  const { id } = context.params;
 
   try {
     const body: UpdateScriptBody = await request.json();

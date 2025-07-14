@@ -1,18 +1,11 @@
 import type { Metadata } from 'next';
-import { Geist, Geist_Mono } from 'next/font/google';
+import { GeistSans } from 'geist/font/sans';
+import { GeistMono } from 'geist/font/mono';
 import './globals.css';
 import Navbar from '@/components/Navbar';
 import { SelectedKeywordsProvider } from '@/contexts/SelectedKeywordsContext'; // G.O.A.T. C.O.D.E.X. B.O.T. - Import provider
 
-const geistSans = Geist({
-  variable: '--font-geist-sans',
-  subsets: ['latin'],
-});
 
-const geistMono = Geist_Mono({
-  variable: '--font-geist-mono',
-  subsets: ['latin'],
-});
 
 export const metadata: Metadata = {
   title: 'Create Next App',
@@ -27,7 +20,7 @@ export default function RootLayout({
   return (
     <html lang='en' className='h-full'>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased h-full bg-slate-50 dark:bg-slate-900`}
+        className={`${GeistSans.variable} ${GeistMono.variable} antialiased h-full bg-slate-50 dark:bg-slate-900`}
       >
         <Navbar />
         <main className='py-8 px-4 sm:px-6 lg:px-8'>

@@ -2,11 +2,11 @@
 
 import { NextResponse } from 'next/server';
 import { scriptOrchestrationService } from '@/lib/services/scriptOrchestrationService';
-import { YouTubeKeywordItem } from '@/lib/services/trendDiscoveryService';
+import { YouTubeKeywordTrend } from '@/lib/services/trendDiscoveryService';
 
 interface GenerateScriptBody {
   topic: string;
-  trends: YouTubeKeywordItem[];
+  trends: YouTubeKeywordTrend[];
 }
 
 // 'Elegant' and 'Xtensible' handler for POST requests
@@ -16,7 +16,7 @@ export async function POST(request: Request) {
     const {
       topic,
       trends = [],
-    }: { topic: string; trends: YouTubeKeywordItem[] } = body;
+    }: { topic: string; trends: YouTubeKeywordTrend[] } = body;
 
     if (!topic) {
       return NextResponse.json(
