@@ -35,10 +35,14 @@ export async function POST(
     );
 
     return NextResponse.json({ success: true, data: updatedScript });
-  } catch (error: any) {
+  } catch (error: unknown) {
     // Specific check for Supabase/Postgres unique constraint violation
-    // Now that the service layer throws the original DB error, we can check the code directly.
-    if (error && error.code === '23505') {
+    if (
+      error &&
+      typeof error === 'object' &&
+      'code' in error &&
+      (error as { code: unknown }).code === '23505'
+    ) {
       return NextResponse.json(
         {
           success: false,
