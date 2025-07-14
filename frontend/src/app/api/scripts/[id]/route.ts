@@ -14,9 +14,9 @@ interface UpdateScriptBody {
  */
 export async function GET(
   request: Request,
-  context: { params: { id: string } }
+  { params }: { params: { id: string } }
 ) {
-  const { id } = context.params;
+  const { id } = params;
 
   try {
     console.info(`[API /scripts/{id}] Fetching script with ID: ${id}`);
@@ -55,9 +55,9 @@ export async function GET(
  */
 export async function PUT(
   request: Request,
-  context: { params: { id: string } }
+  { params }: { params: { id: string } }
 ) {
-  const { id } = context.params;
+  const { id } = params;
 
   try {
     const body: UpdateScriptBody = await request.json();
